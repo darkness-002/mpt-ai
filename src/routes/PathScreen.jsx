@@ -59,7 +59,10 @@ export default function PathScreen() {
         {blueprint && (
           <p className="path-header__blurb">
             {blueprint.totalMcqs} MCQs in {blueprint.minutes} minutes · qualifying mark{' '}
-            {blueprint.passingMarks}/{blueprint.totalMcqs} · no negative marking
+            {blueprint.passingMarks}/{blueprint.totalMcqs} ·{' '}
+            {blueprint.negativeMarking > 0
+              ? `${blueprint.negativeMarking} negative marking per wrong MCQ`
+              : 'no negative marking'}
           </p>
         )}
         {track.note && <p className="path-header__note">{track.note}</p>}
@@ -82,6 +85,12 @@ export default function PathScreen() {
               ' · every lesson cleared'
             )}
           </p>
+        </div>
+
+        <div style={{ marginTop: '1rem' }}>
+          <Link className="btn btn--small" to={`/mock/${track.id}`}>
+            Take Timed Mock Exam ({blueprint?.minutes ?? 60} mins) →
+          </Link>
         </div>
       </header>
 

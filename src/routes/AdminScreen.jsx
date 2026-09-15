@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BookIcon, CheckIcon, CloseIcon } from '../components/icons.jsx'
 import { useContent } from '../content/contentContext.js'
@@ -6,6 +6,7 @@ import { contentStore, fromDataFile, toDataFile } from '../storage/contentStore.
 import './AdminScreen.css'
 
 const EXAM_CHOICES = ['CSS', 'PMS', 'UPSC', 'Custom']
+const PAGE_SIZE = 10
 const BLANK_QUESTION = {
   prompt: '',
   directive: '',
@@ -24,12 +25,32 @@ export default function AdminScreen() {
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState(null)
   const [flash, setFlash] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [page, setPage] = useState(1)
   const fileRef = useRef(null)
 
   const selected = categories.find((category) => category.id === selectedId) ?? categories[0] ?? null
-  const mine = customQuestions
-    .filter((q) => q.categoryId === selected?.id)
-    .sort((a, b) => a.order - b.order)
+  const mine = useMemo(
+    () =>
+      customQuestions
+        .filter((q) => q.categoryId === selected?.id)
+        .sort((a, b) => a.order - b.order),
+    [customQuestions, selected],
+  )
+
+  const filteredMine = useMemo(() => {
+    if (!searchQuery.trim()) return mine
+    const q = searchQuery.toLowerCase()
+    return mine.filter(
+      (item) =>
+        item.prompt.toLowerCase().includes(q) ||
+        item.choices.some((c) => c.toLowerCase().includes(q)) ||
+        (item.explanation && item.explanation.toLowerCase().includes(q)),
+    )
+  }, [mine, searchQuery])
+
+  const totalPages = Math.max(1, Math.ceil(filteredMine.length / PAGE_SIZE))
+  const paginatedMine = filteredMine.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   useEffect(() => {
     if (!flash) return undefined
@@ -271,15 +292,31 @@ export default function AdminScreen() {
                 )}
               </h2>
 
+              <div className="admin__search-bar">
+                <input
+                  type="search"
+                  placeholder="Search questions by prompt, choices, or explanation..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    setPage(1)
+                  }}
+                />
+              </div>
+
               <ul className="q-list">
                 {mine.length === 0 && <li className="cat-list__empty">No questions in this category yet.</li>}
-                {mine.map((item, index) => {
+                {mine.length > 0 && filteredMine.length === 0 && (
+                  <li className="cat-list__empty">No questions match your search "{searchQuery}".</li>
+                )}
+                {paginatedMine.map((item, index) => {
                   const keyed = Number.isInteger(item.answer) && item.answer >= 0
+                  const globalIndex = (page - 1) * PAGE_SIZE + index + 1
                   return (
                     <li key={item.id}>
                       <div>
                         <p className="q-list__prompt">
-                          <span className="q-list__num">{index + 1}</span>
+                          <span className="q-list__num">{globalIndex}</span>
                           {item.prompt}
                         </p>
                         <p className="q-list__answer">
@@ -304,6 +341,30 @@ export default function AdminScreen() {
                   )
                 })}
               </ul>
+
+              {filteredMine.length > PAGE_SIZE && (
+                <div className="admin__pagination">
+                  <button
+                    className="btn btn--small btn--ghost"
+                    type="button"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    ← Previous
+                  </button>
+                  <span className="pagination-info">
+                    Page {page} of {totalPages} ({filteredMine.length} questions)
+                  </span>
+                  <button
+                    className="btn btn--small btn--ghost"
+                    type="button"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
 
               <form className="stack q-form" onSubmit={saveQuestion}>
                 <h3>{editingId ? 'Edit question' : 'New question'}</h3>

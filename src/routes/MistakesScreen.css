@@ -1,0 +1,126 @@
+.mistakes-screen {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.mistakes-screen__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.mistakes-screen__blurb {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.mistakes-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 600px) {
+  .mistakes-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mistakes-stat {
+  padding: 1rem;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.mistakes-stat__val {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin-bottom: 0.25rem;
+}
+
+.mistakes-stat--warn {
+  color: #d97706;
+}
+
+.mistakes-stat--green {
+  color: var(--green-dark);
+}
+
+.mistakes-stat__lbl {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.mistakes-card {
+  padding: 2.5rem 1.5rem;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.mistakes-card h2 {
+  margin-bottom: 0.5rem;
+}
+
+.mistakes-card p {
+  color: var(--muted);
+  max-width: 30rem;
+  margin: 0 auto 1.5rem;
+}
+
+.mistakes-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.mistakes-practice {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+.mistakes-practice__bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.mistakes-practice__streak {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.mistakes-practice__prompt {
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+}
+
+.mistakes-practice__footer {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mistakes-footer-action {
+  margin-top: 2rem;
+  text-align: center;
+}

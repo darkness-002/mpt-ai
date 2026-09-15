@@ -1,32 +1,95 @@
-import coachedEnglish from './questions/coached/english.json'
-import coachedAbilities from './questions/coached/general-abilities.json'
-import coachedKnowledge from './questions/coached/general-knowledge.json'
-import coachedIslamic from './questions/coached/islamic-studies.json'
-import coachedUrdu from './questions/coached/urdu.json'
-import paperEnglish from './questions/past-papers/english.json'
-import paperAbilities from './questions/past-papers/general-abilities.json'
-import paperKnowledge from './questions/past-papers/general-knowledge.json'
-import paperIslamic from './questions/past-papers/islamic-studies.json'
-import cssGsa from './questions/css-compulsory/general-science-ability.json'
-import pms2023 from './questions/pms-prelims/2023.json'
-import pms2024 from './questions/pms-prelims/2024.json'
-import pms2025 from './questions/pms-prelims/2025.json'
-import pmsPakStudies from './questions/pms-compulsory/pakistan-studies.json'
-import pmsIslamic from './questions/pms-compulsory/islamic-studies.json'
-
 /**
- * Four tracks across the two exams. Each track is an independent path: its units
- * unlock lesson by lesson, and units in one track never gate another.
+ * Curriculum definitions and loaders for MPT-AI.
+ * Dynamic imports code-split question JSON files into separate chunks.
+ *
+ * @typedef {Object} QuestionSource
+ * @property {string} paper
+ * @property {number} [number]
+ * @property {string} [keyedBy]
+ * @property {string} [keySource]
+ *
+ * @typedef {Object} Question
+ * @property {string} id
+ * @property {string} prompt
+ * @property {string} [directive]
+ * @property {string[]} [statements]
+ * @property {string} [closing]
+ * @property {string[]} choices
+ * @property {number} answer
+ * @property {string} [explanation]
+ * @property {QuestionSource} [source]
+ *
+ * @typedef {Object} Lesson
+ * @property {string} id
+ * @property {string} title
+ * @property {string} [subtitle]
+ * @property {string} [paper]
+ * @property {string} kind
+ * @property {string} unitId
+ * @property {string} unitTitle
+ * @property {string} trackId
+ * @property {string} trackTitle
+ * @property {number} hue
+ * @property {boolean} rtl
+ * @property {number} indexInUnit
+ * @property {Question[]} questions
+ *
+ * @typedef {Object} Unit
+ * @property {string} id
+ * @property {string} title
+ * @property {string} tagline
+ * @property {number} [marks]
+ * @property {number} hue
+ * @property {boolean} rtl
+ * @property {string|null} note
+ * @property {number} questionCount
+ * @property {Lesson[]} lessons
+ *
+ * @typedef {Object} Blueprint
+ * @property {number} totalMcqs
+ * @property {number} minutes
+ * @property {number} passingMarks
+ * @property {number} negativeMarking  0 if no negative marking, or fractional penalty e.g. 0.25
+ *
+ * @typedef {Object} Track
+ * @property {string} id
+ * @property {string} exam
+ * @property {string} title
+ * @property {string} tagline
+ * @property {Blueprint} [blueprint]
+ * @property {string} [note]
+ * @property {Unit[]} units
+ * @property {number} lessonCount
+ * @property {number} questionCount
+ * @property {boolean} [custom]
  */
-const TRACKS = [
+
+const SOURCES = {
+  coachedEnglish: () => import('./questions/coached/english.json').then((m) => m.default),
+  coachedAbilities: () => import('./questions/coached/general-abilities.json').then((m) => m.default),
+  coachedKnowledge: () => import('./questions/coached/general-knowledge.json').then((m) => m.default),
+  coachedIslamic: () => import('./questions/coached/islamic-studies.json').then((m) => m.default),
+  coachedUrdu: () => import('./questions/coached/urdu.json').then((m) => m.default),
+  paperEnglish: () => import('./questions/past-papers/english.json').then((m) => m.default),
+  paperAbilities: () => import('./questions/past-papers/general-abilities.json').then((m) => m.default),
+  paperKnowledge: () => import('./questions/past-papers/general-knowledge.json').then((m) => m.default),
+  paperIslamic: () => import('./questions/past-papers/islamic-studies.json').then((m) => m.default),
+  cssGsa: () => import('./questions/css-compulsory/general-science-ability.json').then((m) => m.default),
+  pms2023: () => import('./questions/pms-prelims/2023.json').then((m) => m.default),
+  pms2024: () => import('./questions/pms-prelims/2024.json').then((m) => m.default),
+  pms2025: () => import('./questions/pms-prelims/2025.json').then((m) => m.default),
+  pmsPakStudies: () => import('./questions/pms-compulsory/pakistan-studies.json').then((m) => m.default),
+  pmsIslamic: () => import('./questions/pms-compulsory/islamic-studies.json').then((m) => m.default),
+  upsc2025: () => import('./questions/upsc-prelims/2025-gs1.json').then((m) => m.default),
+}
+
+export const TRACK_CONFIGS = [
   {
     id: 'css-mpt',
     exam: 'CSS',
     title: 'MPT — Preliminary Test',
     tagline: 'The FPSC screening paper you must clear to sit the written exam',
-    // Units and marks are taken from the section headings printed on the papers
-    // themselves (MPT 2023 Special and MPT 2026), not from a syllabus summary.
-    blueprint: { totalMcqs: 200, minutes: 200, passingMarks: 66, negativeMarking: false },
+    blueprint: { totalMcqs: 200, minutes: 200, passingMarks: 66, negativeMarking: 0 },
     note: 'Real questions from MPT 2023 (Special) and MPT 2026, after coached sets that explain the answer.',
     units: [
       {
@@ -35,7 +98,7 @@ const TRACKS = [
         tagline: 'Maths, logic and analytical reasoning',
         marks: 60,
         hue: 172,
-        sources: [coachedAbilities, paperAbilities],
+        sourceLoaders: [SOURCES.coachedAbilities, SOURCES.paperAbilities],
       },
       {
         id: 'english',
@@ -43,7 +106,7 @@ const TRACKS = [
         tagline: 'Grammar, vocabulary, sentence correction',
         marks: 50,
         hue: 244,
-        sources: [coachedEnglish, paperEnglish],
+        sourceLoaders: [SOURCES.coachedEnglish, SOURCES.paperEnglish],
       },
       {
         id: 'general-knowledge',
@@ -51,7 +114,7 @@ const TRACKS = [
         tagline: 'Everyday science, current affairs, Pakistan affairs',
         marks: 50,
         hue: 199,
-        sources: [coachedKnowledge, paperKnowledge],
+        sourceLoaders: [SOURCES.coachedKnowledge, SOURCES.paperKnowledge],
       },
       {
         id: 'islamic-studies',
@@ -59,7 +122,7 @@ const TRACKS = [
         tagline: 'Quran, Seerah, Hadith and history',
         marks: 20,
         hue: 40,
-        sources: [coachedIslamic, paperIslamic],
+        sourceLoaders: [SOURCES.coachedIslamic, SOURCES.paperIslamic],
       },
       {
         id: 'urdu',
@@ -67,7 +130,7 @@ const TRACKS = [
         tagline: 'قواعد، محاورات، ضرب الامثال',
         marks: 20,
         hue: 291,
-        sources: [coachedUrdu],
+        sourceLoaders: [SOURCES.coachedUrdu],
       },
     ],
   },
@@ -76,6 +139,7 @@ const TRACKS = [
     exam: 'CSS',
     title: 'Compulsory subjects',
     tagline: 'Part-I MCQs from the CSS written papers',
+    blueprint: { totalMcqs: 20, minutes: 30, passingMarks: 10, negativeMarking: 0 },
     note: 'No official key was published for these papers, so the answers were worked out by MPT-AI and are flagged as such.',
     units: [
       {
@@ -84,7 +148,7 @@ const TRACKS = [
         tagline: 'Part-I MCQs, 2013–2025',
         marks: 20,
         hue: 152,
-        sources: [cssGsa],
+        sourceLoaders: [SOURCES.cssGsa],
       },
     ],
   },
@@ -93,28 +157,29 @@ const TRACKS = [
     exam: 'PMS',
     title: 'Prelims — General Ability',
     tagline: 'The PPSC screening paper for the Provincial Management Service',
-    note: 'PPSC syllabus: general knowledge, Pakistan studies, Islamic studies, current affairs, geography, maths, English, Urdu, everyday science and computer skills — one mixed paper.',
+    blueprint: { totalMcqs: 100, minutes: 120, passingMarks: 40, negativeMarking: 0.25 },
+    note: 'PPSC syllabus: general knowledge, Pakistan studies, Islamic studies, current affairs, geography, maths, English, Urdu, everyday science and computer skills — 0.25 negative marking per wrong answer.',
     units: [
       {
         id: 'pms-2025',
         title: 'PPSC PMS 2025',
         tagline: 'General ability paper',
         hue: 268,
-        sources: [pms2025],
+        sourceLoaders: [SOURCES.pms2025],
       },
       {
         id: 'pms-2024',
         title: 'PPSC PMS 2024',
         tagline: 'General ability paper',
         hue: 220,
-        sources: [pms2024],
+        sourceLoaders: [SOURCES.pms2024],
       },
       {
         id: 'pms-2023',
         title: 'PPSC PMS 2023',
         tagline: 'General ability paper',
         hue: 190,
-        sources: [pms2023],
+        sourceLoaders: [SOURCES.pms2023],
       },
     ],
   },
@@ -123,37 +188,90 @@ const TRACKS = [
     exam: 'PMS',
     title: 'Compulsory subjects',
     tagline: 'Part-I MCQs from the PMS written papers',
+    blueprint: { totalMcqs: 20, minutes: 30, passingMarks: 10, negativeMarking: 0.25 },
     units: [
       {
         id: 'pms-compulsory-pakistan-studies',
         title: 'Pakistan Studies',
         tagline: 'PMS compulsory paper',
         hue: 142,
-        sources: [pmsPakStudies],
+        sourceLoaders: [SOURCES.pmsPakStudies],
       },
       {
         id: 'pms-compulsory-islamic-studies',
         title: 'Islamic Studies',
         tagline: 'PMS compulsory paper',
         hue: 40,
-        sources: [pmsIslamic],
+        sourceLoaders: [SOURCES.pmsIslamic],
+      },
+    ],
+  },
+  {
+    id: 'upsc-prelims',
+    exam: 'UPSC',
+    title: 'CSE Prelims — General Studies',
+    tagline: 'Civil Services (Preliminary) Examination Paper I',
+    blueprint: { totalMcqs: 100, minutes: 120, passingMarks: 66, negativeMarking: 0.33 },
+    note: 'Real questions from UPSC CSE Prelims 2025 GS Paper I with verified keys. Negative marking: 1/3 (0.33) marks deducted per incorrect answer.',
+    units: [
+      {
+        id: 'upsc-2025-gs1',
+        title: 'UPSC CSE 2025',
+        tagline: 'General Studies Paper I',
+        hue: 35,
+        sourceLoaders: [SOURCES.upsc2025],
       },
     ],
   },
 ]
 
+export const EXAM_META = {
+  CSS: { title: 'CSS', blurb: 'Central Superior Services — FPSC' },
+  PMS: { title: 'PMS', blurb: 'Provincial Management Service — PPSC' },
+  UPSC: { title: 'UPSC', blurb: 'Civil Services Examination — UPSC Prelims' },
+}
+
 /**
  * A question is only usable if its answer is a real index. Staging data carries
  * `answer: null` until a key is attached — and `null >= 0` is true in JS, so
  * without this guard such an item would silently mark option 1 as correct.
+ * @param {Question} question
  */
-function isAnswerable(question) {
-  return Number.isInteger(question.answer) && question.answer >= 0 && question.answer < question.choices.length
+export function isAnswerable(question) {
+  return (
+    Number.isInteger(question.answer) &&
+    question.answer >= 0 &&
+    Array.isArray(question.choices) &&
+    question.answer < question.choices.length
+  )
 }
 
-function buildUnit(unit, track) {
-  const rtl = unit.sources.some((source) => source.rtl)
-  const lessons = unit.sources
+/**
+ * Calculates score with support for fractional negative marking.
+ * @param {Array<{ correct: boolean }>} answers
+ * @param {number} negativeMarking
+ */
+export function calculateScore(answers, negativeMarking = 0) {
+  const correct = answers.filter((a) => a.correct).length
+  const wrong = answers.filter((a) => !a.correct).length
+  const penalty = typeof negativeMarking === 'number' ? negativeMarking : 0
+  const marksDeducted = Math.round(wrong * penalty * 100) / 100
+  const rawScore = correct - marksDeducted
+  const netScore = Math.max(0, Math.round(rawScore * 100) / 100)
+
+  return {
+    correct,
+    wrong,
+    total: answers.length,
+    penalty,
+    marksDeducted,
+    netScore,
+  }
+}
+
+function buildUnit(unit, track, sources) {
+  const rtl = sources.some((source) => source.rtl)
+  const lessons = sources
     .flatMap((source) =>
       source.lessons.map((lesson) => ({
         ...lesson,
@@ -170,7 +288,7 @@ function buildUnit(unit, track) {
     .filter((lesson) => lesson.questions.length > 0)
     .map((lesson, indexInUnit) => ({ ...lesson, indexInUnit }))
 
-  const { sources, ...rest } = unit
+  const { sourceLoaders: _loaders, ...rest } = unit
   return {
     ...rest,
     rtl,
@@ -180,56 +298,61 @@ function buildUnit(unit, track) {
   }
 }
 
-export const tracks = TRACKS.map((track) => {
-  const units = track.units.map((unit) => buildUnit(unit, track))
-  return {
-    ...track,
-    units,
-    lessonCount: units.reduce((n, unit) => n + unit.lessons.length, 0),
-    questionCount: units.reduce((n, unit) => n + unit.questionCount, 0),
-  }
-})
-
-export function getTrack(trackId) {
-  return tracks.find((track) => track.id === trackId) ?? null
-}
-
-const EXAM_META = {
-  CSS: { title: 'CSS', blurb: 'Central Superior Services — FPSC' },
-  PMS: { title: 'PMS', blurb: 'Provincial Management Service — PPSC' },
-}
+let cachedCurriculum = null
 
 /**
- * Exam groups, derived from the tracks themselves — an exam with no entry in
- * EXAM_META still renders, so adding a track can never make it disappear.
+ * Dynamically loads and parses bundled question files on demand.
+ * Caches results in memory for instant subsequent lookups.
  */
-export const exams = [...new Set(TRACKS.map((track) => track.exam))].map((id) => ({
-  id,
-  title: EXAM_META[id]?.title ?? id,
-  blurb: EXAM_META[id]?.blurb ?? '',
-}))
+export async function loadBundledCurriculum() {
+  if (cachedCurriculum) return cachedCurriculum
 
-/** Every lesson in the app, in path order, across all tracks. */
-export const lessons = tracks.flatMap((track) => track.units.flatMap((unit) => unit.lessons))
+  const tracks = await Promise.all(
+    TRACK_CONFIGS.map(async (track) => {
+      const units = await Promise.all(
+        track.units.map(async (unit) => {
+          const sources = await Promise.all(unit.sourceLoaders.map((loader) => loader()))
+          return buildUnit(unit, track, sources)
+        }),
+      )
 
-const lessonsById = new Map(lessons.map((lesson, index) => [lesson.id, { ...lesson, index }]))
+      return {
+        ...track,
+        units,
+        lessonCount: units.reduce((n, unit) => n + unit.lessons.length, 0),
+        questionCount: units.reduce((n, unit) => n + unit.questionCount, 0),
+      }
+    }),
+  )
 
-export function getLesson(lessonId) {
-  return lessonsById.get(lessonId) ?? null
+  const exams = [...new Set(tracks.map((track) => track.exam))].map((id) => ({
+    id,
+    title: EXAM_META[id]?.title ?? id,
+    blurb: EXAM_META[id]?.blurb ?? '',
+  }))
+
+  const lessons = tracks.flatMap((track) => track.units.flatMap((unit) => unit.lessons))
+  const lessonsById = new Map(lessons.map((lesson, index) => [lesson.id, { ...lesson, index }]))
+
+  cachedCurriculum = {
+    tracks,
+    exams,
+    lessons,
+    totalQuestions: lessons.reduce((n, lesson) => n + lesson.questions.length, 0),
+    getTrack: (trackId) => tracks.find((track) => track.id === trackId) ?? null,
+    getLesson: (lessonId) => lessonsById.get(lessonId) ?? null,
+    getNextLesson: (lessonId) => {
+      const current = lessonsById.get(lessonId)
+      if (!current) return null
+      const next = lessons[current.index + 1]
+      return next && next.unitId === current.unitId ? next : null
+    },
+    getPrerequisite: (lessonId) => {
+      const current = lessonsById.get(lessonId)
+      if (!current || current.indexInUnit === 0) return null
+      return lessons[current.index - 1] ?? null
+    },
+  }
+
+  return cachedCurriculum
 }
-
-export function getNextLesson(lessonId) {
-  const current = lessonsById.get(lessonId)
-  if (!current) return null
-  const next = lessons[current.index + 1]
-  return next && next.unitId === current.unitId ? next : null
-}
-
-/** The lesson that gates this one — units unlock independently of each other. */
-export function getPrerequisite(lessonId) {
-  const current = lessonsById.get(lessonId)
-  if (!current || current.indexInUnit === 0) return null
-  return lessons[current.index - 1] ?? null
-}
-
-export const totalQuestions = lessons.reduce((n, lesson) => n + lesson.questions.length, 0)

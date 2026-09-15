@@ -50,3 +50,30 @@ export function BookIcon(props) {
     </svg>
   )
 }
+
+export function FlagIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+      <line x1="4" y1="22" x2="4" y2="15" />
+    </svg>
+  )
+}
+
+export function TimerIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  )
+}
+
+export function FlameIcon(props) {
+  return (
+    <svg {...base} fill="currentColor" strokeWidth={1.2} {...props}>
+      <path d="M8.5 14.5A3.5 3.5 0 0 0 12 18a3.5 3.5 0 0 0 3.5-3.5c0-2-1.5-3.5-2.5-5-.5-1-.5-2-.5-2s-1.5 1.5-2 3c-.5 1.5-2 2.5-2 4z" />
+      <path d="M12 2c-3.5 3.5-6 8-6 12a6 6 0 0 0 12 0c0-4-2.5-8.5-6-12z" />
+    </svg>
+  )
+}

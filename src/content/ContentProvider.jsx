@@ -1,33 +1,39 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ContentContext } from './contentContext.js'
 import { buildCustomTracks } from './buildCustom.js'
-import { exams as bundledExams, tracks as bundledTracks } from '../data/curriculum.js'
+import { loadBundledCurriculum } from '../data/curriculum.js'
 import { contentStore } from '../storage/contentStore.js'
 
 /**
- * Merges the bundled question bank with whatever the author has created on this
- * device, and hands every screen one view of the curriculum.
+ * Merges the bundled question bank with author-created content,
+ * serving a unified, asynchronously loaded curriculum view to all screens.
  */
 export function ContentProvider({ children }) {
   const [custom, setCustom] = useState({ categories: [], questions: [] })
+  const [bundled, setBundled] = useState({ tracks: [], exams: [], lessons: [], totalQuestions: 0 })
   const [ready, setReady] = useState(false)
 
   const refresh = useCallback(async () => {
-    const loaded = await contentStore.load()
-    setCustom(loaded)
+    const [loadedCustom, loadedBundled] = await Promise.all([
+      contentStore.load(),
+      loadBundledCurriculum(),
+    ])
+    setCustom(loadedCustom)
+    setBundled(loadedBundled)
     setReady(true)
-    return loaded
+    return loadedCustom
   }, [])
 
-  // Initial read of the author's content; guarded so a slow load can't set state
-  // after unmount.
   useEffect(() => {
     let cancelled = false
-    contentStore.load().then((loaded) => {
-      if (cancelled) return
-      setCustom(loaded)
-      setReady(true)
-    })
+    Promise.all([contentStore.load(), loadBundledCurriculum()]).then(
+      ([loadedCustom, loadedBundled]) => {
+        if (cancelled) return
+        setCustom(loadedCustom)
+        setBundled(loadedBundled)
+        setReady(true)
+      },
+    )
     return () => {
       cancelled = true
     }
@@ -35,9 +41,9 @@ export function ContentProvider({ children }) {
 
   const value = useMemo(() => {
     const customTracks = buildCustomTracks(custom.categories, custom.questions)
-    const tracks = [...bundledTracks, ...customTracks]
+    const tracks = [...(bundled.tracks ?? []), ...customTracks]
 
-    const examOrder = [...bundledExams]
+    const examOrder = [...(bundled.exams ?? [])]
     for (const track of customTracks) {
       if (!examOrder.some((exam) => exam.id === track.exam)) {
         examOrder.push({ id: track.exam, title: track.exam, blurb: '' })
@@ -71,7 +77,7 @@ export function ContentProvider({ children }) {
         return lessons[current.index - 1] ?? null
       },
     }
-  }, [custom, ready, refresh])
+  }, [bundled, custom, ready, refresh])
 
   return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>
 }

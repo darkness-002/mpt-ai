@@ -78,3 +78,111 @@ export function createLocalAdapter() {
 export function pendingSync(records) {
   return records.filter((record) => record.dirty)
 }
+
+/**
+ * Creates a progress export payload suitable for backup and cross-device restore.
+ * @param {Record<string, LessonRecord>} records
+ */
+export function exportProgressPayload(records) {
+  return {
+    version: 1,
+    app: 'mpt-ai',
+    exportedAt: Date.now(),
+    recordCount: Object.keys(records).length,
+    records: Object.values(records),
+  }
+}
+
+/**
+ * Parses and validates an imported progress payload.
+ * Merges with existing records by preserving highest score and most recent timestamp.
+ * @param {string|object} input
+ * @param {Record<string, LessonRecord>} existingRecords
+ * @returns {LessonRecord[]} merged records array
+ */
+export function parseAndMergeProgress(input, existingRecords = {}) {
+  const data = typeof input === 'string' ? JSON.parse(input) : input
+  if (!data || !Array.isArray(data.records)) {
+    throw new Error('Invalid progress file: expected a records array.')
+  }
+
+  const merged = { ...existingRecords }
+  for (const incoming of data.records) {
+    if (!incoming.lessonId) continue
+    const curr = merged[incoming.lessonId]
+    if (!curr) {
+      merged[incoming.lessonId] = { ...incoming, dirty: true }
+    } else {
+      merged[incoming.lessonId] = {
+        ...curr,
+        attempts: Math.max(curr.attempts ?? 1, incoming.attempts ?? 1),
+        bestScore: Math.max(curr.bestScore ?? 0, incoming.bestScore ?? 0),
+        lastScore: incoming.updatedAt > (curr.updatedAt ?? 0) ? incoming.lastScore : curr.lastScore,
+        total: incoming.total ?? curr.total,
+        completedAt: Math.min(curr.completedAt ?? Date.now(), incoming.completedAt ?? Date.now()),
+        updatedAt: Math.max(curr.updatedAt ?? 0, incoming.updatedAt ?? 0),
+        dirty: true,
+      }
+    }
+  }
+  return Object.values(merged)
+}
+
+/**
+ * Remote sync queue abstraction designed for Firebase / Supabase / REST backends.
+ * Consumes pendingSync() to drain dirty records.
+ */
+export function createSyncQueue({ onPush, onPull } = {}) {
+  let isSyncing = false
+  let lastSyncedAt = null
+  let lastError = null
+
+  return {
+    getStatus: () => ({ isSyncing, lastSyncedAt, lastError }),
+    /**
+     * Drains dirty records through onPush and optionally pulls remote updates.
+     * @param {LessonRecord[]} records
+     * @param {(updated: LessonRecord[]) => Promise<void>} persistLocally
+     */
+    async sync(records, persistLocally) {
+      if (isSyncing) return { status: 'in-progress' }
+      const dirty = pendingSync(records)
+      if (!onPush && !onPull) {
+        return { status: 'no-remote', dirtyCount: dirty.length }
+      }
+
+      isSyncing = true
+      lastError = null
+      try {
+        let updatedRecords = [...records]
+        if (onPush && dirty.length > 0) {
+          const ackedIds = await onPush(dirty)
+          if (Array.isArray(ackedIds)) {
+            const ackSet = new Set(ackedIds)
+            updatedRecords = updatedRecords.map((r) =>
+              ackSet.has(r.id) ? { ...r, dirty: false } : r,
+            )
+          }
+        }
+        if (onPull) {
+          const pulled = await onPull(lastSyncedAt)
+          if (Array.isArray(pulled)) {
+            const byId = new Map(updatedRecords.map((r) => [r.id, r]))
+            pulled.forEach((r) => byId.set(r.id, r))
+            updatedRecords = [...byId.values()]
+          }
+        }
+        if (persistLocally) {
+          await persistLocally(updatedRecords)
+        }
+        lastSyncedAt = Date.now()
+        return { status: 'ok', syncedCount: dirty.length }
+      } catch (err) {
+        lastError = err.message
+        return { status: 'error', error: err.message }
+      } finally {
+        isSyncing = false
+      }
+    },
+  }
+}

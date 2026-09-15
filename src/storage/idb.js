@@ -1,7 +1,9 @@
 const DB_NAME = 'mpt-ai'
 const PROGRESS = 'progress'
 const CONTENT = 'content'
-const VERSION = 2
+const MISTAKES = 'mistakes'
+const BOOKMARKS = 'bookmarks'
+const VERSION = 3
 
 let dbPromise = null
 
@@ -11,9 +13,11 @@ function openDb() {
     const request = indexedDB.open(DB_NAME, VERSION)
     request.onupgradeneeded = () => {
       const db = request.result
-      // v1 shipped with `progress` only; v2 adds author-created content.
+      // v1 shipped with `progress` only; v2 adds author-created content; v3 adds mistakes & bookmarks.
       if (!db.objectStoreNames.contains(PROGRESS)) db.createObjectStore(PROGRESS, { keyPath: 'id' })
       if (!db.objectStoreNames.contains(CONTENT)) db.createObjectStore(CONTENT, { keyPath: 'id' })
+      if (!db.objectStoreNames.contains(MISTAKES)) db.createObjectStore(MISTAKES, { keyPath: 'id' })
+      if (!db.objectStoreNames.contains(BOOKMARKS)) db.createObjectStore(BOOKMARKS, { keyPath: 'id' })
     }
     request.onsuccess = () => resolve(request.result)
     request.onerror = () => reject(request.error)
@@ -35,6 +39,7 @@ function run(store, mode, work) {
 
 function storeApi(name) {
   return {
+    get: (id) => run(name, 'readonly', (store) => store.get(id)),
     getAll: () => run(name, 'readonly', (store) => store.getAll()),
     put: (record) => run(name, 'readwrite', (store) => store.put(record)),
     putMany: (records) =>
@@ -54,3 +59,5 @@ export const idbSupported = typeof indexedDB !== 'undefined'
 
 export const idb = storeApi(PROGRESS)
 export const idbContent = storeApi(CONTENT)
+export const idbMistakes = storeApi(MISTAKES)
+export const idbBookmarks = storeApi(BOOKMARKS)

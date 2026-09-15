@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import './App.css'
@@ -19,7 +19,9 @@ export default function App() {
 
   return (
     <div className="app">
-      <Outlet />
+      <Suspense fallback={<div className="lesson lesson--loading" style={{ minHeight: '60vh' }}>Loading…</div>}>
+        <Outlet />
+      </Suspense>
 
       {(offlineReady || needRefresh) && (
         <div className="toast" role="status">

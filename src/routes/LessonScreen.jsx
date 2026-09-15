@@ -1,9 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { CheckIcon, CloseIcon } from '../components/icons.jsx'
+import { CheckIcon, CloseIcon, StarIcon } from '../components/icons.jsx'
 import { useContent } from '../content/contentContext.js'
+import { calculateScore } from '../data/curriculum.js'
 import { shuffle } from '../lib/shuffle.js'
 import { useProgress } from '../storage/progressContext.js'
+import { mistakesStore } from '../storage/mistakesStore.js'
+import { bookmarksStore } from '../storage/bookmarksStore.js'
+import { streakStore } from '../storage/streakStore.js'
 import './LessonScreen.css'
 
 const CHOICE_KEYS = ['1', '2', '3', '4']
@@ -33,8 +37,10 @@ function keyNote(question) {
 export default function LessonScreen({ lessonId }) {
   const navigate = useNavigate()
   const progress = useProgress()
-  const { getLesson, getNextLesson } = useContent()
+  const { getLesson, getNextLesson, getTrack } = useContent()
   const lesson = getLesson(lessonId)
+  const track = lesson ? getTrack(lesson.trackId) : null
+  const negativeMarking = track?.blueprint?.negativeMarking ?? 0
 
   // Questions are re-ordered per attempt so a repeat run is not recall of position.
   const [questions, setQuestions] = useState(() => (lesson ? shuffle(lesson.questions) : []))
@@ -44,34 +50,65 @@ export default function LessonScreen({ lessonId }) {
   const [checked, setChecked] = useState(false)
   const [answers, setAnswers] = useState([])
   const [finished, setFinished] = useState(false)
+  const [bookmarked, setBookmarked] = useState(false)
   const headingRef = useRef(null)
 
   const question = questions[index]
   const isLast = index === questions.length - 1
-  const score = answers.filter((a) => a.correct).length
+  const scoreDetails = calculateScore(answers, negativeMarking)
+  const score = scoreDetails.netScore
 
-  const check = useCallback(() => {
-    if (selected === null || checked) return
+  useEffect(() => {
+    if (!question) return
+    let active = true
+    bookmarksStore.isBookmarked(question.id).then((is) => {
+      if (active) setBookmarked(is)
+    })
+    return () => {
+      active = false
+    }
+  }, [question])
+
+  const toggleBookmark = async () => {
+    if (!question) return
+    const newState = await bookmarksStore.toggleBookmark(question, {
+      trackId: lesson?.trackId,
+      unitId: lesson?.unitId,
+    })
+    setBookmarked(newState)
+  }
+
+  const check = () => {
+    if (selected === null || checked || !question) return
+    const isCorrect = selected === question.answer
     setChecked(true)
-    setAnswers((prev) => [
-      ...prev,
-      { question, choice: selected, correct: selected === question.answer },
-    ])
-  }, [checked, question, selected])
+    setAnswers((prev) => [...prev, { question, choice: selected, correct: isCorrect }])
 
-  const advance = useCallback(() => {
+    // Update Mistakes Bank with SRS
+    if (isCorrect) {
+      mistakesStore.recordReviewResult(question.id, true)
+    } else {
+      mistakesStore.recordMistake(question, { trackId: lesson?.trackId, unitId: lesson?.unitId })
+    }
+  }
+
+  const advance = () => {
     if (!checked) return
     if (isLast) {
-      // `answers` already includes the question that was just checked.
-      const finalScore = answers.filter((a) => a.correct).length
-      progress.recordAttempt(lesson.id, { score: finalScore, total: questions.length })
+      // Record attempt and update daily streak
+      const finalScoreDetails = calculateScore(answers, negativeMarking)
+      progress.recordAttempt(lesson.id, {
+        score: Math.round(finalScoreDetails.netScore),
+        total: questions.length,
+      })
+      streakStore.recordAnswers(questions.length)
       setFinished(true)
       return
     }
     setIndex((i) => i + 1)
     setSelected(null)
     setChecked(false)
-  }, [answers, checked, isLast, lesson, progress, questions.length])
+  }
 
   const restart = () => {
     setQuestions(shuffle(lesson.questions))
@@ -101,7 +138,7 @@ export default function LessonScreen({ lessonId }) {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [advance, check, checked, finished, question])
+  })
 
   if (!lesson) return <Navigate to="/" replace />
   if (!progress.ready) return <div className="lesson lesson--loading">Loading…</div>
@@ -124,7 +161,12 @@ export default function LessonScreen({ lessonId }) {
                 : 'Lesson complete — worth another run.'}
           </h1>
           <p className="results__score">
-            {score} of {questions.length} correct
+            {score} of {questions.length} marks
+            {negativeMarking > 0 && (
+              <small style={{ display: 'block', marginTop: '0.25rem', opacity: 0.8 }}>
+                ({scoreDetails.correct} correct, {scoreDetails.wrong} wrong · -{scoreDetails.marksDeducted} negative marking)
+              </small>
+            )}
           </p>
 
           {missed.length > 0 && (
@@ -182,6 +224,15 @@ export default function LessonScreen({ lessonId }) {
         <div className="lesson__progress" role="img" aria-label={`Question ${index + 1} of ${questions.length}`}>
           <span style={{ width: `${(index / questions.length) * 100}%` }} />
         </div>
+        <button
+          type="button"
+          className={`icon-btn${bookmarked ? ' is-bookmarked' : ''}`}
+          aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this question'}
+          onClick={toggleBookmark}
+          title={bookmarked ? 'Remove bookmark' : 'Bookmark this question'}
+        >
+          <StarIcon width="20" height="20" />
+        </button>
         <span className="lesson__count">
           {index + 1}/{questions.length}
         </span>
@@ -201,7 +252,7 @@ export default function LessonScreen({ lessonId }) {
           {question.prompt}
         </h1>
 
-        {/* UPSC-style items: a stem, a list of numbered statements, then the ask. */}
+        {/* UPSC/CSS-style items: stem, statement list, closing ask */}
         {question.statements && (
           <ol className="statements">
             {question.statements.map((statement, i) => (
@@ -250,7 +301,6 @@ export default function LessonScreen({ lessonId }) {
                   <CheckIcon width="20" height="20" /> Correct
                 </>
               ) : (
-                // one flex item, so the label and the answer stay on the same line
                 <span>
                   Correct answer:{' '}
                   <span className={lesson.rtl ? 'urdu' : undefined} dir={lesson.rtl ? 'rtl' : 'ltr'}>
@@ -284,7 +334,7 @@ export default function LessonScreen({ lessonId }) {
 function ScoreRing({ score, total }) {
   const radius = 52
   const circumference = 2 * Math.PI * radius
-  const pct = total === 0 ? 0 : score / total
+  const pct = total === 0 ? 0 : Math.max(0, Math.min(1, score / total))
   return (
     <svg className="ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
       <circle className="ring__track" cx="60" cy="60" r={radius} />

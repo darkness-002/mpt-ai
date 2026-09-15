@@ -279,3 +279,39 @@ textarea {
   display: flex;
   gap: 0.6rem;
 }
+
+.admin__search-bar {
+  margin-bottom: 1rem;
+}
+
+.admin__search-bar input {
+  width: 100%;
+  padding: 0.55rem 0.8rem;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.admin__search-bar input:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+
+.admin__pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.pagination-info {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
