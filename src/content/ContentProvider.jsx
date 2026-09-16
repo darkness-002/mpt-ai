@@ -74,7 +74,11 @@ export function ContentProvider({ children }) {
       getPrerequisite: (lessonId) => {
         const current = byId.get(lessonId)
         if (!current || current.indexInUnit === 0) return null
-        return lessons[current.index - 1] ?? null
+        return (
+          lessons.find(
+            (l) => l.unitId === current.unitId && l.indexInUnit === current.indexInUnit - 1,
+          ) ?? null
+        )
       },
     }
   }, [bundled, custom, ready, refresh])

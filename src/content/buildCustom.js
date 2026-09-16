@@ -3,17 +3,9 @@ const PER_LESSON = 10
 const slugify = (text) =>
   String(text).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'custom'
 
-/** Same rule the bundled curriculum applies: a question without a real key cannot be asked. */
-export function isAnswerable(question) {
-  return (
-    Number.isInteger(question.answer) &&
-    question.answer >= 0 &&
-    Array.isArray(question.choices) &&
-    question.answer < question.choices.length &&
-    question.choices.length >= 2 &&
-    Boolean(question.prompt?.trim())
-  )
-}
+import { isAnswerable } from '../data/questionModel.js'
+
+export { isAnswerable }
 
 function chunk(items) {
   const sets = []

@@ -11,8 +11,6 @@ import {
 } from '../components/icons.jsx'
 import { useContent } from '../content/contentContext.js'
 import { useInstallPrompt } from '../lib/useInstallPrompt.js'
-import { exportProgressPayload, parseAndMergeProgress } from '../storage/adapter.js'
-import { idb } from '../storage/idb.js'
 import { mistakesStore } from '../storage/mistakesStore.js'
 import { useProgress } from '../storage/progressContext.js'
 import { streakStore } from '../storage/streakStore.js'
@@ -20,7 +18,7 @@ import './TracksScreen.css'
 
 export default function TracksScreen() {
   const { exams, tracks, totalQuestions } = useContent()
-  const { records } = useProgress()
+  const { records, exportProgress, importProgress } = useProgress()
   const { canInstall, install } = useInstallPrompt()
   const [streakData] = useState(() => streakStore.load())
   const [dueMistakesCount, setDueMistakesCount] = useState(0)
@@ -39,7 +37,7 @@ export default function TracksScreen() {
   }, [])
 
   const handleExportProgress = () => {
-    const payload = exportProgressPayload(records)
+    const payload = exportProgress()
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -56,8 +54,7 @@ export default function TracksScreen() {
     if (!file) return
     try {
       const text = await file.text()
-      const merged = parseAndMergeProgress(text, records)
-      await idb.putMany(merged)
+      const merged = await importProgress(text)
       setStatusMsg(`Imported ${merged.length} progress records. Reloading...`)
       setTimeout(() => window.location.reload(), 1200)
     } catch (err) {

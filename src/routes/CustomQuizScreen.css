@@ -1,7 +1,8 @@
+/* Custom Drill Container */
 .custom-drill {
   width: min(48rem, 100%);
   margin: 0 auto;
-  padding: 1.25rem 1.25rem 6.5rem;
+  padding: 1.25rem 1.25rem calc(6.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 .custom-drill__top {
@@ -20,7 +21,7 @@
 
 .custom-drill__title h1 {
   margin: 0;
-  font-size: clamp(1.5rem, 5vw, 2.1rem);
+  font-size: clamp(1.4rem, 5vw, 2rem);
   font-weight: 900;
 }
 
@@ -28,19 +29,20 @@
   margin: 0.4rem 0 1.5rem;
   color: var(--muted);
   font-size: 0.92rem;
+  line-height: 1.45;
 }
 
 .custom-drill__form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .drill-section {
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.25rem;
+  padding: 1.15rem 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -50,6 +52,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .drill-label {
@@ -61,8 +65,8 @@
 .unit-bulk-actions {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
+  gap: 0.5rem;
+  font-size: 0.82rem;
   color: var(--muted);
 }
 
@@ -70,9 +74,14 @@
   background: none;
   border: none;
   color: var(--blue);
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  padding: 0;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+}
+
+.text-btn:hover {
+  background: color-mix(in srgb, var(--blue) 10%, transparent);
 }
 
 .track-pills,
@@ -84,13 +93,13 @@
 }
 
 .pill-btn {
-  padding: 0.55rem 0.9rem;
+  padding: 0.6rem 0.95rem;
   border: 2px solid var(--border);
   border-radius: calc(var(--radius) * 0.7);
   background: var(--surface-2);
   color: var(--text);
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   cursor: pointer;
   transition: all 0.12s ease;
 }
@@ -103,19 +112,20 @@
   background: var(--blue);
   border-color: var(--blue);
   color: #fff;
+  box-shadow: 0 3px 10px rgba(28, 176, 246, 0.25);
 }
 
 .units-checkbox-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 0.55rem;
 }
 
 .unit-checkbox-label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 0.75rem;
+  gap: 0.6rem;
+  padding: 0.65rem 0.85rem;
   background: var(--surface-2);
   border: 1.5px solid var(--border);
   border-radius: calc(var(--radius) * 0.6);
@@ -123,101 +133,146 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.12s ease;
+  user-select: none;
+}
+
+.unit-checkbox-label:hover {
+  border-color: var(--muted);
 }
 
 .unit-checkbox-label.is-checked {
   border-color: var(--green);
-  background: color-mix(in srgb, var(--green) 10%, var(--surface-2));
+  background: color-mix(in srgb, var(--green) 12%, var(--surface-2));
 }
 
 .unit-checkbox-label input {
   accent-color: var(--green);
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: none;
+}
+
+.scale-chip {
+  padding: 0.55rem 0.9rem;
+  border: 2px solid var(--border);
+  border-radius: calc(var(--radius) * 0.65);
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.scale-chip:hover {
+  border-color: var(--blue);
+}
+
+.scale-chip.is-active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(28, 176, 246, 0.25);
 }
 
 .drill-toggle-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.6rem 0.75rem;
+  padding: 0.75rem 0.9rem;
   background: var(--surface-2);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: calc(var(--radius) * 0.6);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  margin-top: 0.4rem;
+  margin-top: 0.25rem;
 }
 
 .drill-toggle-row input {
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1.25rem;
+  height: 1.25rem;
   accent-color: var(--green);
   cursor: pointer;
 }
 
 .drill-empty-notice {
-  padding: 0.85rem 1rem;
+  padding: 1rem 1.15rem;
   background: color-mix(in srgb, #f59e0b 12%, var(--surface));
   border: 1.5px solid #f59e0b;
   border-radius: var(--radius);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .drill-submit-wrap {
   display: flex;
   justify-content: center;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 }
 
-/* Active drill screen */
+.drill-submit-wrap .btn--wide {
+  width: 100%;
+  max-width: 28rem;
+  min-height: 3.25rem;
+  font-size: 1.05rem;
+}
+
+/* ==========================================================================
+   Active Drill Session (Immersive Mode)
+   ========================================================================== */
 .custom-drill--active {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  padding-bottom: 0;
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 0 1.25rem;
 }
 
 .drill-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 0 1rem;
+  padding: 0.85rem 0 1rem;
+  gap: 0.5rem;
 }
 
 .drill-topbar__center {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .drill-timer {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.35rem;
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--text);
   background: var(--surface-2);
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.6rem;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
 }
 
 .drill-body {
   flex: 1;
+  padding-bottom: 2.5rem;
 }
 
 .drill-unit-title {
   margin: 0;
   font-size: 0.82rem;
   font-weight: 900;
-  color: var(--muted);
+  color: var(--blue);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 
 .drill-directive {
@@ -230,9 +285,9 @@
 
 .drill-prompt {
   margin: 0.4rem 0 1.25rem;
-  font-size: clamp(1.25rem, 4vw, 1.6rem);
+  font-size: clamp(1.25rem, 4.5vw, 1.65rem);
   font-weight: 800;
-  line-height: 1.35;
+  line-height: 1.38;
 }
 
 .drill-statements {
@@ -241,13 +296,13 @@
   margin: 0 0 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .drill-statements li {
   display: flex;
   align-items: baseline;
-  gap: 0.6rem;
+  gap: 0.65rem;
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.45;
@@ -267,7 +322,7 @@
   color: var(--text);
 }
 
-/* Choices list & buttons */
+/* MCQ Choices List */
 .choices {
   list-style: none;
   margin: 0;
@@ -276,12 +331,19 @@
   gap: 0.85rem;
 }
 
+.choice-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+}
+
 .choice {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.9rem;
   width: 100%;
-  min-height: 3.8rem;
+  min-height: 3.75rem;
   padding: 0.85rem 1.15rem;
   font: inherit;
   font-weight: 700;
@@ -295,6 +357,7 @@
   cursor: pointer;
   transition: transform 0.08s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   position: relative;
+  flex: 1;
 }
 
 .choice:hover:not(:disabled) {
@@ -330,6 +393,7 @@
 .choice__text {
   flex: 1;
   line-height: 1.4;
+  word-break: break-word;
 }
 
 .choice__status-icon {
@@ -387,32 +451,63 @@
   border-color: var(--red-dark);
 }
 
+.choice--eliminated {
+  opacity: 0.45;
+  text-decoration: line-through;
+  filter: grayscale(0.6);
+}
+
+.strike-toggle {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: none;
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.strike-toggle:hover:not(:disabled) {
+  border-color: var(--muted);
+  color: var(--text);
+}
+
+.strike-toggle.is-struck {
+  background: color-mix(in srgb, var(--red) 12%, var(--surface));
+  border-color: var(--red);
+  color: var(--red);
+}
+
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-5px); }
   40%, 80% { transform: translateX(5px); }
 }
 
-.btn--continue-wrong {
-  background: var(--red) !important;
-  box-shadow: 0 var(--shadow-press) 0 var(--red-dark) !important;
-}
-
-/* Feedback Drawer */
+/* ==========================================================================
+   Sticky Bottom Drawer & Action Button
+   ========================================================================== */
 .drill-footer {
   position: sticky;
   bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  margin-top: auto;
   background: var(--surface);
   border-top: 2px solid var(--border);
-  padding: 1.25rem 1.25rem 1.75rem;
+  padding: 1.15rem 1.25rem calc(1.15rem + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: 1rem;
   align-items: center;
-  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.08);
   z-index: 100;
   transition: background-color 0.2s ease, border-top-color 0.2s ease;
-  width: 100%;
 }
 
 .drill-footer.is-correct {
@@ -423,6 +518,18 @@
 .drill-footer.is-wrong {
   background: color-mix(in srgb, var(--red) 11%, var(--surface));
   border-top-color: var(--red);
+}
+
+.drill-footer .btn--wide {
+  width: 100%;
+  max-width: 28rem;
+  min-height: 3.25rem;
+  font-size: 1.05rem;
+}
+
+.btn--continue-wrong {
+  background: var(--red) !important;
+  box-shadow: 0 var(--shadow-press) 0 var(--red-dark) !important;
 }
 
 .feedback-drawer {
@@ -442,7 +549,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 900;
 }
 
@@ -528,7 +635,13 @@
   color: var(--text);
 }
 
-/* Results */
+/* ==========================================================================
+   Results / Finished Screen
+   ========================================================================== */
+.custom-drill__results {
+  padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
+}
+
 .drill-score-card {
   text-align: center;
   padding: 2.25rem 1.5rem;
@@ -553,7 +666,7 @@
 }
 
 .drill-review-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
 }
 
 .drill-review-section h3 {
@@ -624,8 +737,17 @@
 
 .drill-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.75rem;
-  justify-content: center;
+  width: 100%;
+  max-width: 28rem;
+  margin: 1.75rem auto 0;
 }
 
+@media (min-width: 600px) {
+  .drill-actions {
+    flex-direction: row;
+    max-width: 100%;
+    justify-content: center;
+  }
+}

@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BookIcon, FlameIcon, StarIcon, TargetIcon, ZapIcon } from '../components/icons.jsx'
+import {
+  AlertTriangleIcon,
+  BookIcon,
+  FlameIcon,
+  StarIcon,
+  TargetIcon,
+  ZapIcon,
+} from '../components/icons.jsx'
 import { useContent } from '../content/contentContext.js'
 import { mistakesStore } from '../storage/mistakesStore.js'
 import { useProgress } from '../storage/progressContext.js'
@@ -102,6 +109,69 @@ export default function AnalyticsScreen() {
     }
   }, [settings.examTargetDate, settings.examTargetName, totalQuestions, progressStats.totalPossibleSum])
 
+  // Weakest subject diagnostic identification
+  const weakestSubject = useMemo(() => {
+    const attempted = []
+    for (const track of tracks) {
+      for (const unit of track.units) {
+        const unitLessons = unit.lessons
+        const doneLessons = unitLessons.filter((l) => records[l.id])
+        if (doneLessons.length > 0) {
+          let unitScore = 0
+          let unitTotal = 0
+          doneLessons.forEach((l) => {
+            const r = records[l.id]
+            if (r) {
+              unitScore += r.bestScore ?? 0
+              unitTotal += r.total ?? 0
+            }
+          })
+          const accuracy = unitTotal > 0 ? Math.round((unitScore / unitTotal) * 100) : 0
+          attempted.push({
+            trackId: track.id,
+            trackTitle: track.title,
+            exam: track.exam,
+            unitId: unit.id,
+            unitTitle: unit.title,
+            rtl: unit.rtl,
+            accuracy,
+            completed: doneLessons.length,
+            totalLessons: unitLessons.length,
+          })
+        }
+      }
+    }
+
+    if (attempted.length === 0) {
+      // If none attempted yet, suggest first unit of first track
+      const firstTrack = tracks[0]
+      const firstUnit = firstTrack?.units?.[0]
+      if (firstTrack && firstUnit) {
+        return {
+          trackId: firstTrack.id,
+          trackTitle: firstTrack.title,
+          exam: firstTrack.exam,
+          unitId: firstUnit.id,
+          unitTitle: firstUnit.title,
+          rtl: firstUnit.rtl,
+          accuracy: null,
+          completed: 0,
+          totalLessons: firstUnit.lessons.length,
+          isSuggested: true,
+        }
+      }
+      return null
+    }
+
+    // Sort by lowest accuracy first, then lowest percentage completed
+    attempted.sort((a, b) => {
+      if (a.accuracy !== b.accuracy) return a.accuracy - b.accuracy
+      return a.completed / a.totalLessons - b.completed / b.totalLessons
+    })
+
+    return attempted[0]
+  }, [tracks, records])
+
   const masteredMistakes = mistakes.filter((m) => m.mastered).length
 
   return (
@@ -124,6 +194,52 @@ export default function AnalyticsScreen() {
       </header>
 
       <main className="analytics-body">
+        {/* Weak-Area Drill 1-Click Action Card */}
+        {weakestSubject && (
+          <section className="analytics-card weakest-card">
+            <div className="weakest-card__header">
+              <div className="weakest-card__info">
+                <div className="weakest-card__icon-wrap">
+                  <AlertTriangleIcon width="24" height="24" style={{ color: 'var(--red)' }} />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+                    <span className="weakest-card__badge">
+                      {weakestSubject.isSuggested ? 'Recommended Focus' : 'Weakest Subject'}
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--muted)', fontWeight: '700' }}>
+                      {weakestSubject.exam} · {weakestSubject.trackTitle}
+                    </span>
+                  </div>
+                  <h3 className={weakestSubject.rtl ? 'urdu' : undefined}>
+                    {weakestSubject.unitTitle}
+                  </h3>
+                  <p>
+                    {weakestSubject.accuracy !== null
+                      ? `Lowest accuracy score at ${weakestSubject.accuracy}% across ${weakestSubject.completed} completed lessons.`
+                      : 'Kickstart your diagnostics by practicing this core subject.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="weakest-card__actions">
+              <Link
+                className="btn btn--small"
+                to={`/drill?trackId=${weakestSubject.trackId}&unitId=${weakestSubject.unitId}&autoStart=true`}
+              >
+                Drill {weakestSubject.unitTitle} Now (1-Click) →
+              </Link>
+              <Link
+                className="btn btn--ghost btn--small"
+                to={`/drill?trackId=${weakestSubject.trackId}&unitId=${weakestSubject.unitId}`}
+              >
+                Configure Drill Options
+              </Link>
+            </div>
+          </section>
+        )}
+
         {/* Exam Countdown & Target Widget */}
         <section className="analytics-card target-card">
           <div className="target-card__header">
@@ -220,7 +336,7 @@ export default function AnalyticsScreen() {
                               style={{
                                 width: `${unit.accuracy}%`,
                                 backgroundColor:
-                                  unit.accuracy >= 75
+                                   unit.accuracy >= 75
                                     ? 'var(--green)'
                                     : unit.accuracy >= 50
                                       ? 'var(--gold)'

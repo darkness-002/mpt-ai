@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { createLocalAdapter } from './adapter.js'
+import { createLocalAdapter, exportProgressPayload, parseAndMergeProgress } from './adapter.js'
 import { ProgressContext } from './progressContext.js'
 import { useContent } from '../content/contentContext.js'
 
@@ -53,6 +53,22 @@ export function ProgressProvider({ adapter, children }) {
     store.clear()
   }, [store])
 
+  const exportProgress = useCallback(() => {
+    return exportProgressPayload(recordsRef.current)
+  }, [])
+
+  const importProgress = useCallback(
+    async (input) => {
+      const mergedList = parseAndMergeProgress(input, recordsRef.current)
+      const byLesson = Object.fromEntries(mergedList.map((row) => [row.lessonId, row]))
+      recordsRef.current = byLesson
+      setRecords(byLesson)
+      await store.save(mergedList)
+      return mergedList
+    },
+    [store],
+  )
+
   const value = useMemo(() => {
     /**
      * A lesson opens once the previous lesson *in its own unit* is finished, so
@@ -72,11 +88,13 @@ export function ProgressProvider({ adapter, children }) {
       records,
       recordAttempt,
       resetProgress,
+      exportProgress,
+      importProgress,
       isUnlocked,
       currentLessonId,
       stats: { completed, mastered, total: lessons.length },
     }
-  }, [ready, records, recordAttempt, resetProgress, lessons, getPrerequisite])
+  }, [ready, records, recordAttempt, resetProgress, exportProgress, importProgress, lessons, getPrerequisite])
 
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>
 }

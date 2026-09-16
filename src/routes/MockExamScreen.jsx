@@ -9,12 +9,10 @@ import {
   TimerIcon,
 } from '../components/icons.jsx'
 import { useContent } from '../content/contentContext.js'
-import { calculateScore } from '../data/curriculum.js'
-import { fireConfetti } from '../lib/confetti.js'
+import { calculateScore, explainQuestion } from '../data/curriculum.js'
+import { feedbackService } from '../lib/feedback.js'
 import { shuffle } from '../lib/shuffle.js'
-import { playCelebrationSound, triggerHaptic } from '../lib/sound.js'
 import { mistakesStore } from '../storage/mistakesStore.js'
-import { settingsStore } from '../storage/settingsStore.js'
 import { streakStore } from '../storage/streakStore.js'
 import './MockExamScreen.css'
 
@@ -187,9 +185,11 @@ export default function MockExamScreen() {
 
     streakStore.recordAnswers(answeredList.filter((a) => a.choice !== undefined).length)
 
-    // Save incorrect or skipped items to mistakes store
+    // Save incorrect or skipped items to mistakes store, or update SRS for correct answers
     for (const item of answeredList) {
-      if (!item.correct) {
+      if (item.correct) {
+        mistakesStore.recordReviewResult(item.question.id, true)
+      } else {
         mistakesStore.recordMistake(item.question, {
           trackId: track?.id,
           unitId: item.question.unitId,
@@ -235,9 +235,7 @@ export default function MockExamScreen() {
     const isPassed = scoreData.netScore >= blueprint.passingMarks
 
     if (isPassed) {
-      fireConfetti()
-      const settings = settingsStore.load()
-      if (settings.soundEnabled) playCelebrationSound()
+      feedbackService.celebrate()
     }
 
     return {
@@ -357,8 +355,7 @@ export default function MockExamScreen() {
                     {!isSkipped && !isCorrect && (
                       <p className="review-item__wrong">Your choice: {q.choices[choice]}</p>
                     )}
-                    <p className="review-item__right">Correct choice: {q.choices[q.answer]}</p>
-                    {q.explanation && <p className="review-item__why">{q.explanation}</p>}
+                    {explainQuestion(q) && <p className="review-item__why">{explainQuestion(q)}</p>}
                   </li>
                 )
               })}
@@ -490,7 +487,7 @@ export default function MockExamScreen() {
                     onClick={() => {
                       if (isStruck) return
                       setSelectedAnswers((prev) => ({ ...prev, [currentIndex]: i }))
-                      triggerHaptic(30)
+                      feedbackService.tap(30)
                     }}
                   >
                     <span className="choice__key">{letter}</span>

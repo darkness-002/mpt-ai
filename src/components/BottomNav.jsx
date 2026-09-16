@@ -13,14 +13,29 @@ import { mistakesStore } from '../storage/mistakesStore.js'
 import './BottomNav.css'
 
 export default function BottomNav() {
+  const location = useLocation()
   const [showSettings, setShowSettings] = useState(false)
   const [dueMistakesCount, setDueMistakesCount] = useState(0)
-  const location = useLocation()
+  const [isDrillImmersive, setIsDrillImmersive] = useState(
+    () => typeof document !== 'undefined' && document.body.dataset.immersive === 'true',
+  )
+
+  // Listen for changes to document.body.dataset.immersive
+  useEffect(() => {
+    const check = () => {
+      setIsDrillImmersive(document.body.dataset.immersive === 'true')
+    }
+    check()
+    const observer = new MutationObserver(check)
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-immersive'] })
+    return () => observer.disconnect()
+  }, [])
 
   // Hide bottom nav during active lessons, mock exams, or custom drill practice to maximize screen focus
   const isImmersiveMode =
     location.pathname.startsWith('/lesson/') ||
-    location.pathname.startsWith('/mock/')
+    location.pathname.startsWith('/mock/') ||
+    isDrillImmersive
 
   useEffect(() => {
     let active = true

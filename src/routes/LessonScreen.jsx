@@ -9,13 +9,11 @@ import {
   XCircleIcon,
 } from '../components/icons.jsx'
 import { useContent } from '../content/contentContext.js'
-import { calculateScore } from '../data/curriculum.js'
-import { fireConfetti } from '../lib/confetti.js'
+import { calculateScore, explainQuestion, keyNoteQuestion } from '../data/curriculum.js'
+import { feedbackService } from '../lib/feedback.js'
 import { shuffle } from '../lib/shuffle.js'
-import { playCelebrationSound, playSuccessSound, playWrongSound, triggerHaptic } from '../lib/sound.js'
 import { bookmarksStore } from '../storage/bookmarksStore.js'
 import { mistakesStore } from '../storage/mistakesStore.js'
-import { settingsStore } from '../storage/settingsStore.js'
 import { streakStore } from '../storage/streakStore.js'
 import { useProgress } from '../storage/progressContext.js'
 import './LessonScreen.css'
@@ -23,26 +21,6 @@ import './LessonScreen.css'
 const CHOICE_KEYS = ['1', '2', '3', '4', 'a', 'b', 'c', 'd', 'A', 'B', 'C', 'D']
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI']
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
-
-/** Coached questions carry a written explanation; past-paper items carry their origin. */
-function explain(question) {
-  if (question.explanation) return question.explanation
-  if (question.source) {
-    const where = question.source.number ? `, Q${question.source.number}` : ''
-    return `Original exam question — ${question.source.paper}${where}.`
-  }
-  return null
-}
-
-/** Says who stands behind the answer when it is not the examiner's own printed key. */
-function keyNote(question) {
-  const source = question.source
-  if (source?.keyedBy === 'mpt-ai') {
-    return 'Answer worked out by MPT-AI — no official key was published for this paper.'
-  }
-  if (source?.keySource) return `Answer key via ${source.keySource}.`
-  return null
-}
 
 /** Mounted with key={lessonId}, so every lesson starts from clean state. */
 export default function LessonScreen({ lessonId }) {
@@ -103,20 +81,12 @@ export default function LessonScreen({ lessonId }) {
     setChecked(true)
     setAnswers((prev) => [...prev, { question, choice: selected, correct: isCorrect }])
 
-    // Sound & Haptic triggers
-    const settings = settingsStore.load()
-    if (settings.soundEnabled) {
-      if (isCorrect) playSuccessSound()
-      else playWrongSound()
-    }
-    if (settings.hapticsEnabled) {
-      triggerHaptic(isCorrect ? 40 : [40, 80, 40])
-    }
-
-    // Update Mistakes Bank with SRS
+    // Coordinated feedback
     if (isCorrect) {
+      feedbackService.onCorrect()
       mistakesStore.recordReviewResult(question.id, true)
     } else {
+      feedbackService.onWrong()
       mistakesStore.recordMistake(question, { trackId: lesson?.trackId, unitId: lesson?.unitId })
     }
   }
@@ -135,9 +105,7 @@ export default function LessonScreen({ lessonId }) {
 
       // Celebrate if high score / mastery
       if (finalScoreDetails.netScore >= questions.length * 0.8) {
-        fireConfetti()
-        const settings = settingsStore.load()
-        if (settings.soundEnabled) playCelebrationSound()
+        feedbackService.celebrate()
       }
       return
     }
@@ -157,33 +125,43 @@ export default function LessonScreen({ lessonId }) {
     setFinished(false)
   }
 
+  const handlersRef = useRef({ check, advance, checked, question, eliminated })
+
   useEffect(() => {
-    headingRef.current?.focus()
-  }, [index, finished])
+    handlersRef.current = { check, advance, checked, question, eliminated }
+  })
 
   useEffect(() => {
     if (finished) return undefined
     const onKeyDown = (event) => {
-      if (CHOICE_KEYS.includes(event.key) && !checked) {
+      if (['INPUT', 'TEXTAREA'].includes(event.target?.tagName)) return
+      const {
+        check: doCheck,
+        advance: doAdvance,
+        checked: isChecked,
+        question: q,
+        eliminated: elim,
+      } = handlersRef.current
+      if (CHOICE_KEYS.includes(event.key) && !isChecked) {
         let i = -1
         if (['1', '2', '3', '4'].includes(event.key)) {
           i = Number(event.key) - 1
         } else {
           i = ['a', 'b', 'c', 'd'].indexOf(event.key.toLowerCase())
         }
-        if (i >= 0 && i < (question?.choices.length ?? 0) && !eliminated[i]) {
+        if (i >= 0 && i < (q?.choices.length ?? 0) && !elim[i]) {
           setSelected(i)
         }
       }
       if (event.key === 'Enter') {
         event.preventDefault()
-        if (checked) advance()
-        else check()
+        if (isChecked) doAdvance()
+        else doCheck()
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  })
+  }, [finished])
 
   if (!lesson) return <Navigate to="/" replace />
   if (!progress.ready) return <div className="lesson lesson--loading">Loading…</div>
@@ -229,7 +207,7 @@ export default function LessonScreen({ lessonId }) {
                     <p className={`review__right${lesson.rtl ? ' urdu' : ''}`} dir={lesson.rtl ? 'rtl' : 'ltr'}>
                       Correct: {q.choices[q.answer]}
                     </p>
-                    <p className="review__why">{explain(q)}</p>
+                    {explainQuestion(q) && <p className="review__why">{explainQuestion(q)}</p>}
                   </li>
                 ))}
               </ul>
@@ -259,6 +237,8 @@ export default function LessonScreen({ lessonId }) {
   }
 
   const answeredCorrectly = checked && selected === question.answer
+  const explanation = explainQuestion(question)
+  const provenance = keyNoteQuestion(question)
 
   return (
     <div className="lesson" style={{ '--hue': lesson.hue }}>
@@ -298,7 +278,7 @@ export default function LessonScreen({ lessonId }) {
         </h1>
 
         {/* UPSC/CSS-style items: stem, statement list, closing ask */}
-        {question.statements && (
+        {question.statements && question.statements.length > 0 && (
           <ol className="statements">
             {question.statements.map((statement, i) => (
               <li key={statement}>
@@ -397,7 +377,7 @@ export default function LessonScreen({ lessonId }) {
               </div>
             )}
 
-            {explain(question) && (
+            {explanation && (
               <div className="explanation-card">
                 <div className="explanation-card__header">
                   <LightbulbIcon width="18" height="18" />
@@ -407,11 +387,11 @@ export default function LessonScreen({ lessonId }) {
                   className={`explanation-card__text${lesson.rtl ? ' urdu' : ''}`}
                   dir={lesson.rtl ? 'rtl' : 'ltr'}
                 >
-                  {explain(question)}
+                  {explanation}
                 </p>
-                {keyNote(question) && (
+                {provenance && (
                   <span className="explanation-card__provenance">
-                    {keyNote(question)}
+                    {provenance}
                   </span>
                 )}
               </div>

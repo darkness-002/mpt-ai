@@ -49,6 +49,71 @@
   font-weight: 800;
 }
 
+.weakest-card {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.09) 0%, var(--surface) 100%);
+  border-color: #ef4444;
+  border-width: 2px;
+}
+
+.weakest-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.weakest-card__info {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.weakest-card__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.15);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.weakest-card__info h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.weakest-card__info p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.weakest-card__badge {
+  display: inline-block;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  letter-spacing: 0.03em;
+}
+
+.weakest-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
 .target-card {
   background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
   border-color: var(--blue);

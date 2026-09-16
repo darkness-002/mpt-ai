@@ -1,16 +1,25 @@
 import { idbBookmarks, idbSupported } from './idb.js'
 
 /**
- * Storage for bookmarked / starred questions.
+ * Storage for bookmarked / starred questions with in-memory caching for instant UI response.
  */
 
 const memory = new Map()
+let cache = null
 
 async function readAll() {
-  if (!idbSupported) return [...memory.values()]
+  if (cache) return [...cache.values()]
+  if (!idbSupported) {
+    cache = memory
+    return [...memory.values()]
+  }
   try {
-    return await idbBookmarks.getAll()
+    const records = await idbBookmarks.getAll()
+    cache = new Map()
+    records.forEach((r) => cache.set(r.id, r))
+    return records
   } catch {
+    cache = memory
     return [...memory.values()]
   }
 }
@@ -31,6 +40,7 @@ export const bookmarksStore = {
     const exists = all.some((item) => item.id === question.id)
 
     if (exists) {
+      if (cache) cache.delete(question.id)
       memory.delete(question.id)
       if (idbSupported) {
         try {
@@ -46,6 +56,7 @@ export const bookmarksStore = {
         unitId,
         savedAt: Date.now(),
       }
+      if (cache) cache.set(question.id, record)
       memory.set(question.id, record)
       if (idbSupported) {
         try {
@@ -57,6 +68,7 @@ export const bookmarksStore = {
   },
 
   async clear() {
+    if (cache) cache.clear()
     memory.clear()
     if (idbSupported) {
       try {

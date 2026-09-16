@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 export function useInstallPrompt() {
   const [promptEvent, setPromptEvent] = useState(null)
   const [installed, setInstalled] = useState(
-    () => window.matchMedia('(display-mode: standalone)').matches,
+    () => typeof window !== 'undefined' && Boolean(window?.matchMedia?.('(display-mode: standalone)')?.matches),
   )
 
   useEffect(() => {

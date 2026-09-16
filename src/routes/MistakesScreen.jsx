@@ -7,10 +7,9 @@ import {
   SlashIcon,
   XCircleIcon,
 } from '../components/icons.jsx'
-import { fireConfetti } from '../lib/confetti.js'
-import { playCelebrationSound, playSuccessSound, playWrongSound, triggerHaptic } from '../lib/sound.js'
+import { explainQuestion } from '../data/curriculum.js'
+import { feedbackService } from '../lib/feedback.js'
 import { mistakesStore } from '../storage/mistakesStore.js'
-import { settingsStore } from '../storage/settingsStore.js'
 import './MistakesScreen.css'
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
@@ -54,6 +53,22 @@ export default function MistakesScreen() {
 
   const currentItem = dueList[currentIndex]
   const question = currentItem?.question
+  const isPracticing = dueList.length > 0 && Boolean(question) && !sessionFinished
+
+  // Hide bottom navigation during active mistake review to keep submit button unblocked
+  useEffect(() => {
+    if (isPracticing) {
+      document.body.dataset.immersive = 'true'
+      document.body.classList.add('is-immersive-drill')
+    } else {
+      delete document.body.dataset.immersive
+      document.body.classList.remove('is-immersive-drill')
+    }
+    return () => {
+      delete document.body.dataset.immersive
+      document.body.classList.remove('is-immersive-drill')
+    }
+  }, [isPracticing])
 
   const toggleEliminate = (choiceIndex) => {
     setEliminated((prev) => ({
@@ -69,22 +84,17 @@ export default function MistakesScreen() {
     mistakesStore.recordReviewResult(currentItem.id, isCorrect)
     setReviewedCount((c) => c + 1)
 
-    const settings = settingsStore.load()
-    if (settings.soundEnabled) {
-      if (isCorrect) playSuccessSound()
-      else playWrongSound()
-    }
-    if (settings.hapticsEnabled) {
-      triggerHaptic(isCorrect ? 40 : [40, 80, 40])
+    if (isCorrect) {
+      feedbackService.onCorrect()
+    } else {
+      feedbackService.onWrong()
     }
   }
 
   const advance = () => {
     if (currentIndex >= dueList.length - 1) {
       setSessionFinished(true)
-      fireConfetti()
-      const settings = settingsStore.load()
-      if (settings.soundEnabled) playCelebrationSound()
+      feedbackService.celebrate()
     } else {
       setCurrentIndex((i) => i + 1)
       setSelected(null)
@@ -105,6 +115,8 @@ export default function MistakesScreen() {
   if (loading) {
     return <div className="lesson lesson--loading">Loading your mistakes bank…</div>
   }
+
+  const explanation = explainQuestion(question)
 
   return (
     <div className="mistakes-screen">
@@ -278,14 +290,14 @@ export default function MistakesScreen() {
                     </div>
                   )}
 
-                  {question.explanation && (
+                  {explanation && (
                     <div className="explanation-card">
                       <div className="explanation-card__header">
                         <LightbulbIcon width="18" height="18" />
                         <span>Explanation & Context</span>
                       </div>
                       <p className={`explanation-card__text${question.rtl ? ' urdu' : ''}`} dir={question.rtl ? 'rtl' : 'ltr'}>
-                        {question.explanation}
+                        {explanation}
                       </p>
                     </div>
                   )}

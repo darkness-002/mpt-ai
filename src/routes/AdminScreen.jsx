@@ -116,7 +116,9 @@ export default function AdminScreen() {
       categoryId: selected.id,
       prompt: question.prompt,
       directive: question.directive,
-      statements: question.statements ? question.statements.split('\n') : undefined,
+      statements: question.statements
+        ? question.statements.split('\n').map((s) => s.trim()).filter(Boolean)
+        : undefined,
       closing: question.closing,
       choices: question.choices,
       answer: question.answer,

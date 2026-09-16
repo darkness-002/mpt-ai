@@ -1,16 +1,17 @@
 import { lazy } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import App from './App.jsx'
+import TracksScreen from './routes/TracksScreen.jsx'
+import PathScreen from './routes/PathScreen.jsx'
+import LessonRoute from './routes/LessonRoute.jsx'
+import MockExamScreen from './routes/MockExamScreen.jsx'
+import MistakesScreen from './routes/MistakesScreen.jsx'
+import BookmarksScreen from './routes/BookmarksScreen.jsx'
+import CustomQuizScreen from './routes/CustomQuizScreen.jsx'
+import AnalyticsScreen from './routes/AnalyticsScreen.jsx'
 
-const TracksScreen = lazy(() => import('./routes/TracksScreen.jsx'))
-const PathScreen = lazy(() => import('./routes/PathScreen.jsx'))
-const LessonRoute = lazy(() => import('./routes/LessonRoute.jsx'))
+// Lazy load heavy admin suite containing PDF parsing engine
 const AdminScreen = lazy(() => import('./routes/AdminScreen.jsx'))
-const MockExamScreen = lazy(() => import('./routes/MockExamScreen.jsx'))
-const MistakesScreen = lazy(() => import('./routes/MistakesScreen.jsx'))
-const BookmarksScreen = lazy(() => import('./routes/BookmarksScreen.jsx'))
-const CustomQuizScreen = lazy(() => import('./routes/CustomQuizScreen.jsx'))
-const AnalyticsScreen = lazy(() => import('./routes/AnalyticsScreen.jsx'))
 
 const router = createBrowserRouter([
   {

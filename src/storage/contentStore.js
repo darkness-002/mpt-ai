@@ -89,13 +89,14 @@ export const contentStore = {
   saveQuestion(input) {
     const now = Date.now()
     const choices = input.choices.map((choice) => choice.trim()).filter(Boolean)
+    const cleanedStatements = input.statements?.map((s) => s.trim()).filter(Boolean)
     return write({
       ...input,
       id: input.id ?? `question:${uuid()}`,
       type: 'question',
       choices,
       answer: Number(input.answer),
-      statements: input.statements?.map((s) => s.trim()).filter(Boolean) ?? undefined,
+      statements: cleanedStatements?.length ? cleanedStatements : undefined,
       order: input.order ?? now,
       updatedAt: now,
     })

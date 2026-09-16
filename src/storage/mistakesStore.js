@@ -19,24 +19,34 @@ import { idbMistakes, idbSupported } from './idb.js'
  */
 
 const memory = new Map()
+let cache = null
 const ONE_DAY_MS = 86_400_000
 
 async function readAll() {
-  if (!idbSupported) return [...memory.values()]
+  if (cache) return [...cache.values()]
+  if (!idbSupported) {
+    cache = memory
+    return [...memory.values()]
+  }
   try {
-    return await idbMistakes.getAll()
+    const records = await idbMistakes.getAll()
+    cache = new Map()
+    records.forEach((r) => cache.set(r.id, r))
+    return records
   } catch {
+    cache = memory
     return [...memory.values()]
   }
 }
 
 async function write(record) {
+  if (cache) cache.set(record.id, record)
   memory.set(record.id, record)
   if (!idbSupported) return record
   try {
     await idbMistakes.put(record)
   } catch {
-    /* memory already has it */
+    /* memory/cache already updated */
   }
   return record
 }
@@ -46,18 +56,27 @@ export const mistakesStore = {
     return await readAll()
   },
 
+  /** Returns all unmastered mistakes regardless of due date */
+  async getActive() {
+    const all = await readAll()
+    return all.filter((item) => !item.mastered)
+  },
+
+  /** Returns mistakes currently due for Spaced Repetition review (nextReviewAt <= now) */
   async getDue() {
     const all = await readAll()
     const now = Date.now()
-    return all.filter((item) => !item.mastered || item.nextReviewAt <= now)
+    return all.filter((item) => !item.mastered && (item.nextReviewAt ?? 0) <= now)
   },
 
   async count() {
     const all = await readAll()
     const active = all.filter((item) => !item.mastered)
+    const due = active.filter((item) => (item.nextReviewAt ?? 0) <= Date.now())
     return {
       total: all.length,
       active: active.length,
+      due: due.length,
       mastered: all.length - active.length,
     }
   },
@@ -120,23 +139,25 @@ export const mistakesStore = {
   },
 
   async remove(id) {
+    if (cache) cache.delete(id)
     memory.delete(id)
     if (idbSupported) {
       try {
         await idbMistakes.delete(id)
       } catch {
-        /* memory deleted */
+        /* deleted from memory/cache */
       }
     }
   },
 
   async clear() {
+    if (cache) cache.clear()
     memory.clear()
     if (idbSupported) {
       try {
         await idbMistakes.clear()
       } catch {
-        /* memory cleared */
+        /* cleared from memory/cache */
       }
     }
   },

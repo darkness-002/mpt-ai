@@ -231,43 +231,14 @@ export const EXAM_META = {
   UPSC: { title: 'UPSC', blurb: 'Civil Services Examination — UPSC Prelims' },
 }
 
-/**
- * A question is only usable if its answer is a real index. Staging data carries
- * `answer: null` until a key is attached — and `null >= 0` is true in JS, so
- * without this guard such an item would silently mark option 1 as correct.
- * @param {Question} question
- */
-export function isAnswerable(question) {
-  return (
-    Number.isInteger(question.answer) &&
-    question.answer >= 0 &&
-    Array.isArray(question.choices) &&
-    question.answer < question.choices.length
-  )
-}
+import {
+  calculateScore,
+  explainQuestion,
+  isAnswerable,
+  keyNoteQuestion,
+} from './questionModel.js'
 
-/**
- * Calculates score with support for fractional negative marking.
- * @param {Array<{ correct: boolean }>} answers
- * @param {number} negativeMarking
- */
-export function calculateScore(answers, negativeMarking = 0) {
-  const correct = answers.filter((a) => a.correct).length
-  const wrong = answers.filter((a) => !a.correct).length
-  const penalty = typeof negativeMarking === 'number' ? negativeMarking : 0
-  const marksDeducted = Math.round(wrong * penalty * 100) / 100
-  const rawScore = correct - marksDeducted
-  const netScore = Math.max(0, Math.round(rawScore * 100) / 100)
-
-  return {
-    correct,
-    wrong,
-    total: answers.length,
-    penalty,
-    marksDeducted,
-    netScore,
-  }
-}
+export { calculateScore, explainQuestion, isAnswerable, keyNoteQuestion }
 
 function buildUnit(unit, track, sources) {
   const rtl = sources.some((source) => source.rtl)
@@ -350,7 +321,11 @@ export async function loadBundledCurriculum() {
     getPrerequisite: (lessonId) => {
       const current = lessonsById.get(lessonId)
       if (!current || current.indexInUnit === 0) return null
-      return lessons[current.index - 1] ?? null
+      return (
+        lessons.find(
+          (l) => l.unitId === current.unitId && l.indexInUnit === current.indexInUnit - 1,
+        ) ?? null
+      )
     },
   }
 

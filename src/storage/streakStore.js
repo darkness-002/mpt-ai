@@ -100,4 +100,10 @@ export const streakStore = {
     } catch {}
     return updated
   },
+
+  clear() {
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {}
+  },
 }

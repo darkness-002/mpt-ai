@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   BookIcon,
   CheckCircleIcon,
@@ -12,13 +12,11 @@ import {
   XCircleIcon,
 } from '../components/icons.jsx'
 import { useContent } from '../content/contentContext.js'
-import { calculateScore } from '../data/curriculum.js'
-import { fireConfetti } from '../lib/confetti.js'
+import { calculateScore, explainQuestion } from '../data/curriculum.js'
+import { feedbackService } from '../lib/feedback.js'
 import { shuffle } from '../lib/shuffle.js'
-import { playCelebrationSound, playSuccessSound, playWrongSound, triggerHaptic } from '../lib/sound.js'
 import { bookmarksStore } from '../storage/bookmarksStore.js'
 import { mistakesStore } from '../storage/mistakesStore.js'
-import { settingsStore } from '../storage/settingsStore.js'
 import { streakStore } from '../storage/streakStore.js'
 import './CustomQuizScreen.css'
 
@@ -28,18 +26,28 @@ const CHOICE_KEYS = ['1', '2', '3', '4', 'a', 'b', 'c', 'd', 'A', 'B', 'C', 'D']
 
 export default function CustomQuizScreen() {
   const { tracks, ready } = useContent()
-  const [selectedTrackId, setSelectedTrackId] = useState('')
-  const activeTrack = tracks.find((t) => t.id === selectedTrackId) ?? tracks[0]
+  const [searchParams] = useSearchParams()
+  const paramTrackId = searchParams.get('trackId')
+  const paramUnitId = searchParams.get('unitId')
+  const paramAutoStart = searchParams.get('autoStart') === 'true'
+  const paramCount = Number(searchParams.get('count'))
+
+  const [selectedTrackId, setSelectedTrackId] = useState(() => paramTrackId || '')
+  const activeTrack = tracks.find((t) => t.id === (selectedTrackId || paramTrackId)) ?? tracks[0]
   const activeTrackId = activeTrack?.id ?? ''
 
-  // Units selection map: default is true (all checked) for active track unless explicitly toggled
-  const [selectedUnits, setSelectedUnits] = useState({})
+  // Units selection map: default is all checked unless specified or explicitly modified
+  const [selectedUnits, setSelectedUnits] = useState(() => {
+    if (paramUnitId) return { [paramUnitId]: true, _onlyExplicit: true }
+    return {}
+  })
 
   const [poolType, setPoolType] = useState('all') // 'all' | 'mistakes' | 'starred'
-  const [questionCount, setQuestionCount] = useState(15)
+  const [questionCount, setQuestionCount] = useState(paramCount > 0 ? paramCount : 15)
   const [isTimed, setIsTimed] = useState(false)
   const [mistakeCount, setMistakeCount] = useState(0)
   const [bookmarkCount, setBookmarkCount] = useState(0)
+  const autoStartedRef = useRef(false)
 
   // Active quiz states
   const [quizState, setQuizState] = useState('config') // 'config' | 'active' | 'finished'
@@ -55,6 +63,21 @@ export default function CustomQuizScreen() {
   const [remainingSeconds, setRemainingSeconds] = useState(0)
   const headingRef = useRef(null)
 
+  // Hide bottom navigation during active and finished drill states to ensure footer is never blocked
+  useEffect(() => {
+    if (quizState === 'active' || quizState === 'finished') {
+      document.body.dataset.immersive = 'true'
+      document.body.classList.add('is-immersive-drill')
+    } else {
+      delete document.body.dataset.immersive
+      document.body.classList.remove('is-immersive-drill')
+    }
+    return () => {
+      delete document.body.dataset.immersive
+      document.body.classList.remove('is-immersive-drill')
+    }
+  }, [quizState])
+
   // Load mistake and bookmark counts for pool selection tabs
   useEffect(() => {
     let active = true
@@ -69,50 +92,50 @@ export default function CustomQuizScreen() {
     }
   }, [quizState])
 
-  // Toggle immersive mode attribute to prevent bottom navigation bar overlap
-  useEffect(() => {
-    if (quizState === 'active') {
-      document.body.dataset.immersive = 'true'
-    } else {
-      delete document.body.dataset.immersive
-    }
-    return () => {
-      delete document.body.dataset.immersive
-    }
-  }, [quizState])
-
   const handleTrackChange = (trackId) => {
     setSelectedTrackId(trackId)
     setSelectedUnits({})
   }
 
+  const isUnitSelected = (unitId) => {
+    if (selectedUnits._onlyExplicit) {
+      return Boolean(selectedUnits[unitId])
+    }
+    return selectedUnits[unitId] ?? true
+  }
+
   const toggleUnit = (unitId) => {
-    setSelectedUnits((prev) => ({
-      ...prev,
-      [unitId]: !(prev[unitId] ?? true),
-    }))
+    setSelectedUnits((prev) => {
+      if (prev._onlyExplicit) {
+        return {
+          ...prev,
+          [unitId]: !prev[unitId],
+        }
+      }
+      const next = { _onlyExplicit: true }
+      activeTrack?.units?.forEach((u) => {
+        next[u.id] = u.id === unitId ? !(prev[u.id] ?? true) : (prev[u.id] ?? true)
+      })
+      return next
+    })
   }
 
   const selectAllUnits = () => {
-    const all = {}
-    activeTrack?.units?.forEach((u) => {
-      all[u.id] = true
-    })
-    setSelectedUnits(all)
+    setSelectedUnits({})
   }
 
   const deselectAllUnits = () => {
-    const none = {}
+    const none = { _onlyExplicit: true }
     activeTrack?.units?.forEach((u) => {
       none[u.id] = false
     })
     setSelectedUnits(none)
   }
 
-  // Calculate available question count based on current settings
-  const enabledUnits = activeTrack?.units?.filter((u) => selectedUnits[u.id] ?? true) ?? []
+  // Calculate available units and question count based on current settings
+  const enabledUnits = (activeTrack?.units ?? []).filter((u) => isUnitSelected(u.id))
   const availableTrackQuestionsCount = enabledUnits.reduce(
-    (acc, u) => acc + (u.questionCount ?? u.lessons?.reduce((n, l) => n + l.questions.length, 0) ?? 0),
+    (acc, u) => acc + (u.questionCount ?? u.lessons?.reduce((n, l) => n + (l.questions?.length ?? 0), 0) ?? 0),
     0,
   )
 
@@ -123,45 +146,11 @@ export default function CustomQuizScreen() {
         ? bookmarkCount
         : availableTrackQuestionsCount
 
-  // Launch the customized quiz session
-  const startQuiz = async () => {
-    let candidatePool = []
-
-    if (poolType === 'mistakes') {
-      const allMistakes = await mistakesStore.getAll()
-      candidatePool = allMistakes
-        .map((m) => m.question)
-        .filter((q) => q && Array.isArray(q.choices) && q.choices.length > 0)
-    } else if (poolType === 'starred') {
-      const allBookmarks = await bookmarksStore.getAll()
-      candidatePool = allBookmarks
-        .map((b) => b.question)
-        .filter((q) => q && Array.isArray(q.choices) && q.choices.length > 0)
-    } else {
-      if (!activeTrack) return
-      candidatePool = enabledUnits.flatMap((u) =>
-        (u.lessons ?? []).flatMap((l) =>
-          (l.questions ?? []).map((q) => ({
-            ...q,
-            unitId: u.id,
-            unitTitle: u.title,
-            rtl: u.rtl ?? q.rtl,
-          })),
-        ),
-      )
-    }
-
-    if (candidatePool.length === 0) {
-      if (poolType === 'mistakes') {
-        alert('No missed questions in your bank yet. Complete regular lessons first to review mistakes here!')
-      } else if (poolType === 'starred') {
-        alert('No starred questions yet. Star questions during lessons or exams to practice them here!')
-      } else {
-        alert('No questions available with the selected subjects. Please check at least one subject to begin.')
-      }
+  const launchSession = useCallback((candidatePool) => {
+    if (!candidatePool || candidatePool.length === 0) {
+      alert('No questions available to start the drill.')
       return
     }
-
     const countToTake = Math.min(candidatePool.length, questionCount)
     const shuffled = shuffle(candidatePool).slice(0, countToTake)
     setActiveQuestions(shuffled)
@@ -175,10 +164,83 @@ export default function CustomQuizScreen() {
     if (isTimed) {
       setRemainingSeconds(shuffled.length * 60) // 1 minute per question
     }
-  }
+  }, [isTimed, questionCount])
+
+  const startQuiz = useCallback((overrideUnits = null) => {
+    const isOverrideValid = Array.isArray(overrideUnits) && overrideUnits.length > 0
+    const unitsToUse = isOverrideValid ? overrideUnits : enabledUnits
+
+    if (poolType === 'mistakes') {
+      mistakesStore.getAll().then((allMistakes) => {
+        const pool = allMistakes
+          .map((m) => m.question)
+          .filter((q) => q && Array.isArray(q.choices) && q.choices.length > 0)
+        if (pool.length === 0) {
+          alert('No missed questions in your bank yet. Complete regular lessons first to review mistakes here!')
+          return
+        }
+        launchSession(pool)
+      })
+      return
+    }
+
+    if (poolType === 'starred') {
+      bookmarksStore.getAll().then((allBookmarks) => {
+        const pool = allBookmarks
+          .map((b) => b.question)
+          .filter((q) => q && Array.isArray(q.choices) && q.choices.length > 0)
+        if (pool.length === 0) {
+          alert('No starred questions yet. Star questions during lessons or exams to practice them here!')
+          return
+        }
+        launchSession(pool)
+      })
+      return
+    }
+
+    if (!unitsToUse || unitsToUse.length === 0) {
+      alert('No subjects selected. Please check at least one subject to begin.')
+      return
+    }
+
+    const candidatePool = unitsToUse.flatMap((u) =>
+      (u.lessons ?? []).flatMap((l) =>
+        (l.questions ?? []).map((q) => ({
+          ...q,
+          unitId: u.id,
+          unitTitle: u.title,
+          rtl: u.rtl ?? q.rtl,
+        })),
+      ),
+    )
+
+    if (candidatePool.length === 0) {
+      alert('No questions available in the selected subjects.')
+      return
+    }
+
+    launchSession(candidatePool)
+  }, [enabledUnits, launchSession, poolType])
+
+  // Automatic drill launch when navigating from 1-Click Weak-Area button or deep-link
+  useEffect(() => {
+    if (paramAutoStart && ready && activeTrack && !autoStartedRef.current && quizState === 'config') {
+      const targetUnits = paramUnitId
+        ? activeTrack.units?.filter((u) => u.id === paramUnitId) ?? []
+        : enabledUnits
+
+      if (targetUnits.length > 0) {
+        autoStartedRef.current = true
+        const timer = setTimeout(() => {
+          startQuiz(targetUnits)
+        }, 0)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [paramAutoStart, ready, activeTrack, paramUnitId, quizState, enabledUnits, startQuiz])
 
   const restartDrill = () => {
-    if (activeQuestions.length === 0) {
+    if (!activeQuestions || activeQuestions.length === 0) {
       setQuizState('config')
       return
     }
@@ -241,40 +303,31 @@ export default function CustomQuizScreen() {
     }))
   }
 
-  const checkAnswer = useCallback(() => {
+  const checkAnswer = () => {
     if (selectedChoice === null || isChecked || !currentQ) return
     const isCorrect = selectedChoice === currentQ.answer
     setIsChecked(true)
     setAnswers((prev) => [...prev, { question: currentQ, choice: selectedChoice, correct: isCorrect }])
 
-    const settings = settingsStore.load()
-    if (settings.soundEnabled) {
-      if (isCorrect) playSuccessSound()
-      else playWrongSound()
-    }
-    if (settings.hapticsEnabled) {
-      triggerHaptic(isCorrect ? 40 : [40, 80, 40])
-    }
-
     if (isCorrect) {
+      feedbackService.onCorrect()
       mistakesStore.recordReviewResult(currentQ.id, true)
     } else {
+      feedbackService.onWrong()
       mistakesStore.recordMistake(currentQ, {
         trackId: activeTrack?.id,
         unitId: currentQ.unitId,
       })
     }
-  }, [selectedChoice, isChecked, currentQ, activeTrack])
+  }
 
-  const advanceQuestion = useCallback(() => {
+  const advanceQuestion = () => {
     if (currentIndex >= activeQuestions.length - 1) {
       streakStore.recordAnswers(activeQuestions.length)
       setQuizState('finished')
       const totalCorrect = answers.filter((a) => a.correct).length
       if (totalCorrect / activeQuestions.length >= 0.8) {
-        fireConfetti()
-        const settings = settingsStore.load()
-        if (settings.soundEnabled) playCelebrationSound()
+        feedbackService.celebrate()
       }
     } else {
       setCurrentIndex((i) => i + 1)
@@ -282,33 +335,46 @@ export default function CustomQuizScreen() {
       setEliminatedChoices({})
       setIsChecked(false)
     }
-  }, [currentIndex, activeQuestions.length, answers])
+  }
+
+  const handlersRef = useRef({ checkAnswer, advanceQuestion, isChecked, currentQ, eliminatedChoices })
+
+  useEffect(() => {
+    handlersRef.current = { checkAnswer, advanceQuestion, isChecked, currentQ, eliminatedChoices }
+  })
 
   // Keyboard navigation support
   useEffect(() => {
-    if (quizState !== 'active' || !currentQ) return undefined
+    if (quizState !== 'active') return undefined
     const onKeyDown = (event) => {
       if (['INPUT', 'TEXTAREA'].includes(event.target?.tagName)) return
-      if (CHOICE_KEYS.includes(event.key) && !isChecked) {
+      const {
+        checkAnswer: doCheck,
+        advanceQuestion: doAdvance,
+        isChecked: checked,
+        currentQ: q,
+        eliminatedChoices: elim,
+      } = handlersRef.current
+      if (CHOICE_KEYS.includes(event.key) && !checked) {
         let i = -1
         if (['1', '2', '3', '4'].includes(event.key)) {
           i = Number(event.key) - 1
         } else {
           i = ['a', 'b', 'c', 'd'].indexOf(event.key.toLowerCase())
         }
-        if (i >= 0 && i < (currentQ.choices?.length ?? 0) && !eliminatedChoices[i]) {
+        if (i >= 0 && i < (q?.choices?.length ?? 0) && !elim[i]) {
           setSelectedChoice(i)
         }
       }
       if (event.key === 'Enter') {
         event.preventDefault()
-        if (isChecked) advanceQuestion()
-        else checkAnswer()
+        if (checked) doAdvance()
+        else doCheck()
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [quizState, currentQ, isChecked, eliminatedChoices, checkAnswer, advanceQuestion])
+  }, [quizState])
 
   if (quizState === 'finished') {
     const finalScore = calculateScore(answers, 0)
@@ -355,7 +421,7 @@ export default function CustomQuizScreen() {
                     {q.closing && <p className="drill-review-closing">{q.closing}</p>}
                     <p className="drill-review-wrong">Your answer: {choice !== null && choice !== undefined ? q.choices[choice] : 'None'}</p>
                     <p className="drill-review-right">Correct answer: {q.choices[q.answer]}</p>
-                    {q.explanation && <p className="drill-review-why">{q.explanation}</p>}
+                    {explainQuestion(q) && <p className="drill-review-why">{explainQuestion(q)}</p>}
                   </li>
                 ))}
               </ul>
@@ -378,7 +444,20 @@ export default function CustomQuizScreen() {
     )
   }
 
-  if (quizState === 'active' && currentQ) {
+  if (quizState === 'active') {
+    if (!currentQ) {
+      return (
+        <div className="custom-drill">
+          <div className="drill-empty-notice" style={{ margin: '3rem auto', maxWidth: 480, textAlign: 'center' }}>
+            <p>No questions available for this drill session.</p>
+            <button type="button" className="btn btn--ghost" onClick={() => setQuizState('config')}>
+              Back to Drill Setup
+            </button>
+          </div>
+        </div>
+      )
+    }
+
     const isAnswerCorrect = isChecked && selectedChoice === currentQ.answer
     return (
       <div className="custom-drill custom-drill--active">
@@ -528,14 +607,14 @@ export default function CustomQuizScreen() {
                 </div>
               )}
 
-              {currentQ.explanation && (
+              {explainQuestion(currentQ) && (
                 <div className="explanation-card">
                   <div className="explanation-card__header">
                     <LightbulbIcon width="18" height="18" />
                     <span>Explanation & Context</span>
                   </div>
                   <p className={`explanation-card__text${currentQ.rtl ? ' urdu' : ''}`} dir={currentQ.rtl ? 'rtl' : 'ltr'}>
-                    {currentQ.explanation}
+                    {explainQuestion(currentQ)}
                   </p>
                 </div>
               )}
@@ -644,7 +723,7 @@ export default function CustomQuizScreen() {
 
             <div className="units-checkbox-grid">
               {activeTrack.units?.map((u) => {
-                const isUnitChecked = selectedUnits[u.id] ?? true
+                const isUnitChecked = isUnitSelected(u.id)
                 return (
                   <label key={u.id} className={`unit-checkbox-label ${isUnitChecked ? 'is-checked' : ''}`}>
                     <input
@@ -700,7 +779,7 @@ export default function CustomQuizScreen() {
           <button
             className="btn btn--wide"
             type="button"
-            onClick={startQuiz}
+            onClick={() => startQuiz()}
             disabled={!ready || currentPoolSize === 0}
           >
             Start Custom Practice Drill ({Math.min(currentPoolSize, questionCount)} MCQs) →
@@ -710,4 +789,3 @@ export default function CustomQuizScreen() {
     </div>
   )
 }
-
