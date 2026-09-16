@@ -9,6 +9,8 @@ const AdminScreen = lazy(() => import('./routes/AdminScreen.jsx'))
 const MockExamScreen = lazy(() => import('./routes/MockExamScreen.jsx'))
 const MistakesScreen = lazy(() => import('./routes/MistakesScreen.jsx'))
 const BookmarksScreen = lazy(() => import('./routes/BookmarksScreen.jsx'))
+const CustomQuizScreen = lazy(() => import('./routes/CustomQuizScreen.jsx'))
+const AnalyticsScreen = lazy(() => import('./routes/AnalyticsScreen.jsx'))
 
 const router = createBrowserRouter([
   {
@@ -19,6 +21,8 @@ const router = createBrowserRouter([
       { path: 'track/:trackId', element: <PathScreen /> },
       { path: 'lesson/:lessonId', element: <LessonRoute /> },
       { path: 'mock/:trackId', element: <MockExamScreen /> },
+      { path: 'drill', element: <CustomQuizScreen /> },
+      { path: 'analytics', element: <AnalyticsScreen /> },
       { path: 'mistakes', element: <MistakesScreen /> },
       { path: 'bookmarks', element: <BookmarksScreen /> },
       { path: 'admin', element: <AdminScreen /> },

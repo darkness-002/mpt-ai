@@ -1,0 +1,144 @@
+.settings-modal {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  width: min(34rem, 92vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 100000;
+  animation: modalSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.4rem;
+  border-bottom: 1.5px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.settings-modal__title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.settings-modal__title h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.settings-modal__body {
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.settings-label {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.theme-grid,
+.scale-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+  gap: 0.5rem;
+}
+
+.theme-chip,
+.scale-chip {
+  padding: 0.65rem 0.5rem;
+  border: 2px solid var(--border);
+  border-radius: calc(var(--radius) * 0.7);
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  text-align: center;
+}
+
+.theme-chip:hover,
+.scale-chip:hover {
+  border-color: var(--blue);
+  transform: translateY(-1px);
+}
+
+.theme-chip.is-active,
+.scale-chip.is-active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(28, 176, 246, 0.35);
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.8rem;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: calc(var(--radius) * 0.6);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.toggle-row input[type='checkbox'] {
+  width: 1.3rem;
+  height: 1.3rem;
+  cursor: pointer;
+  accent-color: var(--green);
+}
+
+.target-exam-fields {
+  display: flex;
+  gap: 0.6rem;
+  flex-direction: column;
+}
+
+.target-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid var(--border);
+  border-radius: calc(var(--radius) * 0.6);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.target-input:focus {
+  border-color: var(--blue);
+  outline: none;
+}
+
+.settings-modal__footer {
+  padding: 1.1rem 1.4rem;
+  border-top: 1.5px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  background: var(--surface-2);
+}

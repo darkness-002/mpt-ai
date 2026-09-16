@@ -1,6 +1,8 @@
 import { Suspense, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
+import BottomNav from './components/BottomNav.jsx'
+import { settingsStore } from './storage/settingsStore.js'
 import './App.css'
 
 export default function App() {
@@ -9,6 +11,11 @@ export default function App() {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW()
+
+  // Initialize theme & typography settings on app launch
+  useEffect(() => {
+    settingsStore.apply(settingsStore.load())
+  }, [])
 
   // "Downloaded for offline" is informational — it must never linger over a lesson.
   useEffect(() => {
@@ -22,6 +29,8 @@ export default function App() {
       <Suspense fallback={<div className="lesson lesson--loading" style={{ minHeight: '60vh' }}>Loading…</div>}>
         <Outlet />
       </Suspense>
+
+      <BottomNav />
 
       {(offlineReady || needRefresh) && (
         <div className="toast" role="status">

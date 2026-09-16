@@ -98,6 +98,7 @@ Access via `src/storage/idb.js`. Object stores:
 ### Fallbacks & Other Stores
 - **In-Memory Fallback:** When IndexedDB is blocked or private browsing restricts storage, `adapter.js`, `contentStore.js`, `mistakesStore.js`, and `bookmarksStore.js` transparently fall back to in-memory `Map` instances without crashing the UI.
 - **`streakStore` (`src/storage/streakStore.js`):** Uses `localStorage` (`mpt_ai_streak`) to track daily practice counts against the user goal (default 20/day) and consecutive active-day streaks.
+- **`settingsStore` (`src/storage/settingsStore.js`):** Manages user preferences (`mpt_ai_settings`) including theme (`system`, `light`, `dark`, `oled`, `sepia`), font scale (`A-` to `A++`), audio sound effects, haptic feedback, and target exam date countdown.
 - **`adapter.js`:** Contains `exportProgressPayload()` and `parseAndMergeProgress()` for JSON backups, and `createSyncQueue()` as a seam for remote sync.
 
 ---
@@ -119,20 +120,21 @@ const { correct, wrong, marksDeducted, netScore } = calculateScore(answers, nega
 ```
 mpt-ai/
 ├── src/
-│   ├── components/            # Reusable icons and UI atoms (LessonNode, icons.jsx)
+│   ├── components/            # UI atoms & components (BottomNav, SettingsModal, LessonNode, icons.jsx)
 │   ├── content/               # ContentProvider, Context, buildCustom (author questions chunker)
 │   ├── data/                  # curriculum.js (track manifests and dynamic loaders)
 │   │   └── questions/         # JSON question banks (coached, past-papers, pms, upsc)
-│   ├── lib/                   # Utilities (shuffle.js, useInstallPrompt.js)
-│   ├── routes/                # Page screens (Tracks, Path, Lesson, MockExam, Mistakes, Bookmarks, Admin)
-│   ├── storage/               # Storage layer (idb.js, adapter.js, contentStore, mistakesStore, bookmarksStore, streakStore)
+│   ├── lib/                   # Utilities (sound.js, confetti.js, browserPdfParser.js, shuffle.js, useInstallPrompt.js)
+│   ├── routes/                # Page screens (Tracks, Path, Lesson, CustomQuiz, Analytics, MockExam, Mistakes, Bookmarks, Admin)
+│   ├── storage/               # Storage layer (idb.js, adapter.js, contentStore, mistakesStore, bookmarksStore, streakStore, settingsStore)
 │   ├── App.jsx                # App shell, PWA update toast, Suspense wrapper for Outlet
 │   ├── routes.jsx             # Route definitions with React.lazy
 │   └── main.jsx               # createRoot entry point
-├── test/                      # Vitest unit test suites (buildCustom, contentStore, progress)
+├── test/                      # Vitest unit test suites (buildCustom, contentStore, progress, settingsAndParser)
 ├── scripts/                   # CLI utilities (import-past-paper.mjs, generate-icons.mjs)
 ├── AGENT.md                   # This AI Agent guide
-└── SUMMARY.md                 # Engineering change log
+├── SUMMARY.md                 # Engineering change log
+└── README.md                  # Comprehensive project documentation
 ```
 
 ---

@@ -1,7 +1,7 @@
 .mistakes-screen {
-  max-width: 48rem;
+  max-width: 50rem;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 4rem;
+  padding: 1.5rem 1.25rem 5.5rem;
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
@@ -11,41 +11,43 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.mistakes-screen h1 {
+  margin: 0.5rem 0 0.25rem;
+  font-size: clamp(1.5rem, 5vw, 2.1rem);
+  font-weight: 900;
 }
 
 .mistakes-screen__blurb {
   color: var(--muted);
   font-size: 0.95rem;
-  margin-bottom: 1.5rem;
+  margin: 0 0 1.5rem;
 }
 
 .mistakes-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-@media (max-width: 600px) {
-  .mistakes-stats {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1.75rem;
 }
 
 .mistakes-stat {
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   background: var(--surface);
   border: 2px solid var(--border);
   border-radius: var(--radius);
   text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
 .mistakes-stat__val {
   display: block;
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   font-weight: 900;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
+  line-height: 1.2;
 }
 
 .mistakes-stat--warn {
@@ -57,33 +59,41 @@
 }
 
 .mistakes-stat__lbl {
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 800;
   color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .mistakes-card {
-  padding: 2.5rem 1.5rem;
+  padding: 2.75rem 1.5rem;
   background: var(--surface);
   border: 2px solid var(--border);
   border-radius: var(--radius);
   text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .mistakes-card h2 {
-  margin-bottom: 0.5rem;
+  margin: 0 0 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 900;
 }
 
 .mistakes-card p {
   color: var(--muted);
-  max-width: 30rem;
+  max-width: 32rem;
   margin: 0 auto 1.5rem;
+  font-size: 0.98rem;
+  line-height: 1.5;
 }
 
 .mistakes-actions {
   display: flex;
   gap: 0.75rem;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .mistakes-practice {
@@ -91,6 +101,7 @@
   border: 2px solid var(--border);
   border-radius: var(--radius);
   padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .mistakes-practice__bar {
@@ -102,22 +113,45 @@
 
 .mistakes-practice__streak {
   font-size: 0.85rem;
+  font-weight: 700;
   color: var(--muted);
 }
 
 .mistakes-practice__prompt {
-  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  font-size: clamp(1.25rem, 4vw, 1.6rem);
   font-weight: 800;
+  line-height: 1.35;
   margin-bottom: 1.5rem;
 }
 
 .mistakes-practice__footer {
   margin-top: 1.5rem;
   padding-top: 1.25rem;
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.1rem;
+  align-items: center;
+}
+
+.mistakes-practice__footer.is-correct {
+  background: color-mix(in srgb, var(--green) 12%, var(--surface));
+  border-top-color: var(--green);
+  border-radius: 0 0 var(--radius) var(--radius);
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  margin-bottom: -1.5rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.mistakes-practice__footer.is-wrong {
+  background: color-mix(in srgb, var(--red) 11%, var(--surface));
+  border-top-color: var(--red);
+  border-radius: 0 0 var(--radius) var(--radius);
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  margin-bottom: -1.5rem;
+  padding: 1.25rem 1.5rem;
 }
 
 .mistakes-footer-action {

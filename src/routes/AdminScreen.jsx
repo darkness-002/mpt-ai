@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BookIcon, CheckIcon, CloseIcon } from '../components/icons.jsx'
 import { useContent } from '../content/contentContext.js'
+import { parsePdfInBrowser, parsePlainTextQuestions } from '../lib/browserPdfParser.js'
 import { contentStore, fromDataFile, toDataFile } from '../storage/contentStore.js'
 import './AdminScreen.css'
 
@@ -27,7 +28,12 @@ export default function AdminScreen() {
   const [flash, setFlash] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)
+  const [showBatchModal, setShowBatchModal] = useState(false)
+  const [batchText, setBatchText] = useState('')
+  const [isParsingPdf, setIsParsingPdf] = useState(false)
+
   const fileRef = useRef(null)
+  const pdfRef = useRef(null)
 
   const selected = categories.find((category) => category.id === selectedId) ?? categories[0] ?? null
   const mine = useMemo(
@@ -54,7 +60,7 @@ export default function AdminScreen() {
 
   useEffect(() => {
     if (!flash) return undefined
-    const timer = setTimeout(() => setFlash(null), 3000)
+    const timer = setTimeout(() => setFlash(null), 3500)
     return () => clearTimeout(timer)
   }, [flash])
 
@@ -110,7 +116,7 @@ export default function AdminScreen() {
       categoryId: selected.id,
       prompt: question.prompt,
       directive: question.directive,
-      statements: question.statements.split('\n'),
+      statements: question.statements ? question.statements.split('\n') : undefined,
       closing: question.closing,
       choices: question.choices,
       answer: question.answer,
@@ -170,24 +176,77 @@ export default function AdminScreen() {
     }
   }
 
+  async function importPdfFile(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!selected) {
+      setError('Please create or select a category first.')
+      return
+    }
+
+    setIsParsingPdf(true)
+    setError(null)
+    try {
+      const buffer = await file.arrayBuffer()
+      const parsedList = await parsePdfInBrowser(buffer)
+      if (parsedList.length === 0) {
+        throw new Error('No numbered MCQ questions found in the uploaded PDF.')
+      }
+
+      for (const item of parsedList) {
+        await contentStore.saveQuestion({ ...item, categoryId: selected.id })
+      }
+      await refresh()
+      const keyless = parsedList.filter((q) => q.answer < 0).length
+      say(
+        `Successfully extracted and imported ${parsedList.length} questions from PDF into "${selected.title}"` +
+          (keyless ? ` (${keyless} without bold keys).` : '.'),
+      )
+    } catch (err) {
+      setError(`PDF Parse Error: ${err.message}`)
+    } finally {
+      setIsParsingPdf(false)
+      event.target.value = ''
+    }
+  }
+
+  async function handleBatchTextImport() {
+    if (!selected) return setError('Select a category first.')
+    const parsed = parsePlainTextQuestions(batchText)
+    if (parsed.length === 0) {
+      return setError('Could not parse any MCQs. Check format: "1. Prompt \n A) Opt1 \n B) Opt2 \n Answer: A"')
+    }
+
+    for (const item of parsed) {
+      await contentStore.saveQuestion({ ...item, categoryId: selected.id })
+    }
+    await refresh()
+    setBatchText('')
+    setShowBatchModal(false)
+    say(`Imported ${parsed.length} questions from text.`)
+  }
+
   const customTrack = tracks.find((track) => track.custom && track.units.some((u) => u.id === selected?.id))
 
   return (
     <div className="admin">
       <header className="admin__header">
-        <Link className="brand" to="/">
-          <BookIcon width="22" height="22" />
-          <span>
-            MPT<span className="brand__dot">·</span>AI
-          </span>
-        </Link>
-        <Link className="path-header__back" to="/">
-          ← Back to the app
-        </Link>
-        <h1>Dashboard</h1>
+        <div className="admin__header-top">
+          <Link className="brand" to="/">
+            <BookIcon width="22" height="22" />
+            <span>
+              MPT<span className="brand__dot">·</span>AI
+            </span>
+          </Link>
+          <Link className="path-header__back" to="/">
+            ← Back to the app
+          </Link>
+        </div>
+
+        <h1>Authoring & Content Dashboard</h1>
         <p className="admin__blurb">
-          Add your own categories and questions. They appear in the app immediately, on this device,
-          and export in the same JSON shape as the bundled question bank.
+          Add your own categories and past papers. Questions are saved locally on this device,
+          function offline, and export in the standard MPT-AI curriculum JSON schema.
         </p>
         {flash && (
           <p className="admin__flash" role="status">
@@ -264,11 +323,31 @@ export default function AdminScreen() {
           </form>
 
           <div className="stack">
-            <h3>Import / export</h3>
+            <h3>Import / Export Tools</h3>
             <button className="btn btn--small btn--ghost" type="button" onClick={() => fileRef.current?.click()}>
-              Import a JSON file
+              Import Standard JSON
             </button>
             <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={importFile} />
+
+            <button
+              className="btn btn--small btn--ghost"
+              type="button"
+              onClick={() => pdfRef.current?.click()}
+              disabled={isParsingPdf || !selected}
+            >
+              {isParsingPdf ? 'Extracting PDF...' : 'Import Past Paper PDF'}
+            </button>
+            <input ref={pdfRef} type="file" accept="application/pdf,.pdf" hidden onChange={importPdfFile} />
+
+            <button
+              className="btn btn--small btn--ghost"
+              type="button"
+              onClick={() => setShowBatchModal(true)}
+              disabled={!selected}
+            >
+              Paste Bulk Text / MCQs
+            </button>
+
             <button
               className="btn btn--small btn--ghost"
               type="button"
@@ -465,6 +544,35 @@ export default function AdminScreen() {
           )}
         </section>
       </main>
+
+      {/* Batch Text Import Modal */}
+      {showBatchModal && (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <div className="modal" style={{ maxWidth: '34rem' }}>
+            <h2>Paste Bulk MCQs</h2>
+            <p>Paste multiple questions separated by empty lines:</p>
+            <textarea
+              rows={8}
+              value={batchText}
+              onChange={(e) => setBatchText(e.target.value)}
+              placeholder={`1. What is the capital of Pakistan?\nA) Lahore\nB) Islamabad\nC) Karachi\nD) Peshawar\nAnswer: B\nExplanation: Islamabad was built in the 1960s.`}
+              style={{ width: '100%', fontFamily: 'monospace', fontSize: '0.85rem' }}
+            />
+            <div className="modal__actions" style={{ marginTop: '1rem' }}>
+              <button className="btn btn--small" type="button" onClick={handleBatchTextImport}>
+                Parse & Import MCQs
+              </button>
+              <button
+                className="btn btn--small btn--ghost"
+                type="button"
+                onClick={() => setShowBatchModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

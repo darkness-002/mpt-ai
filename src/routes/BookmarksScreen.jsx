@@ -4,6 +4,8 @@ import { BookIcon, CloseIcon, StarIcon } from '../components/icons.jsx'
 import { bookmarksStore } from '../storage/bookmarksStore.js'
 import './BookmarksScreen.css'
 
+const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
+
 export default function BookmarksScreen() {
   const [bookmarks, setBookmarks] = useState([])
   const [loading, setLoading] = useState(true)
@@ -50,7 +52,7 @@ export default function BookmarksScreen() {
         </div>
         <h1>Starred Questions</h1>
         <p className="bookmarks-screen__blurb">
-          Questions you bookmarked during practice sessions for quick reference and revision.
+          Questions you bookmarked during study sessions for quick reference and revision.
         </p>
       </header>
 
@@ -100,7 +102,7 @@ export default function BookmarksScreen() {
                 <ul className="bookmark-choices">
                   {question.choices.map((c, i) => (
                     <li key={i} className={`bookmark-choice ${i === question.answer ? 'is-correct' : ''}`}>
-                      <span className="choice-marker">{i + 1}</span>
+                      <span className="choice-marker">{LETTERS[i] ?? i + 1}</span>
                       <span>{c}</span>
                     </li>
                   ))}

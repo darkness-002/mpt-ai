@@ -1,17 +1,28 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { CheckIcon, CloseIcon, StarIcon } from '../components/icons.jsx'
+import {
+  CheckCircleIcon,
+  CloseIcon,
+  LightbulbIcon,
+  SlashIcon,
+  StarIcon,
+  XCircleIcon,
+} from '../components/icons.jsx'
 import { useContent } from '../content/contentContext.js'
 import { calculateScore } from '../data/curriculum.js'
+import { fireConfetti } from '../lib/confetti.js'
 import { shuffle } from '../lib/shuffle.js'
-import { useProgress } from '../storage/progressContext.js'
-import { mistakesStore } from '../storage/mistakesStore.js'
+import { playCelebrationSound, playSuccessSound, playWrongSound, triggerHaptic } from '../lib/sound.js'
 import { bookmarksStore } from '../storage/bookmarksStore.js'
+import { mistakesStore } from '../storage/mistakesStore.js'
+import { settingsStore } from '../storage/settingsStore.js'
 import { streakStore } from '../storage/streakStore.js'
+import { useProgress } from '../storage/progressContext.js'
 import './LessonScreen.css'
 
-const CHOICE_KEYS = ['1', '2', '3', '4']
+const CHOICE_KEYS = ['1', '2', '3', '4', 'a', 'b', 'c', 'd', 'A', 'B', 'C', 'D']
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI']
+const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
 
 /** Coached questions carry a written explanation; past-paper items carry their origin. */
 function explain(question) {
@@ -47,6 +58,7 @@ export default function LessonScreen({ lessonId }) {
 
   const [index, setIndex] = useState(0)
   const [selected, setSelected] = useState(null)
+  const [eliminated, setEliminated] = useState({})
   const [checked, setChecked] = useState(false)
   const [answers, setAnswers] = useState([])
   const [finished, setFinished] = useState(false)
@@ -78,11 +90,28 @@ export default function LessonScreen({ lessonId }) {
     setBookmarked(newState)
   }
 
+  const toggleEliminate = (choiceIndex) => {
+    setEliminated((prev) => ({
+      ...prev,
+      [choiceIndex]: !prev[choiceIndex],
+    }))
+  }
+
   const check = () => {
     if (selected === null || checked || !question) return
     const isCorrect = selected === question.answer
     setChecked(true)
     setAnswers((prev) => [...prev, { question, choice: selected, correct: isCorrect }])
+
+    // Sound & Haptic triggers
+    const settings = settingsStore.load()
+    if (settings.soundEnabled) {
+      if (isCorrect) playSuccessSound()
+      else playWrongSound()
+    }
+    if (settings.hapticsEnabled) {
+      triggerHaptic(isCorrect ? 40 : [40, 80, 40])
+    }
 
     // Update Mistakes Bank with SRS
     if (isCorrect) {
@@ -103,10 +132,18 @@ export default function LessonScreen({ lessonId }) {
       })
       streakStore.recordAnswers(questions.length)
       setFinished(true)
+
+      // Celebrate if high score / mastery
+      if (finalScoreDetails.netScore >= questions.length * 0.8) {
+        fireConfetti()
+        const settings = settingsStore.load()
+        if (settings.soundEnabled) playCelebrationSound()
+      }
       return
     }
     setIndex((i) => i + 1)
     setSelected(null)
+    setEliminated({})
     setChecked(false)
   }
 
@@ -114,6 +151,7 @@ export default function LessonScreen({ lessonId }) {
     setQuestions(shuffle(lesson.questions))
     setIndex(0)
     setSelected(null)
+    setEliminated({})
     setChecked(false)
     setAnswers([])
     setFinished(false)
@@ -127,8 +165,15 @@ export default function LessonScreen({ lessonId }) {
     if (finished) return undefined
     const onKeyDown = (event) => {
       if (CHOICE_KEYS.includes(event.key) && !checked) {
-        const i = Number(event.key) - 1
-        if (i < (question?.choices.length ?? 0)) setSelected(i)
+        let i = -1
+        if (['1', '2', '3', '4'].includes(event.key)) {
+          i = Number(event.key) - 1
+        } else {
+          i = ['a', 'b', 'c', 'd'].indexOf(event.key.toLowerCase())
+        }
+        if (i >= 0 && i < (question?.choices.length ?? 0) && !eliminated[i]) {
+          setSelected(i)
+        }
       }
       if (event.key === 'Enter') {
         event.preventDefault()
@@ -269,22 +314,48 @@ export default function LessonScreen({ lessonId }) {
           {question.choices.map((choice, i) => {
             const isSelected = selected === i
             const isAnswer = i === question.answer
+            const isStruck = Boolean(eliminated[i])
             let tone = ''
             if (checked && isAnswer) tone = ' choice--correct'
-            else if (checked && isSelected) tone = ' choice--wrong'
+            else if (checked && isSelected && !isAnswer) tone = ' choice--wrong'
             else if (isSelected) tone = ' choice--selected'
+            if (isStruck) tone += ' choice--eliminated'
+
+            const letter = LETTERS[i] ?? `${i + 1}`
+
             return (
-              <li key={choice}>
+              <li key={choice} className="choice-row">
                 <button
                   type="button"
                   className={`choice${tone}${lesson.rtl ? ' urdu' : ''}`}
                   dir={lesson.rtl ? 'rtl' : 'ltr'}
-                  onClick={() => !checked && setSelected(i)}
+                  onClick={() => !checked && !isStruck && setSelected(i)}
                   aria-pressed={isSelected}
+                  disabled={checked || isStruck}
+                >
+                  <span className="choice__key">{letter}</span>
+                  <span className="choice__text">{choice}</span>
+                  {checked && isAnswer && (
+                    <span className="choice__status-icon choice__status-icon--correct">
+                      <CheckCircleIcon width="20" height="20" />
+                    </span>
+                  )}
+                  {checked && isSelected && !isAnswer && (
+                    <span className="choice__status-icon choice__status-icon--wrong">
+                      <XCircleIcon width="20" height="20" />
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  className={`strike-toggle${isStruck ? ' is-struck' : ''}`}
+                  aria-label={isStruck ? 'Restore option' : 'Eliminate option'}
+                  title={isStruck ? 'Restore option' : 'Eliminate option'}
+                  onClick={() => toggleEliminate(i)}
                   disabled={checked}
                 >
-                  <span className="choice__key">{i + 1}</span>
-                  <span className="choice__text">{choice}</span>
+                  <SlashIcon width="16" height="16" />
                 </button>
               </li>
             )
@@ -294,37 +365,67 @@ export default function LessonScreen({ lessonId }) {
 
       <footer className={`lesson__footer${checked ? (answeredCorrectly ? ' is-correct' : ' is-wrong') : ''}`}>
         {checked && (
-          <div className="feedback">
-            <p className="feedback__title">
+          <div className="feedback-drawer">
+            <div className="feedback-drawer__status">
               {answeredCorrectly ? (
-                <>
-                  <CheckIcon width="20" height="20" /> Correct
-                </>
+                <div className="status-badge status-badge--correct">
+                  <CheckCircleIcon width="24" height="24" />
+                  <span>Correct! Excellent.</span>
+                </div>
               ) : (
-                <span>
-                  Correct answer:{' '}
-                  <span className={lesson.rtl ? 'urdu' : undefined} dir={lesson.rtl ? 'rtl' : 'ltr'}>
+                <div className="status-badge status-badge--wrong">
+                  <XCircleIcon width="24" height="24" />
+                  <span>Incorrect Answer</span>
+                </div>
+              )}
+            </div>
+
+            {!answeredCorrectly && (
+              <div className="answer-comparison">
+                <div className="comparison-box comparison-box--wrong">
+                  <span className="comparison-label">You Picked</span>
+                  <span className={`comparison-text${lesson.rtl ? ' urdu' : ''}`} dir={lesson.rtl ? 'rtl' : 'ltr'}>
+                    {question.choices[selected]}
+                  </span>
+                </div>
+                <div className="comparison-box comparison-box--correct">
+                  <span className="comparison-label">Correct Answer</span>
+                  <span className={`comparison-text${lesson.rtl ? ' urdu' : ''}`} dir={lesson.rtl ? 'rtl' : 'ltr'}>
                     {question.choices[question.answer]}
                   </span>
-                </span>
-              )}
-            </p>
-            <p
-              className={`feedback__why${lesson.rtl ? ' urdu' : ''}`}
-              dir={lesson.rtl ? 'rtl' : 'ltr'}
-            >
-              {explain(question)}
-            </p>
-            {keyNote(question) && <p className="feedback__provenance">{keyNote(question)}</p>}
+                </div>
+              </div>
+            )}
+
+            {explain(question) && (
+              <div className="explanation-card">
+                <div className="explanation-card__header">
+                  <LightbulbIcon width="18" height="18" />
+                  <span>Explanation & Context</span>
+                </div>
+                <p
+                  className={`explanation-card__text${lesson.rtl ? ' urdu' : ''}`}
+                  dir={lesson.rtl ? 'rtl' : 'ltr'}
+                >
+                  {explain(question)}
+                </p>
+                {keyNote(question) && (
+                  <span className="explanation-card__provenance">
+                    {keyNote(question)}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         )}
+
         <button
-          className="btn btn--wide"
+          className={`btn btn--wide ${checked && !answeredCorrectly ? 'btn--continue-wrong' : ''}`}
           type="button"
           onClick={checked ? advance : check}
           disabled={selected === null}
         >
-          {checked ? (isLast ? 'Finish' : 'Continue') : 'Check'}
+          {checked ? (isLast ? 'Finish Lesson' : 'Continue') : 'Check Answer'}
         </button>
       </footer>
     </div>

@@ -1,10 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
-import { BookIcon, CloseIcon, FlagIcon, TimerIcon } from '../components/icons.jsx'
+import {
+  BookIcon,
+  CloseIcon,
+  FlagIcon,
+  MaximizeIcon,
+  SlashIcon,
+  TimerIcon,
+} from '../components/icons.jsx'
 import { useContent } from '../content/contentContext.js'
 import { calculateScore } from '../data/curriculum.js'
+import { fireConfetti } from '../lib/confetti.js'
 import { shuffle } from '../lib/shuffle.js'
+import { playCelebrationSound, triggerHaptic } from '../lib/sound.js'
 import { mistakesStore } from '../storage/mistakesStore.js'
+import { settingsStore } from '../storage/settingsStore.js'
 import { streakStore } from '../storage/streakStore.js'
 import './MockExamScreen.css'
 
@@ -36,8 +46,19 @@ export default function MockExamScreen() {
     [track],
   )
 
-  // Aggregate questions across all units of the track
-  const allTrackQuestions = useMemo(() => {
+  const sessionKey = `mpt_mock_session_${trackId}`
+
+  // Aggregate questions across all units of the track or restore session
+  const [allTrackQuestions] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem(sessionKey)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed?.questions?.length > 0) return parsed.questions
+      }
+    } catch {
+      // Ignore storage error
+    }
     if (!track) return []
     const flat = track.units.flatMap((unit) =>
       unit.lessons.flatMap((lesson) =>
@@ -51,27 +72,94 @@ export default function MockExamScreen() {
     )
     const shuffled = shuffle(flat)
     return shuffled.slice(0, Math.min(flat.length, blueprint.totalMcqs))
-  }, [track, blueprint.totalMcqs])
+  })
 
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [selectedAnswers, setSelectedAnswers] = useState({}) // { [index]: choiceNumber }
-  const [flagged, setFlagged] = useState({}) // { [index]: boolean }
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(sessionKey) || '{}')
+      return saved.currentIndex ?? 0
+    } catch {
+      return 0
+    }
+  })
+
+  const [selectedAnswers, setSelectedAnswers] = useState(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(sessionKey) || '{}')
+      return saved.selectedAnswers ?? {}
+    } catch {
+      return {}
+    }
+  })
+
+  const [flagged, setFlagged] = useState(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(sessionKey) || '{}')
+      return saved.flagged ?? {}
+    } catch {
+      return {}
+    }
+  })
+
+  const [eliminatedChoices, setEliminatedChoices] = useState({})
+  const [paletteFilter, setPaletteFilter] = useState('all') // 'all' | 'unanswered' | 'flagged'
   const [submitted, setSubmitted] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
-  // Timer initialization
+  // Timer initialization with session restore
   const totalDurationMs = blueprint.minutes * 60 * 1000
-  const [remainingMs, setRemainingMs] = useState(totalDurationMs)
+  const [remainingMs, setRemainingMs] = useState(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(sessionKey) || '{}')
+      if (saved.targetTime) {
+        const diff = saved.targetTime - Date.now()
+        if (diff > 0) return diff
+      }
+    } catch {
+      // Fallback to default
+    }
+    return totalDurationMs
+  })
+
   const targetTimeRef = useRef(0)
 
   useEffect(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(sessionKey) || '{}')
+      if (saved.targetTime && saved.targetTime > Date.now()) {
+        targetTimeRef.current = saved.targetTime
+        return
+      }
+    } catch {
+      // ignore
+    }
     targetTimeRef.current = Date.now() + totalDurationMs
-  }, [totalDurationMs])
+  }, [totalDurationMs, sessionKey])
+
+  // Persist session to sessionStorage
+  useEffect(() => {
+    if (submitted || allTrackQuestions.length === 0) return
+    try {
+      sessionStorage.setItem(
+        sessionKey,
+        JSON.stringify({
+          questions: allTrackQuestions,
+          currentIndex,
+          selectedAnswers,
+          flagged,
+          targetTime: targetTimeRef.current,
+        }),
+      )
+    } catch {
+      // Storage full/blocked
+    }
+  }, [submitted, allTrackQuestions, currentIndex, selectedAnswers, flagged, sessionKey])
 
   const submitExam = useCallback(() => {
     setSubmitted(true)
     setShowConfirm(false)
-  }, [])
+    sessionStorage.removeItem(sessionKey)
+  }, [sessionKey])
 
   useEffect(() => {
     if (submitted) return undefined
@@ -110,7 +198,7 @@ export default function MockExamScreen() {
     }
   }, [submitted, allTrackQuestions, selectedAnswers, track?.id])
 
-  // Calculate results on submission (unconditional hook)
+  // Calculate results on submission
   const results = useMemo(() => {
     if (!submitted || !track) return null
     const answers = allTrackQuestions.map((q, idx) => ({
@@ -146,6 +234,12 @@ export default function MockExamScreen() {
 
     const isPassed = scoreData.netScore >= blueprint.passingMarks
 
+    if (isPassed) {
+      fireConfetti()
+      const settings = settingsStore.load()
+      if (settings.soundEnabled) playCelebrationSound()
+    }
+
     return {
       ...scoreData,
       isPassed,
@@ -153,6 +247,21 @@ export default function MockExamScreen() {
       unansweredCount: allTrackQuestions.length - attemptedOnly.length,
     }
   }, [submitted, track, allTrackQuestions, selectedAnswers, blueprint])
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {})
+    } else {
+      document.exitFullscreen().catch(() => {})
+    }
+  }
+
+  const toggleEliminate = (choiceIndex) => {
+    setEliminatedChoices((prev) => ({
+      ...prev,
+      [`${currentIndex}-${choiceIndex}`]: !prev[`${currentIndex}-${choiceIndex}`],
+    }))
+  }
 
   if (!track) return <Navigate to="/" replace />
 
@@ -260,7 +369,14 @@ export default function MockExamScreen() {
             <button className="btn" type="button" onClick={() => navigate(`/track/${track.id}`)}>
               Back to Track
             </button>
-            <button className="btn btn--ghost" type="button" onClick={() => window.location.reload()}>
+            <button
+              className="btn btn--ghost"
+              type="button"
+              onClick={() => {
+                sessionStorage.removeItem(sessionKey)
+                window.location.reload()
+              }}
+            >
               Retake Mock Exam
             </button>
           </div>
@@ -273,7 +389,16 @@ export default function MockExamScreen() {
     <div className="mock">
       <header className="mock__topbar">
         <div className="mock__topbar-left">
-          <Link className="icon-btn" to={`/track/${track.id}`} aria-label="Exit mock exam">
+          <Link
+            className="icon-btn"
+            to={`/track/${track.id}`}
+            aria-label="Exit mock exam"
+            onClick={() => {
+              if (window.confirm('Leave mock exam? Your progress will remain saved in this browser.')) {
+                navigate(`/track/${track.id}`)
+              }
+            }}
+          >
             <CloseIcon width="20" height="20" />
           </Link>
           <span className="mock__exam-name">
@@ -286,9 +411,20 @@ export default function MockExamScreen() {
           <span>{formatTime(remainingMs)}</span>
         </div>
 
-        <button className="btn btn--small" type="button" onClick={() => setShowConfirm(true)}>
-          Submit Exam
-        </button>
+        <div className="mock__topbar-right">
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label="Toggle Fullscreen Lockdown"
+            title="Toggle Fullscreen Lockdown"
+            onClick={toggleFullscreen}
+          >
+            <MaximizeIcon width="18" height="18" />
+          </button>
+          <button className="btn btn--small" type="button" onClick={() => setShowConfirm(true)}>
+            Submit Exam
+          </button>
+        </div>
       </header>
 
       <div className="mock__progress-bar">
@@ -340,18 +476,35 @@ export default function MockExamScreen() {
           <ul className="choices">
             {currentQuestion.choices.map((choice, i) => {
               const isSelected = selectedAnswers[currentIndex] === i
+              const isStruck = Boolean(eliminatedChoices[`${currentIndex}-${i}`])
+              let tone = isSelected ? ' choice--selected' : ''
+              if (isStruck) tone += ' choice--eliminated'
+              const letter = ['A', 'B', 'C', 'D', 'E', 'F'][i] ?? `${i + 1}`
+
               return (
-                <li key={i}>
+                <li key={i} className="choice-row">
                   <button
                     type="button"
-                    className={`choice ${isSelected ? 'choice--selected' : ''}${currentQuestion.rtl ? ' urdu' : ''}`}
+                    className={`choice${tone}${currentQuestion.rtl ? ' urdu' : ''}`}
                     dir={currentQuestion.rtl ? 'rtl' : 'ltr'}
-                    onClick={() =>
+                    onClick={() => {
+                      if (isStruck) return
                       setSelectedAnswers((prev) => ({ ...prev, [currentIndex]: i }))
-                    }
+                      triggerHaptic(30)
+                    }}
                   >
-                    <span className="choice__key">{i + 1}</span>
+                    <span className="choice__key">{letter}</span>
                     <span className="choice__text">{choice}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`strike-toggle${isStruck ? ' is-struck' : ''}`}
+                    aria-label={isStruck ? 'Restore option' : 'Eliminate option'}
+                    title={isStruck ? 'Restore option' : 'Eliminate option'}
+                    onClick={() => toggleEliminate(i)}
+                  >
+                    <SlashIcon width="16" height="16" />
                   </button>
                 </li>
               )
@@ -378,7 +531,7 @@ export default function MockExamScreen() {
           </div>
         </section>
 
-        {/* Question Palette / Matrix Sidebar */}
+        {/* Question Palette / Matrix Sidebar with Filters */}
         <aside className="mock__sidebar">
           <div className="mock__summary-pills">
             <span>{answeredCount} Answered</span>
@@ -386,12 +539,39 @@ export default function MockExamScreen() {
             {flaggedCount > 0 && <span>{flaggedCount} Flagged</span>}
           </div>
 
-          <h3>Question Palette</h3>
+          <div className="palette-filters">
+            <button
+              type="button"
+              className={`filter-tab ${paletteFilter === 'all' ? 'is-active' : ''}`}
+              onClick={() => setPaletteFilter('all')}
+            >
+              All ({allTrackQuestions.length})
+            </button>
+            <button
+              type="button"
+              className={`filter-tab ${paletteFilter === 'unanswered' ? 'is-active' : ''}`}
+              onClick={() => setPaletteFilter('unanswered')}
+            >
+              Unanswered ({allTrackQuestions.length - answeredCount})
+            </button>
+            <button
+              type="button"
+              className={`filter-tab ${paletteFilter === 'flagged' ? 'is-active' : ''}`}
+              onClick={() => setPaletteFilter('flagged')}
+            >
+              Flagged ({flaggedCount})
+            </button>
+          </div>
+
           <div className="palette-grid">
             {allTrackQuestions.map((_, idx) => {
               const isAnswered = selectedAnswers[idx] !== undefined
               const isFlagged = Boolean(flagged[idx])
               const isCurrent = currentIndex === idx
+
+              // Apply palette filter
+              if (paletteFilter === 'unanswered' && isAnswered) return null
+              if (paletteFilter === 'flagged' && !isFlagged) return null
 
               let tone = ''
               if (isCurrent) tone += ' is-current'

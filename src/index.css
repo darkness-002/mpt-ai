@@ -16,14 +16,17 @@
 
   --radius: 16px;
   --shadow-press: 4px;
+  --font-scale: 1;
 
   font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: calc(16px * var(--font-scale));
   line-height: 1.55;
   color-scheme: light dark;
 }
 
+/* System dark fallback */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]):not([data-theme="sepia"]) {
     --bg: #10141c;
     --surface: #171d28;
     --surface-2: #1d2532;
@@ -32,6 +35,47 @@
     --text: #eef2f8;
     --muted: #94a1b5;
   }
+}
+
+/* Explicit Themes */
+[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f7f9fb;
+  --border: #e5e7eb;
+  --border-strong: #d3d8de;
+  --text: #2b2f38;
+  --muted: #7c8798;
+}
+
+[data-theme="dark"] {
+  --bg: #10141c;
+  --surface: #171d28;
+  --surface-2: #1d2532;
+  --border: #2a3342;
+  --border-strong: #3a4557;
+  --text: #eef2f8;
+  --muted: #94a1b5;
+}
+
+[data-theme="oled"] {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-2: #141414;
+  --border: #222222;
+  --border-strong: #333333;
+  --text: #ffffff;
+  --muted: #888888;
+}
+
+[data-theme="sepia"] {
+  --bg: #fbf0d9;
+  --surface: #f4e6c8;
+  --surface-2: #ebdcb9;
+  --border: #dfcaa4;
+  --border-strong: #cca978;
+  --text: #433422;
+  --muted: #7a6348;
 }
 
 * {
@@ -44,6 +88,7 @@ body {
   color: var(--text);
   background: var(--bg);
   -webkit-tap-highlight-color: transparent;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 h1,
@@ -53,8 +98,7 @@ h3 {
   letter-spacing: -0.01em;
 }
 
-/* Nastaliq-style stack for the Urdu unit; falls back to whatever Arabic-script
-   face the platform ships. Urdu text is also marked dir="rtl" in the markup. */
+/* Nastaliq-style stack for the Urdu unit */
 .urdu {
   font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Segoe UI',
     serif;
@@ -73,6 +117,10 @@ h3 {
   box-shadow: 0 var(--shadow-press) 0 var(--green-dark);
   cursor: pointer;
   transition: transform 0.06s ease, filter 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
 
 .btn:hover:not(:disabled) {
@@ -121,4 +169,115 @@ h3 {
 :focus-visible {
   outline: 3px solid var(--blue);
   outline-offset: 3px;
+}
+
+/* Elimination / Strikethrough Mode styles */
+.choice-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.choice-row .choice {
+  flex: 1;
+}
+
+.strike-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+  width: 2.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.strike-toggle:hover:not(:disabled) {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.strike-toggle.is-struck {
+  background: var(--red);
+  border-color: var(--red-dark);
+  color: #fff;
+}
+
+.choice.choice--eliminated {
+  opacity: 0.4;
+  text-decoration: line-through;
+  filter: grayscale(0.8);
+}
+
+/* Universal Global Modal Overlay & Dialog Styles */
+.modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 99999 !important;
+  padding: 1.25rem !important;
+  animation: modalFadeIn 0.16s ease-out;
+}
+
+.modal {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  max-width: 28rem;
+  width: 100%;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  animation: modalSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: 100000;
+}
+
+.modal h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.modal p {
+  color: var(--muted);
+  margin: 0 0 1.5rem;
+  font-size: 0.92rem;
+}
+
+.modal__actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

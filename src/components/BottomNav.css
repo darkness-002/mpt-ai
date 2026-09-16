@@ -1,0 +1,86 @@
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3.8rem;
+  background: var(--surface);
+  border-top: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 1000;
+  padding: 0 0.5rem;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+}
+
+body[data-immersive='true'] .bottom-nav {
+  display: none !important;
+}
+
+
+.bottom-nav__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.35rem 0;
+  border-radius: var(--radius);
+  transition: all 0.12s ease;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.bottom-nav__item:hover {
+  color: var(--text);
+}
+
+.bottom-nav__item.is-active {
+  color: var(--blue);
+}
+
+.bottom-nav__icon-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.bottom-nav__badge {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  min-width: 14px;
+  height: 14px;
+  line-height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  text-align: center;
+}
+
+/* Floating centered glass pill dock on wide desktop screens */
+@media (min-width: 768px) {
+  .bottom-nav {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 1.25rem;
+    width: min(44rem, 90vw);
+    border-radius: 999px;
+    border: 2px solid var(--border);
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    height: 4rem;
+  }
+}
