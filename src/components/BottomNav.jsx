@@ -16,6 +16,7 @@ export default function BottomNav() {
   const location = useLocation()
   const [showSettings, setShowSettings] = useState(false)
   const [dueMistakesCount, setDueMistakesCount] = useState(0)
+  const [isVisible, setIsVisible] = useState(false)
   const [isDrillImmersive, setIsDrillImmersive] = useState(
     () => typeof document !== 'undefined' && document.body.dataset.immersive === 'true',
   )
@@ -31,7 +32,31 @@ export default function BottomNav() {
     return () => observer.disconnect()
   }, [])
 
-  // Hide bottom nav during active lessons, mock exams, or custom drill practice to maximize screen focus
+  // Scroll listener: reveal bottom nav when user scrolls down past the top header
+  useEffect(() => {
+    const updateVisibility = () => {
+      const scrollY = window.scrollY || document.documentElement.scrollTop
+      const isScrollable = document.documentElement.scrollHeight > window.innerHeight + 80
+      
+      // On scrollable pages, show bottom nav once scrolled past top header (> 70px).
+      // On short non-scrollable pages, keep it visible for easy navigation.
+      if (!isScrollable || scrollY > 70) {
+        setIsVisible(true)
+      } else {
+        setIsVisible(false)
+      }
+    }
+
+    updateVisibility()
+    window.addEventListener('scroll', updateVisibility, { passive: true })
+    window.addEventListener('resize', updateVisibility, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', updateVisibility)
+      window.removeEventListener('resize', updateVisibility)
+    }
+  }, [location.pathname])
+
+  // Hide bottom nav completely during active lessons or mock exams
   const isImmersiveMode =
     location.pathname.startsWith('/lesson/') ||
     location.pathname.startsWith('/mock/') ||
@@ -56,7 +81,7 @@ export default function BottomNav() {
 
   return (
     <>
-      <nav className="bottom-nav" aria-label="Main Navigation">
+      <nav className={`bottom-nav ${isVisible ? 'is-visible' : ''}`} aria-label="Main Navigation">
         <NavLink to="/" className={({ isActive }) => `bottom-nav__item ${isActive ? 'is-active' : ''}`} end>
           <BookIcon width="20" height="20" />
           <span>Curriculum</span>
@@ -100,3 +125,4 @@ export default function BottomNav() {
     </>
   )
 }
+

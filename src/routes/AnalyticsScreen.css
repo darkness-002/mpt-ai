@@ -1,58 +1,60 @@
 .analytics-screen {
-  width: min(48rem, 100%);
+  width: min(52rem, 100%);
   margin: 0 auto;
-  padding: 1.25rem 1.25rem 5.5rem;
+  padding: 1.5rem 1.25rem 6.5rem;
 }
 
 .analytics-header__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .analytics-header h1 {
-  margin: 0.5rem 0 0.25rem;
-  font-size: clamp(1.5rem, 5vw, 2rem);
+  margin: 0.5rem 0 0.35rem;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
   font-weight: 900;
 }
 
 .analytics-header__blurb {
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.75rem;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 0.94rem;
+  line-height: 1.45;
 }
 
 .analytics-body {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 .analytics-card {
   background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .analytics-card__title {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
 }
 
 .analytics-card__title h2 {
   margin: 0;
-  font-size: 1.2rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 900;
 }
 
+/* Weakest Area Alert Card */
 .weakest-card {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.09) 0%, var(--surface) 100%);
-  border-color: #ef4444;
-  border-width: 2px;
+  background: linear-gradient(135deg, var(--red-subtle), var(--surface));
+  border: 1.5px solid rgba(239, 68, 68, 0.4);
 }
 
 .weakest-card__header {
@@ -65,19 +67,19 @@
 .weakest-card__info {
   display: flex;
   align-items: flex-start;
-  gap: 0.85rem;
+  gap: 1rem;
 }
 
 .weakest-card__icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 999px;
-  background: rgba(239, 68, 68, 0.15);
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.18);
+  color: var(--red-dark);
   flex-shrink: 0;
-  margin-top: 0.1rem;
 }
 
 .weakest-card__info h3 {
@@ -94,56 +96,58 @@
 
 .weakest-card__badge {
   display: inline-block;
-  background: #ef4444;
+  background: var(--red);
   color: #fff;
-  font-size: 0.72rem;
-  font-weight: 800;
+  font-size: 0.74rem;
+  font-weight: 900;
   text-transform: uppercase;
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  letter-spacing: 0.03em;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
 }
 
 .weakest-card__actions {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  margin-top: 1rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid var(--border);
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1.5px solid rgba(239, 68, 68, 0.2);
   flex-wrap: wrap;
 }
 
+/* Target Date Pacing Card */
 .target-card {
-  background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
-  border-color: var(--blue);
+  background: linear-gradient(135deg, var(--blue-subtle), var(--surface));
+  border: 1.5px solid rgba(14, 165, 233, 0.35);
 }
 
 .target-card__header {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
 }
 
 .target-card__header h3 {
-  margin: 0 0 0.15rem;
-  font-size: 1.15rem;
+  margin: 0 0 0.2rem;
+  font-size: 1.2rem;
   font-weight: 900;
 }
 
 .target-card__header p {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: var(--muted);
 }
 
 .target-card__stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
-  gap: 0.75rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border);
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1.5px solid rgba(14, 165, 233, 0.2);
 }
 
 .target-stat {
@@ -152,46 +156,50 @@
 }
 
 .target-stat__val {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 900;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .target-stat--highlight {
-  color: var(--blue);
+  color: var(--blue-dark);
 }
 
 .target-stat__lbl {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--muted);
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.2rem;
 }
 
+/* Top KPI Metrics Grid */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+  gap: 1rem;
 }
 
 .metric-box {
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
-  padding: 1rem;
+  padding: 1.25rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  box-shadow: var(--shadow-sm);
 }
 
 .metric-box__val {
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   font-weight: 900;
-  line-height: 1.2;
+  line-height: 1.1;
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.35rem;
 }
 
 .metric-box--green {
@@ -199,22 +207,24 @@
 }
 
 .metric-box--gold {
-  color: #f59e0b;
+  color: var(--gold-dark);
 }
 
 .metric-box--blue {
-  color: var(--blue);
+  color: var(--blue-dark);
 }
 
 .metric-box__lbl {
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--muted);
-  margin-top: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.35rem;
 }
 
 .track-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
 }
 
 .track-group:last-child {
@@ -222,27 +232,28 @@
 }
 
 .track-group__title {
-  margin: 0 0 0.6rem;
-  font-size: 1rem;
-  font-weight: 800;
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 900;
   color: var(--text);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.35rem;
+  border-bottom: 1.5px solid var(--border);
+  padding-bottom: 0.45rem;
 }
 
 .units-table {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .unit-stat-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 0.6rem;
-  border-radius: calc(var(--radius) * 0.6);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
   background: var(--surface-2);
+  border: 1px solid var(--border);
   gap: 1rem;
   flex-wrap: wrap;
 }
@@ -250,33 +261,35 @@
 .unit-stat-row__info {
   display: flex;
   flex-direction: column;
+  gap: 0.15rem;
 }
 
 .unit-name {
-  font-weight: 800;
-  font-size: 0.9rem;
+  font-weight: 900;
+  font-size: 0.94rem;
 }
 
 .unit-progress {
   font-size: 0.78rem;
   color: var(--muted);
+  font-weight: 700;
 }
 
 .unit-stat-row__score {
-  min-width: 9rem;
+  min-width: 10rem;
 }
 
 .accuracy-pill {
   position: relative;
-  background: var(--border);
-  border-radius: 999px;
-  height: 1.4rem;
+  background: var(--surface-3);
+  border-radius: var(--radius-full);
+  height: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-size: 0.76rem;
+  font-weight: 900;
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
@@ -286,7 +299,7 @@
   left: 0;
   top: 0;
   bottom: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
 }
 
 .accuracy-pill span {
@@ -295,38 +308,41 @@
 }
 
 .not-started {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--muted);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .shortcuts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.85rem;
+  margin-top: 0.85rem;
 }
 
 .shortcut-card {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  padding: 0.85rem;
+  gap: 0.85rem;
+  padding: 1rem;
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface-2);
   text-decoration: none;
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
 }
 
 .shortcut-card:hover {
   border-color: var(--blue);
+  background: var(--surface);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .shortcut-card strong {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+  font-weight: 900;
   margin-bottom: 0.15rem;
 }
 
@@ -335,3 +351,4 @@
   font-size: 0.78rem;
   color: var(--muted);
 }
+

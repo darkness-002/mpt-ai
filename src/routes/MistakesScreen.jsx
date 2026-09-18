@@ -130,7 +130,7 @@ export default function MistakesScreen() {
             ← Back to Home
           </Link>
         </div>
-        <h1>Mistakes Bank & SRS</h1>
+        <h1>Mistakes Bank</h1>
         <p className="mistakes-screen__blurb">
           Spaced Repetition automatically schedules questions you missed until you master them.
         </p>

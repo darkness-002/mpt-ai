@@ -180,3 +180,13 @@ export function ZapIcon(props) {
     </svg>
   )
 }
+
+export function ArrowLeftIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 19 12 5" />
+    </svg>
+  )
+}
+
