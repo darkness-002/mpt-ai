@@ -103,6 +103,15 @@ export default function MockExamScreen() {
   const [paletteFilter, setPaletteFilter] = useState('all') // 'all' | 'unanswered' | 'flagged'
   const [submitted, setSubmitted] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [showMobilePalette, setShowMobilePalette] = useState(false)
+
+  const unansweredIndices = useMemo(() => {
+    const indices = []
+    allTrackQuestions.forEach((_, idx) => {
+      if (selectedAnswers[idx] === undefined) indices.push(idx)
+    })
+    return indices
+  }, [allTrackQuestions, selectedAnswers])
 
   // Timer initialization with session restore
   const totalDurationMs = blueprint.minutes * 60 * 1000
@@ -381,6 +390,113 @@ export default function MockExamScreen() {
       </div>
     )
   }
+  const jumpToNextUnanswered = () => {
+    if (unansweredIndices.length === 0) return
+    const next = unansweredIndices.find((idx) => idx > currentIndex)
+    if (next !== undefined) {
+      setCurrentIndex(next)
+    } else {
+      setCurrentIndex(unansweredIndices[0])
+    }
+    setShowMobilePalette(false)
+  }
+
+  const renderPaletteContent = () => (
+    <>
+      <div className="palette-header-info">
+        <div className="palette-header-title">
+          <span className="palette-main-title">Question Palette</span>
+          <span className="palette-progress-pct">
+            <strong>{answeredCount}</strong>/{allTrackQuestions.length} ({Math.round((answeredCount / allTrackQuestions.length) * 100)}%)
+          </span>
+        </div>
+
+        {unansweredIndices.length > 0 && (
+          <button
+            type="button"
+            className="btn btn--small btn--ghost palette-jump-btn"
+            onClick={jumpToNextUnanswered}
+          >
+            Next Unanswered →
+          </button>
+        )}
+      </div>
+
+      <div className="palette-filters" role="tablist" aria-label="Question palette filters">
+        <button
+          type="button"
+          className={`filter-tab ${paletteFilter === 'all' ? 'is-active' : ''}`}
+          onClick={() => setPaletteFilter('all')}
+        >
+          All ({allTrackQuestions.length})
+        </button>
+        <button
+          type="button"
+          className={`filter-tab ${paletteFilter === 'unanswered' ? 'is-active' : ''}`}
+          onClick={() => setPaletteFilter('unanswered')}
+        >
+          Left ({allTrackQuestions.length - answeredCount})
+        </button>
+        <button
+          type="button"
+          className={`filter-tab ${paletteFilter === 'flagged' ? 'is-active' : ''}`}
+          onClick={() => setPaletteFilter('flagged')}
+        >
+          Flagged ({flaggedCount})
+        </button>
+      </div>
+
+      {/* Status Legend */}
+      <div className="palette-legend">
+        <span className="legend-item">
+          <span className="legend-dot legend-dot--current" /> Current
+        </span>
+        <span className="legend-item">
+          <span className="legend-dot legend-dot--answered" /> Answered
+        </span>
+        <span className="legend-item">
+          <span className="legend-dot legend-dot--flagged" /> Flagged
+        </span>
+        <span className="legend-item">
+          <span className="legend-dot legend-dot--unanswered" /> Left
+        </span>
+      </div>
+
+      <div className="palette-grid">
+        {allTrackQuestions.map((_, idx) => {
+          const isAnswered = selectedAnswers[idx] !== undefined
+          const isFlagged = Boolean(flagged[idx])
+          const isCurrent = currentIndex === idx
+
+          // Apply palette filter
+          if (paletteFilter === 'unanswered' && isAnswered) return null
+          if (paletteFilter === 'flagged' && !isFlagged) return null
+
+          let tone = ''
+          if (isCurrent) tone += ' is-current'
+          if (isFlagged) tone += ' is-flagged'
+          if (isAnswered) tone += ' is-answered'
+
+          return (
+            <button
+              key={idx}
+              type="button"
+              className={`palette-btn${tone}`}
+              onClick={() => {
+                setCurrentIndex(idx)
+                setShowMobilePalette(false)
+              }}
+              aria-label={`Go to question ${idx + 1}`}
+              title={`Question ${idx + 1}${isFlagged ? ' (Flagged)' : ''}${isAnswered ? ' (Answered)' : ''}`}
+            >
+              <span className="palette-btn__num">{idx + 1}</span>
+              {isFlagged && <span className="palette-flag-dot" />}
+            </button>
+          )
+        })}
+      </div>
+    </>
+  )
 
   return (
     <div className="mock">
@@ -390,17 +506,18 @@ export default function MockExamScreen() {
             className="icon-btn"
             to={`/track/${track.id}`}
             aria-label="Exit mock exam"
-            onClick={() => {
-              if (window.confirm('Leave mock exam? Your progress will remain saved in this browser.')) {
-                navigate(`/track/${track.id}`)
+            onClick={(e) => {
+              if (!window.confirm('Leave mock exam? Your progress will remain saved in this browser.')) {
+                e.preventDefault()
               }
             }}
           >
             <CloseIcon width="20" height="20" />
           </Link>
-          <span className="mock__exam-name">
-            {track.title} · Mock Exam
-          </span>
+          <div className="mock__topbar-title-wrap">
+            <span className="mock__exam-name">{track.title}</span>
+            <span className="mock__topbar-sub">Mock Exam</span>
+          </div>
         </div>
 
         <div className={`timer ${remainingMs < 300000 ? 'timer--urgent' : ''}`}>
@@ -411,14 +528,22 @@ export default function MockExamScreen() {
         <div className="mock__topbar-right">
           <button
             type="button"
-            className="icon-btn"
+            className="btn btn--small btn--ghost mobile-palette-trigger"
+            onClick={() => setShowMobilePalette(true)}
+            aria-label="Open Question Map"
+          >
+            Map ({answeredCount}/{allTrackQuestions.length})
+          </button>
+          <button
+            type="button"
+            className="icon-btn desktop-only-btn"
             aria-label="Toggle Fullscreen Lockdown"
             title="Toggle Fullscreen Lockdown"
             onClick={toggleFullscreen}
           >
             <MaximizeIcon width="18" height="18" />
           </button>
-          <button className="btn btn--small" type="button" onClick={() => setShowConfirm(true)}>
+          <button className="btn btn--small btn--primary" type="button" onClick={() => setShowConfirm(true)}>
             Submit Exam
           </button>
         </div>
@@ -434,9 +559,14 @@ export default function MockExamScreen() {
       <main className="mock__layout">
         <section className="mock__question-panel">
           <div className="mock__qheader">
-            <span className="badge">
-              Question {currentIndex + 1} of {allTrackQuestions.length}
-            </span>
+            <button
+              type="button"
+              className="qheader-jump-pill"
+              onClick={() => setShowMobilePalette(true)}
+              title="Click to view all questions"
+            >
+              Question {currentIndex + 1} of {allTrackQuestions.length} ▾
+            </button>
             <span className="mock__unit-tag">{currentQuestion.unitTitle}</span>
             <button
               type="button"
@@ -518,78 +648,42 @@ export default function MockExamScreen() {
               ← Previous
             </button>
             <button
-              className="btn btn--small"
+              className="btn btn--small btn--primary"
               type="button"
               disabled={currentIndex === allTrackQuestions.length - 1}
               onClick={() => setCurrentIndex((i) => i + 1)}
             >
-              Next →
+              Next Question →
             </button>
           </div>
         </section>
 
-        {/* Question Palette / Matrix Sidebar with Filters */}
+        {/* Question Palette Sidebar (Desktop) */}
         <aside className="mock__sidebar">
-          <div className="mock__summary-pills">
-            <span>{answeredCount} Answered</span>
-            <span>{allTrackQuestions.length - answeredCount} Left</span>
-            {flaggedCount > 0 && <span>{flaggedCount} Flagged</span>}
-          </div>
-
-          <div className="palette-filters">
-            <button
-              type="button"
-              className={`filter-tab ${paletteFilter === 'all' ? 'is-active' : ''}`}
-              onClick={() => setPaletteFilter('all')}
-            >
-              All ({allTrackQuestions.length})
-            </button>
-            <button
-              type="button"
-              className={`filter-tab ${paletteFilter === 'unanswered' ? 'is-active' : ''}`}
-              onClick={() => setPaletteFilter('unanswered')}
-            >
-              Unanswered ({allTrackQuestions.length - answeredCount})
-            </button>
-            <button
-              type="button"
-              className={`filter-tab ${paletteFilter === 'flagged' ? 'is-active' : ''}`}
-              onClick={() => setPaletteFilter('flagged')}
-            >
-              Flagged ({flaggedCount})
-            </button>
-          </div>
-
-          <div className="palette-grid">
-            {allTrackQuestions.map((_, idx) => {
-              const isAnswered = selectedAnswers[idx] !== undefined
-              const isFlagged = Boolean(flagged[idx])
-              const isCurrent = currentIndex === idx
-
-              // Apply palette filter
-              if (paletteFilter === 'unanswered' && isAnswered) return null
-              if (paletteFilter === 'flagged' && !isFlagged) return null
-
-              let tone = ''
-              if (isCurrent) tone += ' is-current'
-              if (isFlagged) tone += ' is-flagged'
-              else if (isAnswered) tone += ' is-answered'
-
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  className={`palette-btn${tone}`}
-                  onClick={() => setCurrentIndex(idx)}
-                  aria-label={`Go to question ${idx + 1}`}
-                >
-                  {idx + 1}
-                </button>
-              )
-            })}
-          </div>
+          {renderPaletteContent()}
         </aside>
       </main>
+
+      {/* Mobile Bottom Sheet Drawer for Question Palette */}
+      {showMobilePalette && (
+        <div className="modal-backdrop" onClick={() => setShowMobilePalette(false)}>
+          <div className="mobile-palette-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="mobile-palette-sheet__top">
+              <h3>Question Map</h3>
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => setShowMobilePalette(false)}
+                aria-label="Close question palette"
+              >
+                <CloseIcon width="18" height="18" />
+              </button>
+            </div>
+            {renderPaletteContent()}
+          </div>
+        </div>
+      )}
+
 
       {/* Confirmation Modal */}
       {showConfirm && (
