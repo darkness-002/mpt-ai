@@ -120,6 +120,54 @@ export default function SettingsModal({ isOpen, onClose }) {
               />
             </div>
           </section>
+
+          {/* Full Data Backup & Cloud-Ready Export/Import */}
+          <section className="settings-section">
+            <label className="settings-label">Full Data Backup & Restore</label>
+            <p style={{ fontSize: '0.78rem', color: 'var(--muted)', margin: '0 0 0.75rem' }}>
+              Export or restore your progress, bookmarks, SRS mistakes, study notes, streaks, and settings.
+            </p>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn btn--small btn--ghost"
+                onClick={async () => {
+                  const { backupManager } = await import('../storage/backupManager.js')
+                  const payload = await backupManager.exportCompleteBackup()
+                  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `mpt-ai-full-backup-${new Date().toISOString().slice(0, 10)}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                }}
+              >
+                Export Full Backup (JSON)
+              </button>
+              <label className="btn btn--small btn--ghost" style={{ cursor: 'pointer', margin: 0 }}>
+                Restore Backup
+                <input
+                  type="file"
+                  accept=".json"
+                  style={{ display: 'none' }}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    try {
+                      const text = await file.text()
+                      const { backupManager } = await import('../storage/backupManager.js')
+                      const res = await backupManager.importCompleteBackup(text)
+                      alert(`Backup restored successfully!\n- Progress: ${res.progressCount}\n- Bookmarks: ${res.bookmarksCount}\n- Mistakes: ${res.mistakesCount}\n- Notes: ${res.notesCount}\n\nReloading app...`)
+                      window.location.reload()
+                    } catch (err) {
+                      alert(`Failed to restore backup: ${err.message}`)
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          </section>
         </main>
 
         <footer className="settings-modal__footer">

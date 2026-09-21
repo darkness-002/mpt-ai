@@ -1,0 +1,118 @@
+.note-modal {
+  max-width: 32rem;
+  width: 92vw;
+}
+
+.note-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.note-modal__title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.note-modal__title-wrap h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.note-modal__prompt {
+  font-size: 0.92rem;
+  color: var(--text);
+  background: var(--surface-2);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+  line-height: 1.45;
+  max-height: 5rem;
+  overflow-y: auto;
+}
+
+.note-modal__label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.note-modal__textarea {
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 7rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.note-modal__textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-subtle);
+}
+
+.note-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.25rem;
+}
+
+/* Question action buttons */
+.q-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.tts-btn,
+.note-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tts-btn:hover,
+.note-btn:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: var(--surface-3);
+  transform: translateY(-1px);
+}
+
+.tts-btn.is-speaking {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue-dark);
+}
+
+.note-btn.has-note {
+  border-color: var(--gold);
+  color: var(--gold-dark);
+  background: var(--gold-subtle);
+}

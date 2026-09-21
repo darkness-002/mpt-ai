@@ -1,7 +1,11 @@
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
+import AppHeader from './components/AppHeader.jsx'
 import BottomNav from './components/BottomNav.jsx'
+import GlobalSearchModal from './components/GlobalSearchModal.jsx'
+import FocusTimerModal from './components/FocusTimerModal.jsx'
+import SettingsModal from './components/SettingsModal.jsx'
 import { settingsStore } from './storage/settingsStore.js'
 import './App.css'
 
@@ -12,9 +16,25 @@ export default function App() {
     updateServiceWorker,
   } = useRegisterSW()
 
+  const [showSearch, setShowSearch] = useState(false)
+  const [showFocus, setShowFocus] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+
   // Initialize theme & typography settings on app launch
   useEffect(() => {
     settingsStore.apply(settingsStore.load())
+  }, [])
+
+  // Global Ctrl+K / Cmd+K listener for instant search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        setShowSearch((s) => !s)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   // "Downloaded for offline" is informational — it must never linger over a lesson.
@@ -26,11 +46,35 @@ export default function App() {
 
   return (
     <div className="app">
+      {/* Modern Top Header Navigation with Search & Tools */}
+      <AppHeader
+        onOpenSearch={() => setShowSearch(true)}
+        onOpenFocus={() => setShowFocus(true)}
+        onOpenSettings={() => setShowSettings(true)}
+      />
+
       <Suspense fallback={<div className="lesson lesson--loading" style={{ minHeight: '60vh' }}>Loading…</div>}>
         <Outlet />
       </Suspense>
 
       <BottomNav />
+
+      {/* Global Dialogs & Tool Modals */}
+      <GlobalSearchModal
+        isOpen={showSearch}
+        onClose={() => setShowSearch(false)}
+        onOpenFocus={() => setShowFocus(true)}
+      />
+
+      <FocusTimerModal
+        isOpen={showFocus}
+        onClose={() => setShowFocus(false)}
+      />
+
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
 
       {(offlineReady || needRefresh) && (
         <div className="toast" role="status">

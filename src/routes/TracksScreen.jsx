@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import SettingsModal from '../components/SettingsModal.jsx'
 import {
-  BookIcon,
+  CardsIcon,
+  FileTextIcon,
   FlameIcon,
-  SettingsIcon,
+  SparklesIcon,
   StarIcon,
   TargetIcon,
+  TrophyIcon,
   ZapIcon,
 } from '../components/icons.jsx'
 
@@ -23,7 +24,6 @@ export default function TracksScreen() {
   const { canInstall, install } = useInstallPrompt()
   const [streakData] = useState(() => streakStore.load())
   const [dueMistakesCount, setDueMistakesCount] = useState(0)
-  const [showSettings, setShowSettings] = useState(false)
   const [selectedExamTab, setSelectedExamTab] = useState('all')
   const fileInputRef = useRef(null)
   const [statusMsg, setStatusMsg] = useState(null)
@@ -108,39 +108,16 @@ export default function TracksScreen() {
 
   return (
     <div className="tracks-page">
-      {/* Sleek Top Header Bar */}
-      <header className="tracks-header">
-        <div className="tracks-header__top">
-          <div className="brand-group">
-            <Link className="brand" to="/" aria-label="MPT-AI Home">
-              <span className="brand-logo-disc">
-                <BookIcon width="20" height="20" />
-              </span>
-              <span className="brand-text">
-                MPT<span className="brand__dot">·</span>AI
-              </span>
-            </Link>
-            <span className="brand-tagline">Civil Service Preparation</span>
-          </div>
-
-          <div className="tracks-header__actions">
-            {canInstall && (
-              <button className="btn btn--small btn--primary" type="button" onClick={install}>
-                Install
-              </button>
-            )}
-
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={() => setShowSettings(true)}
-              aria-label="Open Settings"
-              title="App Settings"
-            >
-              <SettingsIcon width="18" height="18" />
+      {/* Hero Streak & Practice Stats */}
+      <div className="tracks-hero">
+        {canInstall && (
+          <div className="install-banner">
+            <span>Install MPT-AI to your device for rapid offline access.</span>
+            <button className="btn btn--small btn--primary" type="button" onClick={install}>
+              Install App
             </button>
           </div>
-        </div>
+        )}
 
         {/* Daily Streak & Practice Stats Ribbon */}
         <div className="streak-bar">
@@ -201,6 +178,49 @@ export default function TracksScreen() {
           </div>
         )}
 
+        {/* Quick Study Modes Grid */}
+        <div className="quick-modes-grid">
+          <Link to="/daily" className="quick-mode-card quick-mode-card--gold">
+            <div className="quick-mode-icon">
+              <SparklesIcon width="18" height="18" />
+            </div>
+            <div className="quick-mode-text">
+              <strong>Daily 10-MCQ Sprint</strong>
+              <span>Today&apos;s challenge</span>
+            </div>
+          </Link>
+
+          <Link to="/flashcards" className="quick-mode-card quick-mode-card--blue">
+            <div className="quick-mode-icon">
+              <CardsIcon width="18" height="18" />
+            </div>
+            <div className="quick-mode-text">
+              <strong>Flashcards</strong>
+              <span>Active recall review</span>
+            </div>
+          </Link>
+
+          <Link to="/readiness" className="quick-mode-card quick-mode-card--green">
+            <div className="quick-mode-icon">
+              <TrophyIcon width="18" height="18" />
+            </div>
+            <div className="quick-mode-text">
+              <strong>Readiness Score</strong>
+              <span>Diagnostic analysis</span>
+            </div>
+          </Link>
+
+          <Link to="/papers" className="quick-mode-card quick-mode-card--purple">
+            <div className="quick-mode-icon">
+              <FileTextIcon width="18" height="18" />
+            </div>
+            <div className="quick-mode-text">
+              <strong>Past Papers Vault</strong>
+              <span>2013–2026 papers</span>
+            </div>
+          </Link>
+        </div>
+
         {/* Exam Category Segmented Tabs */}
         <div className="exam-filter-bar" role="tablist" aria-label="Exam Track Filters">
           <button
@@ -230,7 +250,7 @@ export default function TracksScreen() {
             {statusMsg}
           </div>
         )}
-      </header>
+      </div>
 
       <main className="tracks">
         {filteredExams.map((exam) => {
@@ -334,11 +354,9 @@ export default function TracksScreen() {
         </div>
 
         <Link className="tracks-footer__admin" to="/admin">
-          Authoring Suite & Past Paper PDF Importer →
+          MPT-AI Studio · Examiner & Admin Console →
         </Link>
       </footer>
-
-      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </div>
   )
 }

@@ -4,16 +4,20 @@ import {
   CheckCircleIcon,
   CloseIcon,
   LightbulbIcon,
+  NotesIcon,
   SlashIcon,
   StarIcon,
   XCircleIcon,
 } from '../components/icons.jsx'
+import QuestionTTS from '../components/QuestionTTS.jsx'
+import NoteModal from '../components/NoteModal.jsx'
 import { useContent } from '../content/contentContext.js'
 import { calculateScore, explainQuestion, keyNoteQuestion } from '../data/curriculum.js'
 import { feedbackService } from '../lib/feedback.js'
 import { shuffle } from '../lib/shuffle.js'
 import { bookmarksStore } from '../storage/bookmarksStore.js'
 import { mistakesStore } from '../storage/mistakesStore.js'
+import { notesStore } from '../storage/notesStore.js'
 import { streakStore } from '../storage/streakStore.js'
 import { useProgress } from '../storage/progressContext.js'
 import './LessonScreen.css'
@@ -41,6 +45,8 @@ export default function LessonScreen({ lessonId }) {
   const [answers, setAnswers] = useState([])
   const [finished, setFinished] = useState(false)
   const [bookmarked, setBookmarked] = useState(false)
+  const [showNoteModal, setShowNoteModal] = useState(false)
+  const [hasNote, setHasNote] = useState(false)
   const headingRef = useRef(null)
 
   const question = questions[index]
@@ -53,6 +59,9 @@ export default function LessonScreen({ lessonId }) {
     let active = true
     bookmarksStore.isBookmarked(question.id).then((is) => {
       if (active) setBookmarked(is)
+    })
+    notesStore.getNote(question.id).then((text) => {
+      if (active) setHasNote(Boolean(text))
     })
     return () => {
       active = false
@@ -264,9 +273,23 @@ export default function LessonScreen({ lessonId }) {
       </header>
 
       <main className="lesson__body">
-        <p className="lesson__unit">
-          {lesson.trackTitle} · {lesson.unitTitle}
-        </p>
+        <div className="lesson__unit-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+          <p className="lesson__unit" style={{ margin: 0 }}>
+            {lesson.trackTitle} · {lesson.unitTitle}
+          </p>
+          <div className="q-action-bar" style={{ margin: 0 }}>
+            <QuestionTTS question={question} />
+            <button
+              type="button"
+              className={`note-btn ${hasNote ? 'has-note' : ''}`}
+              onClick={() => setShowNoteModal(true)}
+              title="Add or view question study note"
+            >
+              <NotesIcon width="14" height="14" />
+              <span>{hasNote ? 'Note' : '+Note'}</span>
+            </button>
+          </div>
+        </div>
         {question.directive && <p className="lesson__directive">{question.directive}</p>}
         <h1
           className={`lesson__prompt${lesson.rtl ? ' urdu' : ''}`}
@@ -408,6 +431,19 @@ export default function LessonScreen({ lessonId }) {
           {checked ? (isLast ? 'Finish Lesson' : 'Continue') : 'Check Answer'}
         </button>
       </footer>
+
+      {showNoteModal && (
+        <NoteModal
+          isOpen={showNoteModal}
+          onClose={() => {
+            setShowNoteModal(false)
+            if (question) {
+              notesStore.getNote(question.id).then((text) => setHasNote(Boolean(text)))
+            }
+          }}
+          question={question}
+        />
+      )}
     </div>
   )
 }

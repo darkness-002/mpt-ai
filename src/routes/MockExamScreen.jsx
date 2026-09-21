@@ -5,9 +5,13 @@ import {
   CloseIcon,
   FlagIcon,
   MaximizeIcon,
+  NotesIcon,
   SlashIcon,
   TimerIcon,
 } from '../components/icons.jsx'
+import QuestionTTS from '../components/QuestionTTS.jsx'
+import NoteModal from '../components/NoteModal.jsx'
+import OMRSheet from '../components/OMRSheet.jsx'
 import { useContent } from '../content/contentContext.js'
 import { calculateScore, explainQuestion } from '../data/curriculum.js'
 import { feedbackService } from '../lib/feedback.js'
@@ -129,6 +133,9 @@ export default function MockExamScreen() {
   })
 
   const targetTimeRef = useRef(0)
+  const [reviewFilter, setReviewFilter] = useState('all')
+  const [noteModalQuestion, setNoteModalQuestion] = useState(null)
+  const [savedToMistakesMsg, setSavedToMistakesMsg] = useState(null)
 
   useEffect(() => {
     try {
@@ -339,12 +346,77 @@ export default function MockExamScreen() {
           </section>
 
           <section className="section-card">
-            <h3>Review All Questions</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0 }}>Review Exam Questions</h3>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className={`btn btn--small ${reviewFilter === 'all' ? 'btn--primary' : 'btn--ghost'}`}
+                  onClick={() => setReviewFilter('all')}
+                >
+                  All ({allTrackQuestions.length})
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn--small ${reviewFilter === 'wrong' ? 'btn--primary' : 'btn--ghost'}`}
+                  onClick={() => setReviewFilter('wrong')}
+                >
+                  Wrong ({results.wrong})
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn--small ${reviewFilter === 'skipped' ? 'btn--primary' : 'btn--ghost'}`}
+                  onClick={() => setReviewFilter('skipped')}
+                >
+                  Skipped ({results.unansweredCount})
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn--small ${reviewFilter === 'flagged' ? 'btn--primary' : 'btn--ghost'}`}
+                  onClick={() => setReviewFilter('flagged')}
+                >
+                  Flagged ({Object.values(flagged).filter(Boolean).length})
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Bulk Actions for missed questions */}
+            {results.wrong > 0 && (
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', background: 'var(--surface-2)', padding: '0.75rem 1rem', borderRadius: 'var(--radius)' }}>
+                <button
+                  type="button"
+                  className="btn btn--small btn--ghost"
+                  onClick={async () => {
+                    let count = 0
+                    for (let idx = 0; idx < allTrackQuestions.length; idx++) {
+                      const q = allTrackQuestions[idx]
+                      const choice = selectedAnswers[idx]
+                      if (choice !== undefined && choice !== q.answer) {
+                        await mistakesStore.recordMistake(q, { trackId: track.id, unitId: q.unitId })
+                        count++
+                      }
+                    }
+                    setSavedToMistakesMsg(`Saved ${count} incorrect questions to SRS Mistakes bank!`)
+                    setTimeout(() => setSavedToMistakesMsg(null), 3000)
+                  }}
+                >
+                  Save All Missed to Mistakes Bank (SRS)
+                </button>
+                {savedToMistakesMsg && <span style={{ color: 'var(--green)', fontSize: '0.85rem', fontWeight: 700 }}>{savedToMistakesMsg}</span>}
+              </div>
+            )}
+
             <ul className="review-list">
               {allTrackQuestions.map((q, idx) => {
                 const choice = selectedAnswers[idx]
                 const isCorrect = choice === q.answer
                 const isSkipped = choice === undefined
+                const isWrong = choice !== undefined && !isCorrect
+                const isFlag = !!flagged[idx]
+
+                if (reviewFilter === 'wrong' && !isWrong) return null
+                if (reviewFilter === 'skipped' && !isSkipped) return null
+                if (reviewFilter === 'flagged' && !isFlag) return null
 
                 return (
                   <li
@@ -354,9 +426,19 @@ export default function MockExamScreen() {
                     <div className="review-item__header">
                       <span className="review-item__num">Q{idx + 1}</span>
                       <span className="review-item__unit">{q.unitTitle}</span>
-                      <span className="review-item__status">
-                        {isCorrect ? 'Correct (+1)' : isSkipped ? 'Skipped (0)' : `Wrong (-${blueprint.negativeMarking})`}
-                      </span>
+                      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <QuestionTTS question={q} />
+                        <button
+                          type="button"
+                          className="note-btn"
+                          onClick={() => setNoteModalQuestion(q)}
+                        >
+                          <NotesIcon width="13" height="13" /> +Note
+                        </button>
+                        <span className="review-item__status">
+                          {isCorrect ? 'Correct (+1)' : isSkipped ? 'Skipped (0)' : `Wrong (-${blueprint.negativeMarking})`}
+                        </span>
+                      </div>
                     </div>
                     <p className={`review-item__prompt${q.rtl ? ' urdu' : ''}`} dir={q.rtl ? 'rtl' : 'ltr'}>
                       {q.prompt}
@@ -364,6 +446,9 @@ export default function MockExamScreen() {
                     {!isSkipped && !isCorrect && (
                       <p className="review-item__wrong">Your choice: {q.choices[choice]}</p>
                     )}
+                    <p className="review-item__right" style={{ color: 'var(--green)', fontWeight: 700, margin: '0.35rem 0' }}>
+                      Correct answer: {q.choices[q.answer]}
+                    </p>
                     {explainQuestion(q) && <p className="review-item__why">{explainQuestion(q)}</p>}
                   </li>
                 )
@@ -387,6 +472,14 @@ export default function MockExamScreen() {
             </button>
           </div>
         </main>
+
+        {noteModalQuestion && (
+          <NoteModal
+            isOpen={!!noteModalQuestion}
+            onClose={() => setNoteModalQuestion(null)}
+            question={noteModalQuestion}
+          />
+        )}
       </div>
     )
   }
@@ -712,6 +805,18 @@ export default function MockExamScreen() {
           </div>
         </div>
       )}
+      {/* Authentic OMR Bubble Sheet simulation drawer */}
+      <OMRSheet
+        totalQuestions={allTrackQuestions.length}
+        currentIndex={currentIndex}
+        selectedAnswers={selectedAnswers}
+        flagged={flagged}
+        onSelectAnswer={(qIdx, optIdx) => {
+          setSelectedAnswers((prev) => ({ ...prev, [qIdx]: optIdx }))
+          feedbackService.tap(30)
+        }}
+        onJumpToQuestion={(qIdx) => setCurrentIndex(qIdx)}
+      />
     </div>
   )
 }

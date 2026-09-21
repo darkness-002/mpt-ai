@@ -3,7 +3,9 @@ const PROGRESS = 'progress'
 const CONTENT = 'content'
 const MISTAKES = 'mistakes'
 const BOOKMARKS = 'bookmarks'
-const VERSION = 3
+const NOTES = 'notes'
+const MOCK_HISTORY = 'mock_history'
+const VERSION = 4
 
 let dbPromise = null
 
@@ -13,11 +15,13 @@ function openDb() {
     const request = indexedDB.open(DB_NAME, VERSION)
     request.onupgradeneeded = () => {
       const db = request.result
-      // v1 shipped with `progress` only; v2 adds author-created content; v3 adds mistakes & bookmarks.
+      // v1 shipped with `progress` only; v2 adds author-created content; v3 adds mistakes & bookmarks; v4 adds notes & mock_history.
       if (!db.objectStoreNames.contains(PROGRESS)) db.createObjectStore(PROGRESS, { keyPath: 'id' })
       if (!db.objectStoreNames.contains(CONTENT)) db.createObjectStore(CONTENT, { keyPath: 'id' })
       if (!db.objectStoreNames.contains(MISTAKES)) db.createObjectStore(MISTAKES, { keyPath: 'id' })
       if (!db.objectStoreNames.contains(BOOKMARKS)) db.createObjectStore(BOOKMARKS, { keyPath: 'id' })
+      if (!db.objectStoreNames.contains(NOTES)) db.createObjectStore(NOTES, { keyPath: 'id' })
+      if (!db.objectStoreNames.contains(MOCK_HISTORY)) db.createObjectStore(MOCK_HISTORY, { keyPath: 'id' })
     }
     request.onsuccess = () => resolve(request.result)
     request.onerror = () => reject(request.error)
@@ -61,3 +65,6 @@ export const idb = storeApi(PROGRESS)
 export const idbContent = storeApi(CONTENT)
 export const idbMistakes = storeApi(MISTAKES)
 export const idbBookmarks = storeApi(BOOKMARKS)
+export const idbNotes = storeApi(NOTES)
+export const idbMockHistory = storeApi(MOCK_HISTORY)
+

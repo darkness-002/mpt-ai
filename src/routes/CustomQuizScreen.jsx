@@ -5,18 +5,23 @@ import {
   CheckCircleIcon,
   CloseIcon,
   LightbulbIcon,
+  NotesIcon,
   SlashIcon,
   StarIcon,
   TargetIcon,
   TimerIcon,
   XCircleIcon,
 } from '../components/icons.jsx'
+import QuestionTTS from '../components/QuestionTTS.jsx'
+import NoteModal from '../components/NoteModal.jsx'
+import OMRSheet from '../components/OMRSheet.jsx'
 import { useContent } from '../content/contentContext.js'
 import { calculateScore, explainQuestion } from '../data/curriculum.js'
 import { feedbackService } from '../lib/feedback.js'
 import { shuffle } from '../lib/shuffle.js'
 import { bookmarksStore } from '../storage/bookmarksStore.js'
 import { mistakesStore } from '../storage/mistakesStore.js'
+import { notesStore } from '../storage/notesStore.js'
 import { streakStore } from '../storage/streakStore.js'
 import './CustomQuizScreen.css'
 
@@ -58,10 +63,25 @@ export default function CustomQuizScreen() {
   const [isChecked, setIsChecked] = useState(false)
   const [answers, setAnswers] = useState([])
   const [bookmarked, setBookmarked] = useState(false)
+  const [showNoteModal, setShowNoteModal] = useState(false)
+  const [hasNote, setHasNote] = useState(false)
 
   // Timer state for timed drill
   const [remainingSeconds, setRemainingSeconds] = useState(0)
   const headingRef = useRef(null)
+
+  const currentQ = activeQuestions[currentIndex]
+
+  useEffect(() => {
+    if (!currentQ) return
+    let active = true
+    notesStore.getNote(currentQ.id).then((text) => {
+      if (active) setHasNote(Boolean(text))
+    })
+    return () => {
+      active = false
+    }
+  }, [currentQ])
 
   // Hide bottom navigation during active and finished drill states to ensure footer is never blocked
   useEffect(() => {
@@ -256,8 +276,6 @@ export default function CustomQuizScreen() {
       setRemainingSeconds(reshuffled.length * 60)
     }
   }
-
-  const currentQ = activeQuestions[currentIndex]
 
   // Timer countdown
   useEffect(() => {
@@ -494,7 +512,21 @@ export default function CustomQuizScreen() {
         </header>
 
         <main className="drill-body">
-          <p className="drill-unit-title">{currentQ.unitTitle || activeTrack?.title}</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <p className="drill-unit-title" style={{ margin: 0 }}>{currentQ.unitTitle || activeTrack?.title}</p>
+            <div className="q-action-bar" style={{ margin: 0 }}>
+              <QuestionTTS question={currentQ} />
+              <button
+                type="button"
+                className={`note-btn ${hasNote ? 'has-note' : ''}`}
+                onClick={() => setShowNoteModal(true)}
+                title="Add or view study note"
+              >
+                <NotesIcon width="14" height="14" />
+                <span>{hasNote ? 'Note' : '+Note'}</span>
+              </button>
+            </div>
+          </div>
           {currentQ.directive && <p className="drill-directive">{currentQ.directive}</p>}
           <h2
             className={`drill-prompt${currentQ.rtl ? ' urdu' : ''}`}
@@ -630,6 +662,28 @@ export default function CustomQuizScreen() {
             {isChecked ? (currentIndex === activeQuestions.length - 1 ? 'Finish Drill' : 'Continue (Enter)') : 'Check Answer (Enter)'}
           </button>
         </footer>
+
+        <OMRSheet
+          totalQuestions={activeQuestions.length}
+          currentIndex={currentIndex}
+          selectedAnswers={{ [currentIndex]: selectedChoice }}
+          onSelectAnswer={(_, optIdx) => {
+            if (!isChecked) setSelectedChoice(optIdx)
+          }}
+        />
+
+        {showNoteModal && (
+          <NoteModal
+            isOpen={showNoteModal}
+            onClose={() => {
+              setShowNoteModal(false)
+              if (currentQ) {
+                notesStore.getNote(currentQ.id).then((text) => setHasNote(Boolean(text)))
+              }
+            }}
+            question={currentQ}
+          />
+        )}
       </div>
     )
   }

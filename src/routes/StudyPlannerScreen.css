@@ -1,0 +1,277 @@
+.planner-page {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 6rem;
+}
+
+.planner-header {
+  margin-bottom: 1.5rem;
+}
+
+.planner-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.planner-title-wrap h1 {
+  font-size: 1.6rem;
+  margin: 0;
+  font-weight: 900;
+}
+
+.planner-subtitle {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.planner-hero-card {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1.5rem;
+}
+
+.countdown-dial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 4px solid var(--green);
+  flex-shrink: 0;
+}
+
+.countdown-days {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--green);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.countdown-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+.planner-hero-info {
+  flex: 1;
+}
+
+.target-exam-pill {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--green);
+  background: var(--green-subtle);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.target-pacing-headline {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0 0 0.75rem;
+  line-height: 1.35;
+}
+
+.pacing-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.pacing-status-indicator.is-ahead {
+  background: var(--green-subtle);
+  color: var(--green-dark);
+}
+
+.pacing-status-indicator.is-on-track {
+  background: var(--blue-subtle);
+  color: var(--blue-dark);
+}
+
+.pacing-status-indicator.is-behind {
+  background: var(--gold-subtle);
+  color: var(--gold-dark);
+}
+
+.planner-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.planner-metric-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.planner-metric-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.planner-metric-val {
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 0.35rem;
+}
+
+.planner-metric-sub {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.planner-form-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.planner-form-card h3 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.form-fields-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.planner-label {
+  flex: 1;
+  min-width: 14rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.planner-input {
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  outline: none;
+}
+
+.planner-input:focus {
+  border-color: var(--green);
+  background: var(--surface);
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.save-toast {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--green);
+}
+
+.subject-pacing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.subject-pacing-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.25rem;
+}
+
+.subject-pacing-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.subject-pacing-info strong {
+  font-size: 0.92rem;
+}
+
+.subject-pacing-info span {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.subject-progress-bar {
+  width: 8rem;
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.subject-progress-fill {
+  height: 100%;
+  background: var(--green);
+}
+
+@media (max-width: 640px) {
+  .planner-hero-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.25rem;
+  }
+  .planner-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  .subject-pacing-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .subject-progress-bar {
+    width: 100%;
+  }
+}

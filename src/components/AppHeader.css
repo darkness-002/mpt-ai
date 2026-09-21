@@ -1,0 +1,216 @@
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-bottom: 1.5px solid var(--border);
+  padding: 0.6rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.site-header__container {
+  max-width: 68rem;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.site-brand-badge {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--blue), var(--green));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+}
+
+.site-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.site-brand-title {
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.brand-accent {
+  color: var(--blue);
+}
+
+.site-brand-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.header-desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 0.5rem;
+}
+
+.header-nav-link {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.header-nav-link:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.header-nav-link.is-active {
+  color: var(--blue);
+  background: var(--blue-subtle);
+  font-weight: 800;
+}
+
+@media (max-width: 859px) {
+  .header-desktop-nav {
+    display: none;
+  }
+}
+
+.header-search-trigger {
+  flex: 1;
+  max-width: 22rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 0.45rem 0.9rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.header-search-trigger:hover {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.header-search-icon {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.header-search-text {
+  flex: 1;
+  text-align: left;
+  font-size: 0.84rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-search-kbd {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  color: var(--muted);
+}
+
+.site-header__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.header-streak-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--gold-subtle);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-full);
+  padding: 0.3rem 0.65rem;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 800;
+  transition: transform 0.15s ease;
+}
+
+.header-streak-pill:hover {
+  transform: scale(1.05);
+}
+
+.header-streak-flame {
+  color: var(--gold);
+}
+
+.header-tool-btn {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.header-tool-btn:hover {
+  background: var(--surface-3);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    padding: 0.5rem 0.85rem;
+  }
+  .site-brand-tag {
+    display: none;
+  }
+  .header-search-text {
+    display: none;
+  }
+  .header-search-kbd {
+    display: none;
+  }
+  .header-search-trigger {
+    padding: 0.45rem;
+    max-width: fit-content;
+  }
+}

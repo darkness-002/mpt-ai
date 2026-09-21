@@ -1,0 +1,283 @@
+.worksheet-page {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 6rem;
+}
+
+.worksheet-controls {
+  margin-bottom: 2rem;
+}
+
+.worksheet-controls__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.worksheet-config-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.config-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0 0 0.25rem;
+}
+
+.config-subtitle {
+  color: var(--muted);
+  font-size: 0.88rem;
+  margin: 0 0 1.25rem;
+}
+
+.config-row {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.config-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.config-select {
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.88rem;
+}
+
+.config-toggles {
+  display: flex;
+  gap: 1.25rem;
+  padding-bottom: 0.35rem;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Printable Paper Canvas */
+.printable-paper {
+  background: #ffffff;
+  color: #000000;
+  padding: 2.5rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.paper-top-header {
+  text-align: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.paper-seal {
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+}
+
+.paper-exam-name {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+}
+
+.paper-meta-row {
+  display: flex;
+  justify-content: space-around;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.candidate-details-box {
+  border: 1px solid #000;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.field-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.instructions-box {
+  font-size: 0.8rem;
+  text-align: left;
+  border-top: 1px dashed #666;
+  padding-top: 0.5rem;
+}
+
+.instructions-box ol {
+  margin: 0.25rem 0 0;
+  padding-left: 1.25rem;
+}
+
+/* Questions 2-column format */
+.paper-questions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem 1.5rem;
+}
+
+.print-q {
+  break-inside: avoid;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.print-q-prompt {
+  margin-bottom: 0.35rem;
+}
+
+.print-q-statements {
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-bottom: 0.35rem;
+  padding-left: 0.5rem;
+}
+
+.print-q-choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+/* Printable OMR Sheet */
+.print-omr-section {
+  margin-top: 2rem;
+  border-top: 2px dashed #000;
+  padding-top: 1.5rem;
+}
+
+.omr-print-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.omr-print-header h2 {
+  font-size: 1.2rem;
+  margin: 0 0 0.25rem;
+}
+
+.omr-print-header p {
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.omr-print-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem 1rem;
+}
+
+.omr-print-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #ccc;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.8rem;
+}
+
+.omr-circles {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.omr-print-bubble {
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 1px solid #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+/* Printable Answer Key */
+.print-key-section {
+  margin-top: 2rem;
+  border-top: 2px dashed #000;
+  padding-top: 1.5rem;
+}
+
+.key-header {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.key-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.key-item {
+  border: 1px solid #ddd;
+  padding: 0.25rem 0.5rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Media Print Rules */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .no-print,
+  .site-header,
+  .bottom-nav,
+  .toast {
+    display: none !important;
+  }
+  .worksheet-page {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .printable-paper {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .print-page-break {
+    page-break-before: always;
+    break-before: page;
+  }
+}

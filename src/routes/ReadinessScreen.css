@@ -1,0 +1,225 @@
+.readiness-page {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 6rem;
+}
+
+.readiness-header {
+  margin-bottom: 1.5rem;
+}
+
+.readiness-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.readiness-title-wrap h1 {
+  font-size: 1.6rem;
+  margin: 0;
+  font-weight: 900;
+}
+
+.readiness-subtitle {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.readiness-hero-card {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+}
+
+.readiness-dial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 4px solid var(--border);
+  flex-shrink: 0;
+}
+
+.readiness-dial__number {
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.readiness-dial__label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+.readiness-hero__body {
+  flex: 1;
+}
+
+.readiness-status-badge {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.readiness-advice {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 2rem 0 1rem;
+}
+
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.pillar-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.pillar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.pillar-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pillar-value {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.pillar-bar {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.pillar-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.pillar-desc {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.no-weakness-card {
+  text-align: center;
+  padding: 2rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+}
+
+.no-weakness-card h3 {
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}
+
+.weak-spots-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.weak-spot-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.weak-spot-icon {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: var(--radius-sm);
+  background: var(--red-subtle);
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.weak-spot-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.weak-spot-info strong {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.weak-spot-info span {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .readiness-hero-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.25rem;
+  }
+  .pillars-grid {
+    grid-template-columns: 1fr;
+  }
+  .weak-spot-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .weak-spot-card .btn {
+    width: 100%;
+  }
+}
