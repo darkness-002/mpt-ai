@@ -1,7 +1,14 @@
 .readiness-page {
-  max-width: 52rem;
+  width: min(94rem, 100%);
+  max-width: 94rem;
   margin: 0 auto;
   padding: 1.5rem 1.25rem 6rem;
+}
+
+@media (min-width: 1024px) {
+  .readiness-page {
+    padding: 2.5rem 2.5rem 6.5rem;
+  }
 }
 
 .readiness-header {
@@ -99,6 +106,12 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .pillars-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .pillar-card {

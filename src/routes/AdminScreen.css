@@ -16,7 +16,7 @@
 }
 
 .admin-header__container {
-  max-width: 72rem;
+  max-width: 94rem;
   margin: 0 auto;
   padding: 1rem 1.25rem 0.5rem;
   display: flex;
@@ -24,6 +24,12 @@
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+@media (min-width: 1024px) {
+  .admin-header__container {
+    padding: 1.25rem 2.5rem 0.65rem;
+  }
 }
 
 .admin-header__left {
@@ -77,7 +83,7 @@
 
 /* Nav Tabs */
 .admin-nav-tabs {
-  max-width: 72rem;
+  max-width: 94rem;
   margin: 0 auto;
   padding: 0.4rem 1.25rem 0;
   display: flex;
@@ -85,6 +91,12 @@
   gap: 0.4rem;
   overflow-x: auto;
   scrollbar-width: none;
+}
+
+@media (min-width: 1024px) {
+  .admin-nav-tabs {
+    padding: 0.5rem 2.5rem 0;
+  }
 }
 
 .admin-nav-tabs::-webkit-scrollbar {
@@ -119,12 +131,18 @@
 
 /* Banners */
 .admin-banner {
-  max-width: 72rem;
+  max-width: 94rem;
   margin: 1rem auto 0;
   padding: 0.75rem 1.25rem;
   border-radius: var(--radius);
   font-size: 0.85rem;
   font-weight: 700;
+}
+
+@media (min-width: 1024px) {
+  .admin-banner {
+    padding: 0.85rem 2.5rem;
+  }
 }
 
 .admin-banner--success {
@@ -141,9 +159,15 @@
 
 /* Main Content Area */
 .admin-content {
-  max-width: 72rem;
+  max-width: 94rem;
   margin: 1.5rem auto;
   padding: 0 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .admin-content {
+    padding: 0 2.5rem;
+  }
 }
 
 /* KPI Cards Grid */

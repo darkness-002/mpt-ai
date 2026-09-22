@@ -1,7 +1,14 @@
 .daily-page {
-  max-width: 48rem;
+  width: min(64rem, 100%);
+  max-width: 64rem;
   margin: 0 auto;
   padding: 1.5rem 1.25rem 6rem;
+}
+
+@media (min-width: 1024px) {
+  .daily-page {
+    padding: 2.5rem 2.5rem 6.5rem;
+  }
 }
 
 .daily-header {

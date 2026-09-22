@@ -5,12 +5,18 @@
 }
 
 .tracks-hero {
-  width: min(56rem, 100%);
+  width: min(94rem, 100%);
   margin: 0 auto;
   padding: 1.25rem 1.25rem 0;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .tracks-hero {
+    padding: 1.5rem 2.5rem 0;
+  }
 }
 
 .install-banner {
@@ -317,10 +323,16 @@
 }
 
 .tracks {
-  width: min(72rem, 100%);
+  width: min(94rem, 100%);
   margin: 0 auto;
   padding: 2.5rem 1.5rem 2rem;
   flex: 1;
+}
+
+@media (min-width: 1024px) {
+  .tracks {
+    padding: 3rem 2.5rem 2rem;
+  }
 }
 
 .exam {
@@ -364,7 +376,13 @@
 .exam__tracks {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(18.5rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
+}
+
+@media (min-width: 1280px) {
+  .exam__tracks {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .track {
@@ -495,9 +513,9 @@
 }
 
 .tracks-footer {
-  width: min(56rem, 100%);
+  width: min(94rem, 100%);
   margin: 0 auto;
-  padding: 1rem 1.25rem 6.5rem;
+  padding: 1.5rem 1.25rem 6.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -505,6 +523,114 @@
   font-size: 0.86rem;
   color: var(--muted);
   border-top: 1.5px solid var(--border);
+}
+
+@media (min-width: 1024px) {
+  .tracks-footer {
+    padding: 2rem 2.5rem 6.5rem;
+  }
+}
+
+/* Homepage Dedicated Resume Lesson Banner */
+.homepage-resume-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.15rem 1.5rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  flex-wrap: wrap;
+}
+
+.homepage-resume-banner:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.homepage-resume-banner__left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 14rem;
+}
+
+.homepage-resume-banner__icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-full);
+  background: var(--primary-subtle);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.homepage-resume-banner__icon svg {
+  fill: currentColor;
+}
+
+.homepage-resume-banner__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.homepage-resume-banner__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.homepage-resume-banner__title {
+  margin: 0;
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.homepage-resume-banner__meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.homepage-resume-banner__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.4rem;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: #ffffff !important;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 14px -2px rgba(37, 99, 235, 0.4);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.homepage-resume-banner__btn svg {
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.homepage-resume-banner__btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
 }
 
 .tracks-footer__stats {

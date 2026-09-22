@@ -1,7 +1,13 @@
 .analytics-screen {
-  width: min(52rem, 100%);
+  width: min(94rem, 100%);
   margin: 0 auto;
   padding: 1.5rem 1.25rem 6.5rem;
+}
+
+@media (min-width: 1024px) {
+  .analytics-screen {
+    padding: 2.5rem 2.5rem 6.5rem;
+  }
 }
 
 .analytics-header__top {

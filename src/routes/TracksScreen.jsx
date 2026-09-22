@@ -5,6 +5,7 @@ import {
   FileTextIcon,
   SparklesIcon,
   TrophyIcon,
+  ZapIcon,
 } from '../components/icons.jsx'
 import HeroSection from '../components/HeroSection.jsx'
 import FeatureCard from '../components/FeatureCard.jsx'
@@ -160,6 +161,39 @@ export default function TracksScreen() {
             </div>
           </Link>
         </div>
+
+        {/* Dedicated Resume Lesson Banner - prominent & high-contrast across all themes */}
+        {resumeInfo && resumeInfo.track && (
+          <div className="homepage-resume-banner" role="region" aria-label="Resume Active Lesson">
+            <div className="homepage-resume-banner__left">
+              <div className="homepage-resume-banner__icon">
+                <ZapIcon width="20" height="20" />
+              </div>
+              <div className="homepage-resume-banner__info">
+                <div className="homepage-resume-banner__tag">
+                  <span>{resumeInfo.isNew ? 'Recommended Next' : 'Active Lesson'}</span>
+                  <span>·</span>
+                  <span>{Math.round((resumeInfo.doneCount / (resumeInfo.totalCount || 1)) * 100)}% Complete</span>
+                </div>
+                <strong className="homepage-resume-banner__title">
+                  {resumeInfo.lesson?.title ?? 'Lesson 1'} — {resumeInfo.track.title}
+                </strong>
+                <span className="homepage-resume-banner__meta">
+                  {resumeInfo.doneCount} of {resumeInfo.totalCount} lessons completed
+                </span>
+              </div>
+            </div>
+
+            <Link
+              to={resumeInfo.lesson ? `/lesson/${resumeInfo.lesson.id}` : `/track/${resumeInfo.track.id}`}
+              className="homepage-resume-banner__btn"
+            >
+              <ZapIcon width="16" height="16" />
+              <span>{resumeInfo.isNew ? 'Start Lesson' : 'Resume Lesson'}</span>
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        )}
 
         {/* Exam Category Segmented Tabs */}
         <div className="exam-filter-bar" role="tablist" aria-label="Exam Track Filters">

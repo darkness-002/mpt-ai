@@ -1,7 +1,14 @@
 .planner-page {
-  max-width: 52rem;
+  width: min(94rem, 100%);
+  max-width: 94rem;
   margin: 0 auto;
   padding: 1.5rem 1.25rem 6rem;
+}
+
+@media (min-width: 1024px) {
+  .planner-page {
+    padding: 2.5rem 2.5rem 6.5rem;
+  }
 }
 
 .planner-header {

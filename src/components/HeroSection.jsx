@@ -61,15 +61,27 @@ export default function HeroSection({
             {resumeInfo && resumeInfo.lesson ? (
               <Link
                 to={`/lesson/${resumeInfo.lesson.id}`}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm bg-primary-600 hover:bg-primary-700 active:scale-[0.98] text-white shadow-[0_4px_16px_-2px_rgba(37,99,235,0.35)] transition-all"
+                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full font-bold text-sm text-white transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                style={{
+                  background: 'var(--primary)',
+                  boxShadow: '0 4px 16px -2px rgba(37,99,235,0.4)',
+                  color: '#ffffff',
+                }}
               >
                 <ZapIcon width="16" height="16" className="fill-current text-white shrink-0" />
-                <span>Resume Lesson ({resumeInfo.track.title})</span>
+                <span>
+                  {resumeInfo.isNew ? 'Start Lesson 1' : 'Resume Lesson'} · {resumeInfo.track.title}
+                </span>
               </Link>
             ) : (
               <Link
                 to="/daily"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm bg-primary-600 hover:bg-primary-700 active:scale-[0.98] text-white shadow-[0_4px_16px_-2px_rgba(37,99,235,0.35)] transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-bold text-sm text-white transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                style={{
+                  background: 'var(--primary)',
+                  boxShadow: '0 4px 16px -2px rgba(37,99,235,0.4)',
+                  color: '#ffffff',
+                }}
               >
                 <SparklesIcon width="16" height="16" className="text-white shrink-0" />
                 <span>Start Daily Sprint</span>
@@ -78,20 +90,37 @@ export default function HeroSection({
 
             <Link
               to="/drill"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-full font-semibold text-sm bg-[#f5f5f3] dark:bg-[#13151f] hover:bg-[#ebebe8] dark:hover:bg-[#1a1d2b] text-zinc-800 dark:text-zinc-200 border border-black/[0.08] dark:border-white/[0.1] transition-all"
+              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-full font-semibold text-sm transition-all hover:-translate-y-0.5"
+              style={{
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                border: '1.5px solid var(--border)',
+              }}
             >
-              <TargetIcon width="15" height="15" className="shrink-0 text-current" />
+              <TargetIcon width="15" height="15" className="shrink-0" style={{ color: 'var(--primary)' }} />
               <span>Custom Drill</span>
             </Link>
 
             <Link
               to="/mistakes"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-full font-medium text-sm text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-full font-semibold text-sm transition-all hover:-translate-y-0.5"
+              style={{
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                border: '1.5px solid var(--border)',
+              }}
             >
-              <FlameIcon width="15" height="15" className="text-amber-600 dark:text-amber-400 shrink-0" />
+              <FlameIcon width="15" height="15" className="shrink-0" style={{ color: 'var(--gold-dark)' }} />
               <span>Review Mistakes</span>
               {dueMistakesCount > 0 && (
-                <span className="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/20">
+                <span
+                  className="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold rounded-full"
+                  style={{
+                    background: 'var(--red-subtle)',
+                    color: 'var(--red)',
+                    border: '1px solid var(--red)',
+                  }}
+                >
                   {dueMistakesCount}
                 </span>
               )}
@@ -99,21 +128,24 @@ export default function HeroSection({
           </div>
 
           {/* Micro-Metrics Bar */}
-          <div className="mt-8 pt-6 border-t border-black/[0.06] dark:border-white/[0.08] flex flex-wrap items-center gap-6 sm:gap-10 text-xs text-zinc-600 dark:text-zinc-400">
+          <div
+            className="mt-8 pt-6 border-t flex flex-wrap items-center gap-6 sm:gap-10 text-xs"
+            style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
+          >
             <div>
-              <strong className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{streakData.currentStreak}</strong>
+              <strong className="text-sm font-bold" style={{ color: 'var(--text)' }}>{streakData.currentStreak}</strong>
               <span className="ml-1.5">Day Streak</span>
             </div>
             <div>
-              <strong className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{streakData.todayCount}/{streakData.goal}</strong>
+              <strong className="text-sm font-bold" style={{ color: 'var(--text)' }}>{streakData.todayCount}/{streakData.goal}</strong>
               <span className="ml-1.5">MCQs Today</span>
             </div>
             <div>
-              <strong className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{totalQuestions}+</strong>
+              <strong className="text-sm font-bold" style={{ color: 'var(--text)' }}>{totalQuestions}+</strong>
               <span className="ml-1.5">Questions</span>
             </div>
             <div>
-              <strong className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{totalCleared}</strong>
+              <strong className="text-sm font-bold" style={{ color: 'var(--text)' }}>{totalCleared}</strong>
               <span className="ml-1.5">Cleared Units</span>
             </div>
           </div>
@@ -121,13 +153,29 @@ export default function HeroSection({
 
         {/* Right Column (5 cols): Asymmetric Live Diagnostic / Next Focus Card */}
         <div className="lg:col-span-5">
-          <div className="relative p-7 rounded-2xl bg-[#f5f5f3] dark:bg-[#13151f] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_4px_20px_-2px_rgba(12,13,17,0.03),0_0_3px_rgba(12,13,17,0.02),0_12px_32px_-4px_rgba(12,13,17,0.05)]">
+          <div
+            className="relative p-7 rounded-2xl border shadow-diffused transition-all"
+            style={{
+              background: 'var(--surface)',
+              borderColor: 'var(--border)',
+            }}
+          >
             {/* Header pill */}
             <div className="flex items-center justify-between gap-2 mb-4">
-              <span className="text-[11px] font-semibold tracking-wider uppercase text-zinc-500 dark:text-zinc-400">
-                Active Study Focus
+              <span
+                className="text-[11px] font-bold tracking-wider uppercase"
+                style={{ color: 'var(--primary)' }}
+              >
+                ⚡ Active Study Focus
               </span>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+              <span
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                style={{
+                  background: 'var(--green-subtle)',
+                  color: 'var(--green-dark)',
+                  border: '1px solid var(--green)',
+                }}
+              >
                 PWA Offline Ready
               </span>
             </div>
@@ -135,10 +183,16 @@ export default function HeroSection({
             {/* Focus Card Body */}
             {resumeInfo && resumeInfo.track ? (
               <div>
-                <h3 className="font-['Space_Grotesk'] text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                <h3
+                  className="font-['Space_Grotesk'] text-xl font-bold tracking-tight"
+                  style={{ color: 'var(--text)' }}
+                >
                   {resumeInfo.track.title}
                 </h3>
-                <p className="mt-1.5 text-xs text-zinc-600 dark:text-zinc-400">
+                <p
+                  className="mt-1.5 text-xs font-medium"
+                  style={{ color: 'var(--muted)' }}
+                >
                   {resumeInfo.isNew
                     ? `Ready to begin: ${resumeInfo.lesson?.title ?? 'Lesson 1'}`
                     : `Next Up: ${resumeInfo.lesson?.title ?? 'Next Unit'}`}
@@ -146,63 +200,105 @@ export default function HeroSection({
 
                 {/* Progress bar */}
                 <div className="mt-4">
-                  <div className="flex justify-between text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">
+                  <div
+                    className="flex justify-between text-xs font-semibold mb-1.5"
+                    style={{ color: 'var(--muted)' }}
+                  >
                     <span>Course Progress</span>
-                    <span>{Math.round((resumeInfo.doneCount / (resumeInfo.totalCount || 1)) * 100)}%</span>
+                    <span style={{ color: 'var(--text)' }}>
+                      {Math.round((resumeInfo.doneCount / (resumeInfo.totalCount || 1)) * 100)}%
+                    </span>
                   </div>
-                  <div className="h-1.5 w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-2 w-full rounded-full overflow-hidden"
+                    style={{ background: 'var(--surface-3)' }}
+                  >
                     <div
-                      className="h-full bg-primary-600 dark:bg-primary-500 rounded-full"
+                      className="h-full rounded-full transition-all duration-300"
                       style={{
                         width: `${Math.round((resumeInfo.doneCount / (resumeInfo.totalCount || 1)) * 100)}%`,
+                        background: 'var(--primary)',
                       }}
                     />
                   </div>
                 </div>
 
-                <div className="mt-5 flex items-center justify-between pt-4 border-t border-black/[0.05] dark:border-white/[0.06]">
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                <div
+                  className="mt-5 flex items-center justify-between pt-4 border-t"
+                  style={{ borderColor: 'var(--border)' }}
+                >
+                  <span className="text-xs" style={{ color: 'var(--muted)' }}>
                     {resumeInfo.doneCount} of {resumeInfo.totalCount} lessons completed
                   </span>
                   <Link
                     to={resumeInfo.lesson ? `/lesson/${resumeInfo.lesson.id}` : `/track/${resumeInfo.track.id}`}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-primary-600 hover:bg-primary-700 text-white shadow-sm transition-all"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold text-white shadow-sm transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                    style={{ background: 'var(--primary)', color: '#ffffff' }}
                   >
-                    <ZapIcon width="13" height="13" className="fill-current text-white shrink-0" />
-                    <span>Continue</span>
+                    <ZapIcon width="14" height="14" className="fill-current text-white shrink-0" />
+                    <span>{resumeInfo.isNew ? 'Start Lesson' : 'Resume Lesson'}</span>
                     <span aria-hidden="true">→</span>
                   </Link>
                 </div>
               </div>
             ) : (
               <div>
-                <h3 className="font-['Space_Grotesk'] text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                <h3
+                  className="font-['Space_Grotesk'] text-xl font-bold tracking-tight"
+                  style={{ color: 'var(--text)' }}
+                >
                   Daily Practice Challenge
                 </h3>
-                <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>
                   Solve 10 mixed MCQs daily to reinforce memory and build streak momentum.
                 </p>
 
-                <div className="mt-5 p-4 rounded-xl bg-zinc-200/40 dark:bg-zinc-800/40 border border-black/[0.04] dark:border-white/[0.05]">
-                  <div className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
+                <div
+                  className="mt-5 p-4 rounded-xl border"
+                  style={{
+                    background: 'var(--surface-2)',
+                    borderColor: 'var(--border)',
+                  }}
+                >
+                  <div
+                    className="text-[11px] font-bold uppercase tracking-wider mb-1"
+                    style={{ color: 'var(--muted)' }}
+                  >
                     Sample Diagnostic MCQ
                   </div>
-                  <p className="text-xs font-medium text-zinc-800 dark:text-zinc-200 leading-snug">
+                  <p
+                    className="text-xs font-medium leading-snug"
+                    style={{ color: 'var(--text)' }}
+                  >
                     Which mountain pass connects Chitral with Gilgit-Baltistan in northern Pakistan?
                   </p>
                   <div className="mt-2.5 flex items-center gap-2">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-500/10 text-primary-700 dark:text-primary-300">
+                    <span
+                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                      style={{
+                        background: 'var(--primary-subtle)',
+                        color: 'var(--primary)',
+                      }}
+                    >
                       Shandur Pass
                     </span>
-                    <span className="text-[10px] text-zinc-500 dark:text-zinc-400">· General Knowledge</span>
+                    <span className="text-[10px]" style={{ color: 'var(--muted)' }}>
+                      · General Knowledge
+                    </span>
                   </div>
                 </div>
 
-                <div className="mt-5 flex items-center justify-between pt-4 border-t border-black/[0.05] dark:border-white/[0.06]">
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400">10 questions · 5 mins</span>
+                <div
+                  className="mt-5 flex items-center justify-between pt-4 border-t"
+                  style={{ borderColor: 'var(--border)' }}
+                >
+                  <span className="text-xs" style={{ color: 'var(--muted)' }}>
+                    10 questions · 5 mins
+                  </span>
                   <Link
                     to="/daily"
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-primary-600 hover:bg-primary-700 text-white shadow-sm transition-all"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-white shadow-sm transition-all transform hover:-translate-y-0.5"
+                    style={{ background: 'var(--primary)', color: '#ffffff' }}
                   >
                     <SparklesIcon width="13" height="13" className="text-white shrink-0" />
                     <span>Start Drill</span>

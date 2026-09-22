@@ -1,10 +1,17 @@
 .mistakes-screen {
-  max-width: 52rem;
+  width: min(80rem, 100%);
+  max-width: 80rem;
   margin: 0 auto;
   padding: 1.5rem 1.25rem 6.5rem;
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+}
+
+@media (min-width: 1024px) {
+  .mistakes-screen {
+    padding: 2.5rem 2.5rem 6.5rem;
+  }
 }
 
 .mistakes-screen__top {

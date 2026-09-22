@@ -1,8 +1,14 @@
 /* Custom Drill Container */
 .custom-drill {
-  width: min(48rem, 100%);
+  width: min(72rem, 100%);
   margin: 0 auto;
   padding: 1.25rem 1.25rem calc(6.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 1024px) {
+  .custom-drill {
+    padding: 2.5rem 2.5rem calc(6.5rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .custom-drill__top {
