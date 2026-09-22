@@ -54,8 +54,8 @@
   width: 5rem;
   height: 5rem;
   border-radius: 50%;
-  background: var(--purple-subtle);
-  color: var(--purple);
+  background: var(--gold-subtle);
+  color: var(--gold-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -192,7 +192,7 @@
   display: inline-block;
   font-size: 0.75rem;
   font-weight: 800;
-  color: var(--purple);
+  color: var(--primary);
   text-transform: uppercase;
   margin-bottom: 0.75rem;
 }
@@ -229,7 +229,7 @@
 
 .arena-choice-btn:hover {
   background: var(--surface-3);
-  border-color: var(--purple);
+  border-color: var(--primary);
   transform: translateY(-2px);
 }
 

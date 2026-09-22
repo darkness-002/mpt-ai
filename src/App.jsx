@@ -20,9 +20,27 @@ export default function App() {
   const [showFocus, setShowFocus] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
-  // Initialize theme & typography settings on app launch
+  // Initialize theme & typography settings on app launch and follow OS theme changes
   useEffect(() => {
     settingsStore.apply(settingsStore.load())
+
+    const media = window.matchMedia?.('(prefers-color-scheme: dark)')
+    if (!media) return undefined
+
+    const handler = () => {
+      const current = settingsStore.load()
+      if (current.theme === 'system') {
+        settingsStore.apply(current)
+      }
+    }
+
+    if (media.addEventListener) {
+      media.addEventListener('change', handler)
+      return () => media.removeEventListener('change', handler)
+    } else if (media.addListener) {
+      media.addListener(handler)
+      return () => media.removeListener(handler)
+    }
   }, [])
 
   // Global Ctrl+K / Cmd+K listener for instant search

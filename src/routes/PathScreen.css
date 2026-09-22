@@ -191,8 +191,8 @@
 .mock-launcher-card {
   margin-top: 1.25rem;
   padding: 1.35rem 1.45rem;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--purple) 14%, var(--surface)), var(--surface));
-  border: 1.5px solid color-mix(in srgb, var(--purple) 35%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--teal) 12%, var(--surface)), var(--surface));
+  border: 1.5px solid color-mix(in srgb, var(--teal) 35%, var(--border));
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
@@ -211,7 +211,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--purple), var(--blue));
+  background: linear-gradient(90deg, var(--teal), var(--primary));
 }
 
 .mock-launcher-card__info {
@@ -230,7 +230,7 @@
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--purple);
+  color: var(--teal-dark);
 }
 
 .mock-launcher-card h3 {
@@ -247,8 +247,8 @@
 }
 
 .mock-launcher-btn {
-  background: var(--purple);
-  box-shadow: 0 var(--shadow-press) 0 #6d28d9, var(--shadow-sm);
+  background: var(--teal);
+  box-shadow: 0 var(--shadow-press) 0 var(--teal-dark), var(--shadow-sm);
   white-space: nowrap;
 }
 

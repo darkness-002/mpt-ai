@@ -21,7 +21,7 @@
 }
 
 .search-input-icon {
-  color: var(--muted);
+  color: var(--text-body);
   flex-shrink: 0;
 }
 
@@ -37,12 +37,12 @@
 }
 
 .search-input::placeholder {
-  color: var(--muted-light);
+  color: var(--muted);
   font-weight: 500;
 }
 
 .search-close-btn {
-  color: var(--muted);
+  color: var(--text-body);
 }
 
 .search-results-list {
@@ -76,9 +76,9 @@
 .search-result-icon {
   width: 2rem;
   height: 2rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   background: var(--surface-3);
-  color: var(--blue);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -151,7 +151,7 @@ export default function BottomNav() {
               </NavLink>
 
               <NavLink to="/speed-run" className="more-menu-tile" onClick={() => setShowMoreMenu(false)}>
-                <div className="tile-icon-wrap is-purple">
+                <div className="tile-icon-wrap is-teal">
                   <ZapIcon width="20" height="20" />
                 </div>
                 <div className="tile-text">

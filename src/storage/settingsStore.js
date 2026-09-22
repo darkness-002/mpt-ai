@@ -55,6 +55,21 @@ export const settingsStore = {
       root.setAttribute('data-theme', settings.theme)
     }
 
+    const isSystemDark =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-color-scheme: dark)').matches
+
+    const isDark =
+      settings.theme === THEMES.DARK ||
+      settings.theme === THEMES.OLED ||
+      (settings.theme === THEMES.SYSTEM && isSystemDark)
+
+    if (isDark) {
+      root.classList.add('dark')
+    } else {
+      root.classList.remove('dark')
+    }
+
     // Font scaling
     root.style.setProperty('--font-scale', `${settings.fontScale ?? 1.0}`)
   },

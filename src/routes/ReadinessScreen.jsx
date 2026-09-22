@@ -200,7 +200,7 @@ export default function ReadinessScreen() {
             <strong className="pillar-value">{diagnosis.streakPct}%</strong>
           </div>
           <div className="pillar-bar">
-            <div className="pillar-bar-fill" style={{ width: `${diagnosis.streakPct}%`, background: 'var(--purple)' }} />
+            <div className="pillar-bar-fill" style={{ width: `${diagnosis.streakPct}%`, background: 'var(--teal)' }} />
           </div>
           <span className="pillar-desc">Daily practice streak discipline</span>
         </div>

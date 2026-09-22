@@ -94,8 +94,8 @@ export function CloseIcon(props) {
 export function BookIcon(props) {
   return (
     <svg {...base} {...props}>
-      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5z" />
-      <path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H19v3H6.5A2.5 2.5 0 0 1 4 20.5z" />
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
     </svg>
   )
 }
@@ -175,7 +175,7 @@ export function MaximizeIcon(props) {
 
 export function ZapIcon(props) {
   return (
-    <svg {...base} {...props}>
+    <svg {...base} fill="currentColor" stroke="currentColor" strokeWidth={1} {...props}>
       <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
     </svg>
   )

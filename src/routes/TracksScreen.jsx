@@ -3,13 +3,11 @@ import { Link } from 'react-router-dom'
 import {
   CardsIcon,
   FileTextIcon,
-  FlameIcon,
   SparklesIcon,
-  StarIcon,
-  TargetIcon,
   TrophyIcon,
-  ZapIcon,
 } from '../components/icons.jsx'
+import HeroSection from '../components/HeroSection.jsx'
+import FeatureCard from '../components/FeatureCard.jsx'
 
 import { useContent } from '../content/contentContext.js'
 import { useInstallPrompt } from '../lib/useInstallPrompt.js'
@@ -108,75 +106,17 @@ export default function TracksScreen() {
 
   return (
     <div className="tracks-page">
-      {/* Hero Streak & Practice Stats */}
+      {/* Hero Section with Asymmetrical 7/5 Layout & Anti-Generic Aesthetic */}
       <div className="tracks-hero">
-        {canInstall && (
-          <div className="install-banner">
-            <span>Install MPT-AI to your device for rapid offline access.</span>
-            <button className="btn btn--small btn--primary" type="button" onClick={install}>
-              Install App
-            </button>
-          </div>
-        )}
-
-        {/* Daily Streak & Practice Stats Ribbon */}
-        <div className="streak-bar">
-          <div className="streak-bar__item">
-            <div className="streak-flame-disc">
-              <FlameIcon width="20" height="20" />
-            </div>
-            <div className="streak-info">
-              <span className="streak-title">
-                <strong>{streakData.currentStreak}</strong> Day Streak
-              </span>
-              <span className="streak-subtitle">
-                {streakData.todayCount}/{streakData.goal} MCQs solved today
-              </span>
-            </div>
-          </div>
-
-          <div className="streak-bar__links">
-            <Link className="chip chip--accent" to="/drill">
-              <TargetIcon width="14" height="14" /> Custom Drill
-            </Link>
-            <Link className="chip" to="/mistakes">
-              <FlameIcon width="14" height="14" style={{ color: 'var(--gold)' }} /> Mistakes
-              {dueMistakesCount > 0 && <span className="chip__badge">{dueMistakesCount}</span>}
-            </Link>
-            <Link className="chip" to="/bookmarks">
-              <StarIcon width="14" height="14" style={{ color: 'var(--gold)' }} /> Starred
-            </Link>
-          </div>
-        </div>
-
-
-        {/* Hero Resume Practice Banner */}
-        {resumeInfo && resumeInfo.track && (
-          <div className="resume-hero-card">
-            <div className="resume-hero-card__content">
-              <span className="resume-pill">
-                <ZapIcon width="13" height="13" /> {resumeInfo.isNew ? 'Get Started' : 'Continue Studying'}
-              </span>
-              <h2 className="resume-title">{resumeInfo.track.title}</h2>
-              <p className="resume-subtitle">
-                {resumeInfo.isNew
-                  ? `Begin with Lesson 1: ${resumeInfo.lesson?.title ?? 'First Unit'}`
-                  : `Next Up: ${resumeInfo.lesson?.title ?? 'Unit Lesson'} (${resumeInfo.doneCount}/${resumeInfo.totalCount} completed)`}
-              </p>
-            </div>
-            <div className="resume-hero-card__action">
-              {resumeInfo.lesson ? (
-                <Link className="btn btn--primary" to={`/lesson/${resumeInfo.lesson.id}`}>
-                  Resume Lesson →
-                </Link>
-              ) : (
-                <Link className="btn btn--primary" to={`/track/${resumeInfo.track.id}`}>
-                  View Track →
-                </Link>
-              )}
-            </div>
-          </div>
-        )}
+        <HeroSection
+          streakData={streakData}
+          resumeInfo={resumeInfo}
+          totalQuestions={totalQuestions}
+          totalCleared={totalCompletedLessons}
+          onInstall={install}
+          canInstall={canInstall}
+          dueMistakesCount={dueMistakesCount}
+        />
 
         {/* Quick Study Modes Grid */}
         <div className="quick-modes-grid">
@@ -210,7 +150,7 @@ export default function TracksScreen() {
             </div>
           </Link>
 
-          <Link to="/papers" className="quick-mode-card quick-mode-card--purple">
+          <Link to="/papers" className="quick-mode-card quick-mode-card--teal">
             <div className="quick-mode-icon">
               <FileTextIcon width="18" height="18" />
             </div>
@@ -278,45 +218,41 @@ export default function TracksScreen() {
                   const isCompleted = done === track.lessonCount && track.lessonCount > 0
 
                   return (
-                    <Link className="track" to={`/track/${track.id}`} key={track.id}>
-                      <div className="track__top">
-                        <div className="track__title-wrap">
-                          <h3>{track.title}</h3>
-                          <span className="track__exam-tag">{exam.title}</span>
-                        </div>
-                        {isCompleted ? (
-                          <span className="track__badge track__badge--completed">Completed</span>
-                        ) : percent > 0 ? (
-                          <span className="track__badge track__badge--progress">{percent}%</span>
-                        ) : (
-                          <span className="track__badge">{track.units.length} Subjects</span>
-                        )}
-                      </div>
-
-                      <p className="track__tagline">{track.tagline}</p>
-
-                      {track.blueprint && (
-                        <div className="track__rules-pill">
-                          <span>{track.blueprint.totalMcqs} MCQs · {track.blueprint.minutes} mins</span>
-                          <span>
-                            {track.blueprint.negativeMarking > 0
-                              ? `-${track.blueprint.negativeMarking} wrong`
-                              : 'No negative marking'}
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="track__bar">
-                        <span style={{ width: `${percent}%` }} />
-                      </div>
-
-                      <div className="track__meta">
-                        <span>
-                          <strong>{done}/{track.lessonCount}</strong> lessons
-                        </span>
-                        <span>{track.questionCount} Questions</span>
-                      </div>
-                    </Link>
+                    <FeatureCard
+                      key={track.id}
+                      to={`/track/${track.id}`}
+                      title={track.title}
+                      category={exam.title}
+                      tagline={track.tagline}
+                      metric={
+                        track.blueprint
+                          ? `${track.blueprint.totalMcqs} MCQs · ${track.blueprint.minutes} mins · ${
+                              track.blueprint.negativeMarking > 0
+                                ? `-${track.blueprint.negativeMarking} wrong`
+                                : 'No negative marking'
+                            }`
+                          : null
+                      }
+                      badge={
+                        isCompleted
+                          ? 'Completed'
+                          : percent > 0
+                          ? `${percent}%`
+                          : `${track.units.length} Subjects`
+                      }
+                      badgeVariant={
+                        isCompleted
+                          ? 'success'
+                          : percent > 0
+                          ? 'primary'
+                          : 'neutral'
+                      }
+                      progress={percent}
+                      stats={[
+                        { label: 'lessons cleared', value: `${done}/${track.lessonCount}` },
+                        { label: 'questions', value: track.questionCount },
+                      ]}
+                    />
                   )
                 })}
               </div>

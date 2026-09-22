@@ -192,11 +192,56 @@ A complete UI/UX layout transformation has been performed—introducing a persis
 - **`mpt_ai_focus` (`localStorage`)**: Pomodoro session history and daily study minutes.
 - **`mpt_ai_settings` (`localStorage`)**: Color theme, typography scale, sound/haptic toggles, and target exam goal.
 
+- **`mpt_ai_streak` (`localStorage`)**: Daily solved questions and consecutive active-day streak count.
+- **`mpt_ai_daily_sprints` (`localStorage`)**: Calendar-dated record of completed daily sprints and scores.
+- **`mpt_ai_focus` (`localStorage`)**: Pomodoro session history and daily study minutes.
+- **`mpt_ai_settings` (`localStorage`)**: Color theme, typography scale, sound/haptic toggles, and target exam goal.
+
 ---
 
-## 8. Verification & Test Metrics
+## 8. Anti-Generic Design System & Standalone Admin Portal
 
-- **Oxlint**: `0 errors` across 75 files (`npm run lint`).
+### A. Standalone Examiner & Admin Portal (`/admin`)
+- Decoupled `/admin` from the candidate navigation hierarchy into a standalone, distraction-free examiner workstation.
+- Added **Console Lock Mode** with PIN-protected unlock screen for sensitive question editing sessions.
+- Added independent dark/light mode toggle and exit link returning directly to student practice.
+
+### B. Foundational Anti-Generic Design Constraints
+- **Color Restrictions**: Pure black (`#000000`) and pure white (`#FFFFFF`) are strictly banned across all styles.
+  - **Ground**: Warm porcelain off-white (`#FAFAF9` / stone-50) for light mode, deep carbon slate (`#0C0D12` / slate-950) for dark mode.
+  - **Surfaces**: Toned off-white mineral surfaces (`#F5F5F3`) and dark slate panels (`#13151F`).
+- **Brand Palette**: Custom mineral primary scale (Lapis / Deep Cobalt, `primary-50` through `primary-950`, key: `#4F46E5` / `#3730A3`), completely eliminating default generic AI indigo/blue scales.
+- **Shadow System**: Overrode harsh, abrupt box shadows with multi-layered `shadow-diffused` ambient utilities (`0 4px 20px -2px rgba(12,13,17,0.03), 0 0 3px rgba(12,13,17,0.02), 0 12px 32px -4px rgba(12,13,17,0.05)`).
+- **Typography & Rhythm**:
+  - Headings: `Space Grotesk` with tight negative letter tracking (`tracking-tight` / `-0.03em`) and tight line height (`1.15`).
+  - Body: `Plus Jakarta Sans` with `text-zinc-700` (`#3F3F46`) to actively eliminate visual fatigue.
+- **Strict Geometric Rules**:
+  - `rounded-2xl` strictly enforced across all cards, containers, dialogs, and modals.
+  - `rounded-full` strictly enforced across all badges, pills, buttons, and segmented tabs.
+  - Hairline borders (`border-black/[0.06]` in light mode, `border-white/[0.08]` in dark mode).
+- **Asymmetric Layouts & Whitespace**:
+  - Broke rigid center symmetry with left-aligned editorial typography and asymmetric 7-col / 5-col grid splits.
+  - Doubled breathing room and container whitespace.
+
+### C. Refactored Core Components & Icon Visibility
+- **`src/components/HeroSection.jsx`**:
+  - Removed technical category pill element from above the headline.
+  - Simplified headline and subtitle to human, punchy marketing copy:
+    - Headline: *"Pass your screening exam with confidence."*
+    - Subtitle: *"Practice real past questions, conquer tricky topics in minutes, and track your daily streak — 100% offline."*
+  - Enhanced CTA button contrast: Solid white icons (`ZapIcon`, `SparklesIcon`) on royal cobalt buttons with high-contrast pills.
+- **Icon Contrast & Visibility System Across All Themes**:
+  - Upgraded `BookIcon` in `src/components/icons.jsx` to a clean, balanced open-book vector (`M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z / M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z`), ensuring full clarity in bottom navigation and header badges.
+  - Upgraded `ZapIcon` to use `fill="currentColor" stroke="currentColor"` for a solid, crisp lightning bolt that never washes out against light backgrounds.
+  - Configured `@custom-variant dark (&:where(.dark, .dark *));` in `src/index.css` and updated `src/storage/settingsStore.js` to toggle the `.dark` class on `<html>`. This completely resolved the issue where Tailwind's `dark:` classes stayed active in light/sepia modes when the user's OS had dark mode enabled.
+  - Added zero-flicker theme bootstrap script to `<head>` in `index.html`.
+- **`src/components/FeatureCard.jsx`**: Reusable feature and track card adhering to strict `rounded-2xl` geometry, subtle hairline borders, and diffused shadows.
+
+---
+
+## 9. Verification & Test Metrics
+
+- **Oxlint**: `0 errors` across 78 files (`npm run lint`).
 - **Vitest**: `55 passed / 55 tests` across 16 test files (`npm test`):
   1. `test/questionModel.test.js` (12 tests)
   2. `test/paperGenerator.test.js` (3 tests)
@@ -214,4 +259,4 @@ A complete UI/UX layout transformation has been performed—introducing a persis
   14. `test/analytics.test.js` (2 tests)
   15. `test/dailyStore.test.js` (1 test)
   16. `test/settingsAndParser.test.js` (4 tests)
-- **Vite Build**: Production bundle built cleanly in ~796ms, 49 precached assets for offline PWA operation (`npm run build`).
+- **Vite Build**: Production bundle built cleanly in ~659ms, 49 precached assets for offline PWA operation (`npm run build`).

@@ -111,8 +111,8 @@
 .lesson__directive {
   font-size: 0.85rem;
   font-weight: 800;
-  color: var(--purple);
-  background: var(--purple-subtle);
+  color: var(--primary);
+  background: var(--primary-subtle);
   padding: 0.35rem 0.75rem;
   border-radius: var(--radius-sm);
   display: inline-block;

@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     react(),
     VitePWA({
       registerType: 'autoUpdate',
@@ -12,9 +14,9 @@ export default defineConfig({
       manifest: {
         name: 'MPT-AI - CSS Preliminary Test Trainer',
         short_name: 'MPT-AI',
-        description: 'Duolingo-style practice for the FPSC CSS MCQ-based Preliminary Test.',
-        theme_color: '#58cc02',
-        background_color: '#ffffff',
+        description: 'High-yield practice for the FPSC CSS MCQ-based Preliminary Test.',
+        theme_color: '#2563eb',
+        background_color: '#fafaf9',
         display: 'standalone',
         start_url: '/',
         scope: '/',

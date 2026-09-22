@@ -145,7 +145,7 @@ export default function SpeedRunScreen() {
           <span>Curriculum</span>
         </Link>
         <div className="speedrun-title-wrap">
-          <ZapIcon width="24" height="24" style={{ color: 'var(--purple)' }} />
+          <ZapIcon width="24" height="24" style={{ color: 'var(--gold-dark)' }} />
           <h1>60-Second Speed Run</h1>
         </div>
       </div>
