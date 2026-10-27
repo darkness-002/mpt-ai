@@ -12,12 +12,14 @@ export function evaluatePermissions(role, profile = null) {
   const isEditor = isAdmin || role === 'editor'
   const isReviewer = isAdmin || role === 'reviewer'
   const isContributor = isAdmin || role === 'contributor' || isEditor
+  const isStaff = isAdmin || isEditor || isReviewer || role === 'contributor'
 
   return {
     isAdmin,
     isEditor,
     isReviewer,
     isContributor,
+    isStaff,
     canAddQuestion: (categoryId) => {
       if (isAdmin || isEditor) return true
       if (isContributor) {

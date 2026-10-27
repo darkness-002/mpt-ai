@@ -106,6 +106,21 @@
   font-weight: 700;
 }
 
+.header-nav-link--admin {
+  color: var(--primary);
+  background: var(--primary-subtle);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 700;
+}
+
+.header-nav-link--admin:hover {
+  background: var(--primary);
+  color: #ffffff;
+}
+
 @media (max-width: 859px) {
   .header-desktop-nav {
     display: none;
@@ -208,6 +223,126 @@
   color: var(--primary);
   border-color: var(--border-strong);
 }
+
+/* Public Student Auth Button */
+.header-auth-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.8rem;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.header-auth-btn:hover {
+  background: var(--primary-subtle);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.header-auth-btn svg {
+  color: var(--primary);
+}
+
+/* Admin / Staff Header Badge Button */
+.header-admin-badge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--primary-subtle);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.65rem;
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.header-admin-badge-btn:hover {
+  background: var(--primary);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+
+.header-admin-badge-btn svg {
+  flex-shrink: 0;
+}
+
+/* Logged-In User Profile Pill */
+.header-user-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.65rem 0.25rem 0.35rem;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  max-width: 11rem;
+}
+
+.header-user-btn:hover {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+
+.header-user-avatar {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-user-email {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 640px) {
+  .header-auth-btn__text {
+    display: none;
+  }
+  .header-auth-btn {
+    padding: 0.4rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    justify-content: center;
+  }
+  .header-user-email {
+    display: none;
+  }
+  .header-user-btn {
+    padding: 0.25rem;
+  }
+}
+
 
 .header-nav-link--lab {
   background: var(--primary-subtle);

@@ -13,6 +13,12 @@ EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
 
+DO $$ BEGIN
+  CREATE TYPE question_status AS ENUM ('pending', 'approved', 'rejected');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
 -- 3. USER PROFILES & RBAC ROLES TABLE
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -194,6 +200,8 @@ CREATE TABLE IF NOT EXISTS public.questions (
   display_order INT NOT NULL DEFAULT 0,
   rtl BOOLEAN NOT NULL DEFAULT false,
   is_reviewed BOOLEAN NOT NULL DEFAULT true,
+  status question_status NOT NULL DEFAULT 'pending',
+  exam_target TEXT[] NOT NULL DEFAULT ARRAY['CSS', 'PMS']::text[],
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
   created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL
@@ -202,6 +210,8 @@ CREATE TABLE IF NOT EXISTS public.questions (
 CREATE INDEX IF NOT EXISTS idx_questions_category_id ON public.questions(category_id);
 CREATE INDEX IF NOT EXISTS idx_questions_lesson_id ON public.questions(lesson_id);
 CREATE INDEX IF NOT EXISTS idx_questions_created_at ON public.questions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_questions_status ON public.questions(status);
+CREATE INDEX IF NOT EXISTS idx_questions_exam_target ON public.questions USING gin(exam_target);
 
 -- 7. USER PROGRESS TABLE
 CREATE TABLE IF NOT EXISTS public.user_progress (
@@ -342,16 +352,24 @@ CREATE POLICY "Contributor can insert categories"
   WITH CHECK (public.is_contributor());
 
 -- ------------------------------------------------------------------------------
--- QUESTIONS POLICIES (RBAC Enforced)
+-- QUESTIONS POLICIES (Draft-to-Live & RBAC Enforced)
+-- Public/Student: Can ONLY SELECT 'approved' questions
 -- Admin: Full access (CRUD)
--- Contributor: Can only INSERT into assigned categories
--- Editor: Can UPDATE existing questions
--- Reviewer: Can review & DELETE questions
+-- Contributor: Can only INSERT pending questions into assigned categories
+-- Editor: Can UPDATE questions
+-- Reviewer: Can UPDATE (approve/reject) and DELETE questions
 -- ------------------------------------------------------------------------------
 DROP POLICY IF EXISTS "Public can view questions" ON public.questions;
-CREATE POLICY "Public can view questions"
+DROP POLICY IF EXISTS "Public can view approved questions" ON public.questions;
+CREATE POLICY "Public can view approved questions"
   ON public.questions FOR SELECT
-  USING (true);
+  USING (
+    status = 'approved'
+    OR public.is_admin()
+    OR public.is_editor()
+    OR public.is_reviewer()
+    OR (public.is_contributor() AND auth.uid() = created_by)
+  );
 
 DROP POLICY IF EXISTS "Admin full access on questions" ON public.questions;
 CREATE POLICY "Admin full access on questions"
@@ -362,13 +380,16 @@ DROP POLICY IF EXISTS "Contributor can INSERT questions" ON public.questions;
 CREATE POLICY "Contributor can INSERT questions"
   ON public.questions FOR INSERT
   WITH CHECK (
-    public.is_contributor() AND public.can_contribute_to_category(category_id)
+    public.is_contributor() 
+    AND public.can_contribute_to_category(category_id)
+    AND (status = 'pending' OR public.is_admin())
   );
 
 DROP POLICY IF EXISTS "Editor can UPDATE questions" ON public.questions;
-CREATE POLICY "Editor can UPDATE questions"
+DROP POLICY IF EXISTS "Reviewer and Editor can UPDATE questions" ON public.questions;
+CREATE POLICY "Reviewer and Editor can UPDATE questions"
   ON public.questions FOR UPDATE
-  USING (public.is_editor());
+  USING (public.is_editor() OR public.is_reviewer());
 
 DROP POLICY IF EXISTS "Reviewer can DELETE questions" ON public.questions;
 CREATE POLICY "Reviewer can DELETE questions"

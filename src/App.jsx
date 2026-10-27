@@ -6,6 +6,7 @@ import BottomNav from './components/BottomNav.jsx'
 import GlobalSearchModal from './components/GlobalSearchModal.jsx'
 import FocusTimerModal from './components/FocusTimerModal.jsx'
 import SettingsModal from './components/SettingsModal.jsx'
+import PublicAuthModal from './components/PublicAuthModal.jsx'
 import { settingsStore } from './storage/settingsStore.js'
 import './App.css'
 
@@ -19,6 +20,13 @@ export default function App() {
   const [showSearch, setShowSearch] = useState(false)
   const [showFocus, setShowFocus] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showAuth, setShowAuth] = useState(false)
+  const [authInitialMode, setAuthInitialMode] = useState('signin')
+
+  const handleOpenAuth = (mode = 'signin') => {
+    setAuthInitialMode(mode)
+    setShowAuth(true)
+  }
 
   // Initialize theme & typography settings on app launch and follow OS theme changes
   useEffect(() => {
@@ -69,6 +77,7 @@ export default function App() {
         onOpenSearch={() => setShowSearch(true)}
         onOpenFocus={() => setShowFocus(true)}
         onOpenSettings={() => setShowSettings(true)}
+        onOpenAuth={handleOpenAuth}
       />
 
       <Suspense fallback={<div className="lesson lesson--loading" style={{ minHeight: '60vh' }}>Loading…</div>}>
@@ -92,6 +101,13 @@ export default function App() {
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
+        onOpenAuth={handleOpenAuth}
+      />
+
+      <PublicAuthModal
+        isOpen={showAuth}
+        initialMode={authInitialMode}
+        onClose={() => setShowAuth(false)}
       />
 
       {(offlineReady || needRefresh) && (

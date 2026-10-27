@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
 
   // Dev / Demo role override for testing RBAC without requiring manual database edits
   const [devRole, setDevRoleState] = useState(() => {
-    return localStorage.getItem(STORAGE_DEV_ROLE) || 'admin'
+    return localStorage.getItem(STORAGE_DEV_ROLE) || 'guest'
   })
 
   const setDevRole = (role) => {
@@ -83,11 +83,16 @@ export function AuthProvider({ children }) {
   }, [])
 
   // Calculate active effective role:
-  // If Supabase profile has a real role, use that; otherwise fall back to devRole.
+  // If Supabase profile has a real role, use that.
+  // If logged in as a student (without staff profile), active role is 'student'.
+  // Otherwise in unauthenticated mode, role is 'guest'.
   const activeRole = useMemo(() => {
     if (profile?.role) return profile.role
-    return devRole || 'admin'
-  }, [profile, devRole])
+    if (user) {
+      return user.user_metadata?.role || 'student'
+    }
+    return devRole || 'guest'
+  }, [profile, user, devRole])
 
   // RBAC Permission checks
   const permissions = useMemo(() => evaluatePermissions(activeRole, profile), [activeRole, profile])
@@ -98,13 +103,15 @@ export function AuthProvider({ children }) {
     }
     const res = await supabase.auth.signInWithPassword({ email, password })
     if (res.data?.user) {
+      setUser(res.data.user)
+      setSession(res.data.session)
       const p = await fetchUserProfile(res.data.user.id)
-      setProfile(p)
+      if (p) setProfile(p)
     }
     return res
   }
 
-  const signUp = async (email, password, fullName = '', requestedRole = 'contributor') => {
+  const signUp = async (email, password, fullName = '', requestedRole = 'student') => {
     if (!isSupabaseConfigured()) {
       return { error: { message: 'Supabase credentials not configured in environment.' } }
     }
@@ -115,9 +122,16 @@ export function AuthProvider({ children }) {
         data: {
           full_name: fullName,
           requested_role: requestedRole,
+          role: requestedRole,
         },
       },
     })
+    if (res.data?.user && res.data?.session) {
+      setUser(res.data.user)
+      setSession(res.data.session)
+      const p = await fetchUserProfile(res.data.user.id)
+      if (p) setProfile(p)
+    }
     return res
   }
 

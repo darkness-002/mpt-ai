@@ -64,11 +64,16 @@ export async function fetchFullCurriculumFromSupabase() {
 
   try {
     // 1. Fetch tracks, categories, and questions in parallel
-    const [tracksRes, catsRes, qRes] = await Promise.all([
+    let [tracksRes, catsRes, qRes] = await Promise.all([
       supabase.from('tracks').select('*').order('display_order', { ascending: true }),
       supabase.from('categories').select('*').order('display_order', { ascending: true }),
-      supabase.from('questions').select('*').order('display_order', { ascending: true }),
+      supabase.from('questions').select('*').eq('status', 'approved').order('display_order', { ascending: true }),
     ])
+
+    // Graceful fallback if remote database has not yet applied the draft-to-live status migration
+    if (qRes.error && (qRes.error.message?.includes('status') || qRes.error.code === '42703')) {
+      qRes = await supabase.from('questions').select('*').order('display_order', { ascending: true })
+    }
 
     if (tracksRes.error || catsRes.error || qRes.error) {
       console.warn('Supabase query error loading curriculum:', {
@@ -102,6 +107,8 @@ export async function fetchFullCurriculumFromSupabase() {
         closing: q.closing || undefined,
         explanation: q.explanation || undefined,
         source: q.source || undefined,
+        status: q.status || 'approved',
+        examTarget: q.exam_target || ['CSS', 'PMS'],
         lessonId: q.lesson_id || `${catId}-lesson-1`,
         lessonTitle: q.lesson_title || 'Core Practice',
         lessonSubtitle: q.lesson_subtitle || undefined,
@@ -232,6 +239,7 @@ export async function fetchPaginatedQuestionsFromSupabase({
   categoryId = 'all',
   exam = 'all',
   quality = 'all',
+  status = 'all',
 } = {}) {
   if (!isSupabaseConfigured()) return null
 
@@ -251,6 +259,10 @@ export async function fetchPaginatedQuestionsFromSupabase({
 
     if (categoryId && categoryId !== 'all') {
       query = query.eq('category_id', categoryId)
+    }
+
+    if (status && status !== 'all') {
+      query = query.eq('status', status)
     }
 
     if (quality === 'needs-key') {
@@ -277,6 +289,9 @@ export async function fetchPaginatedQuestionsFromSupabase({
       if (categoryId && categoryId !== 'all') {
         fallbackQuery = fallbackQuery.eq('category_id', categoryId)
       }
+      if (status && status !== 'all') {
+        fallbackQuery = fallbackQuery.eq('status', status)
+      }
       if (quality === 'needs-key') {
         fallbackQuery = fallbackQuery.is('answer', null)
       } else if (quality === 'missing-exp') {
@@ -298,6 +313,8 @@ export async function fetchPaginatedQuestionsFromSupabase({
           ...q,
           categoryId: q.category_id,
           isReviewed: q.is_reviewed ?? true,
+          status: q.status || 'approved',
+          exam_target: q.exam_target || ['CSS', 'PMS'],
           _trackTitle: 'Track',
           _exam: 'CSS',
           _unitTitle: 'Category',
@@ -312,6 +329,8 @@ export async function fetchPaginatedQuestionsFromSupabase({
       ...q,
       categoryId: q.category_id,
       isReviewed: q.is_reviewed ?? true,
+      status: q.status || 'approved',
+      exam_target: q.exam_target || ['CSS', 'PMS'],
       _trackTitle: q.categories?.tracks?.title || q.categories?.title || 'Track',
       _exam: q.categories?.tracks?.exam || 'CSS',
       _unitTitle: q.categories?.title || 'Category',
@@ -465,5 +484,94 @@ export async function deleteStaffProfile(userId) {
     return { error }
   } catch (err) {
     return { error: err }
+  }
+}
+
+/**
+ * Updates a question's draft-to-live status ('pending', 'approved', 'rejected').
+ * @param {string} questionId
+ * @param {'pending'|'approved'|'rejected'} status
+ */
+export async function updateQuestionStatus(questionId, status) {
+  if (!isSupabaseConfigured()) return { error: null }
+  try {
+    const { error } = await supabase
+      .from('questions')
+      .update({
+        status,
+        is_reviewed: status === 'approved',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', questionId)
+
+    return { error }
+  } catch (err) {
+    return { error: err }
+  }
+}
+
+/**
+ * Inserts or upserts a new subject / category into the categories table.
+ * @param {Object} category
+ * @param {string} category.title
+ * @param {string} [category.id]
+ * @param {'CSS'|'PMS'|'Both'} [category.examTrack]
+ * @param {string} [category.tagline]
+ * @param {number} [category.hue]
+ * @returns {Promise<{ data: Object|null, error: Error|null }>}
+ */
+export async function createCategory({
+  title,
+  id = null,
+  examTrack = 'Both',
+  tagline = '',
+  hue = 220,
+}) {
+  const slug = id || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  if (!isSupabaseConfigured()) {
+    return {
+      data: {
+        id: slug,
+        title: title.trim(),
+        track_id: examTrack === 'PMS' ? 'pms-prelims' : 'css-mpt',
+        tagline: tagline.trim() || `${title.trim()} (${examTrack})`,
+        hue,
+      },
+      error: null,
+    }
+  }
+
+  try {
+    const trackId = examTrack === 'PMS' ? 'pms-prelims' : 'css-mpt'
+
+    const { data, error } = await supabase
+      .from('categories')
+      .upsert({
+        id: slug,
+        track_id: trackId,
+        title: title.trim(),
+        tagline: tagline.trim() || `${title.trim()} (${examTrack})`,
+        hue,
+        display_order: Date.now(),
+      })
+      .select()
+      .maybeSingle()
+
+    if (error) {
+      return {
+        data: {
+          id: slug,
+          title: title.trim(),
+          track_id: trackId,
+          tagline: tagline.trim() || `${title.trim()} (${examTrack})`,
+          hue,
+        },
+        error,
+      }
+    }
+
+    return { data, error: null }
+  } catch (err) {
+    return { data: null, error: err }
   }
 }

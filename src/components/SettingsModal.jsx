@@ -1,12 +1,27 @@
 import { useState } from 'react'
-import { CloseIcon, SettingsIcon } from './icons.jsx'
-import { FONT_SCALES, THEMES, THEME_LIST, settingsStore } from '../storage/settingsStore.js'
+import { Link } from 'react-router-dom'
+import { CloseIcon, LogOutIcon, SettingsIcon, ShieldCheckIcon, UserIcon } from './icons.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
+import { FONT_SCALES, THEME_LIST, settingsStore } from '../storage/settingsStore.js'
 import './SettingsModal.css'
 
-export default function SettingsModal({ isOpen, onClose }) {
+export default function SettingsModal({ isOpen, onClose, onOpenAuth }) {
+  const { user, profile, isStaff, signOut } = useAuth()
   const [settings, setSettings] = useState(() => settingsStore.load())
 
   if (!isOpen) return null
+
+  const displayRole = user
+    ? (profile?.role === 'admin'
+        ? 'Admin'
+        : profile?.role === 'editor'
+        ? 'Editor'
+        : profile?.role === 'reviewer'
+        ? 'Reviewer'
+        : profile?.role === 'contributor' && user.user_metadata?.role !== 'student'
+        ? 'Contributor'
+        : 'Student')
+    : 'Guest'
 
   const update = (partial) => {
     const next = { ...settings, ...partial }
@@ -33,7 +48,77 @@ export default function SettingsModal({ isOpen, onClose }) {
         </header>
 
         <main className="settings-modal__body">
-          {/* Theme Selector: 4 Optimized Modern Themes */}
+          {/* Account Section */}
+          <section className="settings-section settings-account-section">
+            <label className="settings-label">Account</label>
+            {!user ? (
+              <div className="settings-account-card settings-account-card--guest">
+                <div className="settings-account-info">
+                  <div className="settings-account-avatar settings-account-avatar--guest">
+                    <UserIcon width="18" height="18" />
+                  </div>
+                  <div>
+                    <span className="settings-account-name">Not Signed In</span>
+                    <p className="settings-account-hint">
+                      Create an account or sign in to sync progress, streaks, and bookmarks across devices.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn--small btn--primary settings-auth-trigger-btn"
+                  onClick={() => {
+                    onClose()
+                    onOpenAuth?.('signin')
+                  }}
+                >
+                  <UserIcon width="15" height="15" />
+                  <span>Create Account / Sign In</span>
+                </button>
+              </div>
+            ) : (
+              <div className="settings-account-card settings-account-card--user">
+                <div className="settings-account-info">
+                  <div className="settings-account-avatar">
+                    {user.email ? user.email.charAt(0).toUpperCase() : 'S'}
+                  </div>
+                  <div className="settings-account-details">
+                    <div className="settings-account-email-row">
+                      <span className="settings-account-email">{user.email}</span>
+                      <span className="settings-role-badge">{displayRole}</span>
+                    </div>
+                    <p className="settings-account-hint">
+                      Account connected. Progress is automatically synced with cloud.
+                    </p>
+                  </div>
+                </div>
+                <div className="settings-account-actions">
+                  {Boolean(user && isStaff) && (
+                    <Link
+                      to="/admin"
+                      className="btn btn--small btn--primary settings-admin-portal-btn"
+                      onClick={onClose}
+                    >
+                      <ShieldCheckIcon width="14" height="14" />
+                      <span>Open Admin Portal</span>
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    className="btn btn--small btn--ghost settings-signout-btn"
+                    onClick={async () => {
+                      await signOut()
+                    }}
+                  >
+                    <LogOutIcon width="14" height="14" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* Theme Selector: 4 Distinct Themes */}
           <section className="settings-section">
             <label className="settings-label">Color Theme</label>
             <div className="theme-grid">

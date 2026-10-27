@@ -146,7 +146,7 @@ export default function GlobalSearchModal({ isOpen, onClose, onOpenFocus }) {
         matchedUnits.push({
           id: `track-${track.id}`,
           title: track.title,
-          subtitle: `Exam Track • ${track.units.length} Units`,
+          subtitle: `Exam Track • ${track.units.length} Subjects`,
           type: 'track',
           icon: BookIcon,
           path: `/track/${track.id}`,

@@ -66,4 +66,23 @@ describe('Role-Based Access Control (RBAC) Permission Rules', () => {
     expect(perms.canEditQuestion({})).toBe(false)
     expect(perms.canDeleteQuestion({})).toBe(false)
   })
+
+  it('Student role has strict zero-admin permissions across all operations', () => {
+    const perms = evaluatePermissions('student')
+
+    expect(perms.isAdmin).toBe(false)
+    expect(perms.isEditor).toBe(false)
+    expect(perms.isReviewer).toBe(false)
+    expect(perms.isContributor).toBe(false)
+
+    // Cannot add to any category
+    expect(perms.canAddQuestion('general-abilities')).toBe(false)
+    expect(perms.canAddQuestion('english')).toBe(false)
+    expect(perms.canAddQuestion(null)).toBe(false)
+
+    // Cannot edit, delete, or review
+    expect(perms.canEditQuestion({})).toBe(false)
+    expect(perms.canDeleteQuestion({})).toBe(false)
+    expect(perms.canReviewQuestion({})).toBe(false)
+  })
 })

@@ -181,7 +181,7 @@ export default function PathScreen() {
 
       <footer className="path-footer">
         <p>
-          {track.lessonCount} lessons · {track.questionCount} MCQs · Stored offline on this device.
+          {track.units.length} subjects · {track.lessonCount} lessons · Stored offline on this device.
         </p>
         <button
           className="btn btn--ghost btn--small"

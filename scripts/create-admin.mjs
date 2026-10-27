@@ -15,8 +15,8 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const anonKey = process.env.VITE_SUPABASE_ANON_KEY
 
-const email = process.argv[2] || process.env.ADMIN_EMAIL || 'admin@mpt-ai.org'
-const password = process.argv[3] || process.env.ADMIN_PASSWORD || 'Admin123456!'
+const email = process.argv[2] || process.env.ADMIN_EMAIL
+const password = process.argv[3] || process.env.ADMIN_PASSWORD
 
 console.log('='.repeat(65))
 console.log('  MPT-AI — Super Admin Account Provisioning')
@@ -24,6 +24,14 @@ console.log('='.repeat(65))
 
 if (!supabaseUrl) {
   console.error('\n❌ ERROR: VITE_SUPABASE_URL is missing in .env')
+  process.exit(1)
+}
+
+if (!email || !password) {
+  console.error('\n❌ ERROR: Email and password are required.')
+  console.error('Usage:')
+  console.error('  node scripts/create-admin.mjs <email> <password>')
+  console.error('Or set ADMIN_EMAIL and ADMIN_PASSWORD in your .env file.\n')
   process.exit(1)
 }
 

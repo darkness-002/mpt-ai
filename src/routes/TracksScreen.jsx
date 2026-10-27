@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   FlameIcon,
@@ -14,15 +14,13 @@ import { streakStore } from '../storage/streakStore.js'
 import './TracksScreen.css'
 
 export default function TracksScreen() {
-  const { exams, tracks, totalQuestions } = useContent()
-  const { records, exportProgress, importProgress } = useProgress()
+  const { exams, tracks } = useContent()
+  const { records } = useProgress()
   const { canInstall, install } = useInstallPrompt()
   const [streakData] = useState(() => streakStore.load())
   const [todaySprint] = useState(() => dailyStore.getToday())
   const [dueMistakes, setDueMistakes] = useState(0)
   const [selectedExamTab, setSelectedExamTab] = useState('all')
-  const fileInputRef = useRef(null)
-  const [statusMsg, setStatusMsg] = useState(null)
 
   // Fetch count of SRS mistakes due for review
   useState(() => {
@@ -34,34 +32,6 @@ export default function TracksScreen() {
       active = false
     }
   })
-
-  const handleExportProgress = () => {
-    const payload = exportProgress()
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `mpt-ai-progress-${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-    setStatusMsg('Progress backed up successfully.')
-    setTimeout(() => setStatusMsg(null), 3000)
-  }
-
-  const handleImportProgress = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    try {
-      const text = await file.text()
-      const merged = await importProgress(text)
-      setStatusMsg(`Restored ${merged.length} lessons. Refreshing...`)
-      setTimeout(() => window.location.reload(), 1200)
-    } catch (err) {
-      alert(`Import error: ${err.message}`)
-    } finally {
-      e.target.value = ''
-    }
-  }
 
   // Active student lesson to resume
   const resumeInfo = useMemo(() => {
@@ -98,8 +68,6 @@ export default function TracksScreen() {
     if (selectedExamTab === 'all') return tracks
     return tracks.filter((t) => t.exam === selectedExamTab)
   }, [tracks, selectedExamTab])
-
-  const totalCleared = Object.keys(records).length
 
   return (
     <div className="simple-dashboard">
@@ -260,8 +228,6 @@ export default function TracksScreen() {
 
                   <div className="student-track-card__meta">
                     <span>{track.units.length} Subjects</span>
-                    <span>·</span>
-                    <span>{track.questionCount} Questions</span>
                   </div>
 
                   <div className="student-track-card__bar-wrap">
@@ -275,45 +241,6 @@ export default function TracksScreen() {
             })}
           </div>
         </section>
-
-        {statusMsg && (
-          <div className="student-status-toast" role="status">
-            {statusMsg}
-          </div>
-        )}
-
-        {/* 5. Minimalist Student Footer (ZERO admin links) */}
-        <footer className="student-footer">
-          <div className="student-footer__info">
-            <span>{totalQuestions} Live Exam Questions</span>
-            <span>·</span>
-            <span>{totalCleared} Lessons Completed</span>
-          </div>
-
-          <div className="student-footer__actions">
-            <button
-              type="button"
-              className="student-ghost-btn"
-              onClick={handleExportProgress}
-            >
-              Export Progress
-            </button>
-            <button
-              type="button"
-              className="student-ghost-btn"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Restore Progress
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="application/json,.json"
-              hidden
-              onChange={handleImportProgress}
-            />
-          </div>
-        </footer>
       </div>
     </div>
   )

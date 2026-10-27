@@ -16,6 +16,8 @@ import { idbContent, idbSupported } from './idb.js'
  * @typedef {Object} CustomQuestion
  * @property {string} id        `question:<uuid>`
  * @property {'question'} type
+ * @property {'pending'|'approved'|'rejected'} [status]
+ * @property {string[]} [exam_target]
  * @property {string} categoryId
  * @property {string} prompt
  * @property {string[]} choices
@@ -94,11 +96,25 @@ export const contentStore = {
       ...input,
       id: input.id ?? `question:${uuid()}`,
       type: 'question',
+      status: input.status ?? 'pending',
+      exam_target: input.exam_target ?? ['CSS', 'PMS'],
       choices,
       answer: Number(input.answer),
       statements: cleanedStatements?.length ? cleanedStatements : undefined,
       order: input.order ?? now,
+      createdAt: input.createdAt ?? now,
       updatedAt: now,
+    })
+  },
+
+  async updateQuestionStatus(id, status) {
+    const { questions } = await contentStore.load()
+    const target = questions.find((q) => q.id === id)
+    if (!target) return null
+    return write({
+      ...target,
+      status,
+      updatedAt: Date.now(),
     })
   },
 

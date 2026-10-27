@@ -18,6 +18,7 @@ function chunk(items) {
  * Turns author-created categories into the same track/unit/lesson shape the
  * bundled curriculum uses, so every screen treats both alike. One track per exam
  * group, holding that group's categories as units.
+ * End-users only receive questions where status is approved (or legacy items without status).
  */
 export function buildCustomTracks(categories, questions) {
   const byExam = new Map()
@@ -33,7 +34,11 @@ export function buildCustomTracks(categories, questions) {
       const mine = questions
         .filter((question) => question.categoryId === category.id)
         .sort((a, b) => a.order - b.order)
-      const usable = mine.filter(isAnswerable)
+
+      // Only approved & answerable questions reach live practice
+      const usable = mine
+        .filter(isAnswerable)
+        .filter((q) => !q.status || q.status === 'approved')
 
       const lessons = chunk(usable)
         .map((set, index) => ({
@@ -72,9 +77,9 @@ export function buildCustomTracks(categories, questions) {
           mine.length === 0
             ? 'No questions yet — add some from the dashboard.'
             : pending === 1
-              ? '1 question still needs a correct answer marked before it appears here.'
+              ? '1 question is pending approval or needs a key before it appears here.'
               : pending > 1
-                ? `${pending} questions still need a correct answer marked before they appear here.`
+                ? `${pending} questions are pending approval or need a key before they appear here.`
                 : null,
         questionCount: usable.length,
         lessons,

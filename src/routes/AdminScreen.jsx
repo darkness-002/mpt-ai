@@ -1,66 +1,52 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AlertCircleIcon,
   AlertTriangleIcon,
   ArrowLeftIcon,
   BarChartIcon,
-  BookIcon,
   CheckCircleIcon,
+  CheckIcon,
   CloseIcon,
-  DownloadIcon,
   EditIcon,
-  FileTextIcon,
   LockIcon,
   MoonIcon,
   PlusIcon,
-  PrinterIcon,
-  SearchIcon,
   ShieldCheckIcon,
-  SparklesIcon,
   SunIcon,
-  TargetIcon,
   TrashIcon,
-  UploadIcon,
   UserPlusIcon,
   UsersIcon,
-  ZapIcon,
+  XCircleIcon,
 } from '../components/icons.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useContent } from '../content/contentContext.js'
 import { invalidateCurriculumCache } from '../data/curriculum.js'
 import {
+  createCategory,
   createStaffAccount,
   deleteStaffProfile,
-  fetchPaginatedQuestionsFromSupabase,
   fetchProfilesList,
   isSupabaseConfigured,
   supabase,
   updateProfileRole,
+  updateQuestionStatus,
 } from '../lib/supabase.js'
-import { parsePdfInBrowser, parsePlainTextQuestions } from '../lib/browserPdfParser.js'
-import { exportQuestionsToCsv, parseCsvQuestions } from '../lib/csvHelper.js'
-import {
-  BLUEPRINT_PRESETS,
-  classifyQuestionSubject,
-  generateBalancedPaper,
-} from '../lib/paperGenerator.js'
-import { backupManager } from '../storage/backupManager.js'
 import { contentStore } from '../storage/contentStore.js'
 import { settingsStore, THEMES } from '../storage/settingsStore.js'
 import './AdminScreen.css'
 
-const EXAM_CHOICES = ['CSS', 'PMS', 'Custom']
-const PAGE_SIZE = 50
-
-const THEME_NAMES = {
-  [THEMES.LIGHT]: 'Minimal Light',
-  [THEMES.MIDNIGHT]: 'Midnight Slate',
-  [THEMES.IVORY]: 'Warm Ivory',
-  [THEMES.OLED]: 'OLED Console',
-  dark: 'Midnight Slate',
-  sepia: 'Warm Ivory',
-}
+// Default Core Academic Subjects for FPSC CSS & PPSC PMS
+export const CORE_SUBJECTS = [
+  { id: 'general-abilities', title: 'General Abilities', desc: 'Quantitative, Analytical & Logical Reasoning' },
+  { id: 'english', title: 'English', desc: 'Grammar, Vocabulary, Synonyms & Comprehension' },
+  { id: 'pakistan-affairs', title: 'Pakistan Affairs', desc: 'Constitutional History, Reforms & Governance' },
+  { id: 'current-affairs', title: 'Current Affairs', desc: 'National & Global Geopolitics' },
+  { id: 'everyday-science', title: 'Everyday Science', desc: 'Physical, Biological & Environmental Sciences' },
+  { id: 'islamic-studies', title: 'Islamic Studies / Ethics', desc: 'Islamic Principles & Ethics' },
+  { id: 'urdu', title: 'Urdu', desc: 'Grammar, Idioms & Literature', rtl: true },
+  { id: 'general-knowledge', title: 'General Knowledge', desc: 'World Geography, Treaties & Organizations' },
+]
 
 const DEFAULT_DEV_USERS = [
   {
@@ -90,198 +76,138 @@ const DEFAULT_DEV_USERS = [
   {
     id: 'user-contrib-1',
     email: 'contributor@mpt-ai.internal',
-    full_name: 'Zainab Qureshi (Abilities Contributor)',
+    full_name: 'Zainab Qureshi (Contributor)',
     role: 'contributor',
     assigned_categories: ['general-abilities', 'english'],
     created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
   },
 ]
 
-const BLANK_QUESTION = {
-  prompt: '',
-  directive: '',
-  statements: '',
-  closing: '',
-  choices: ['', '', '', ''],
-  answer: 0,
-  explanation: '',
+const INITIAL_SAMPLE_QUESTIONS = [
+  {
+    id: 'sample-pending-1',
+    prompt: 'Under the 1973 Constitution of Pakistan, which Article guarantees the Fundamental Right to Freedom of Speech and Expression?',
+    choices: ['Article 18', 'Article 19', 'Article 20', 'Article 25'],
+    answer: 1,
+    explanation: 'Article 19 provides freedom of speech, expression, and freedom of the press subject to reasonable restrictions.',
+    category_id: 'pakistan-affairs',
+    status: 'pending',
+    exam_target: ['CSS', 'PMS'],
+    created_at: new Date().toISOString(),
+    created_by_name: 'Zainab Qureshi',
+  },
+  {
+    id: 'sample-pending-2',
+    prompt: 'If a train traveling at 72 km/h crosses a 180-meter long platform in 15 seconds, what is the length of the train?',
+    choices: ['100 meters', '120 meters', '140 meters', '150 meters'],
+    answer: 1,
+    explanation: 'Speed = 72 * (5/18) = 20 m/s. Total distance in 15s = 20 * 15 = 300m. Train length = 300 - 180 = 120m.',
+    category_id: 'general-abilities',
+    status: 'pending',
+    exam_target: ['CSS', 'PMS'],
+    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+    created_by_name: 'Ayesha Raza',
+  },
+  {
+    id: 'sample-pending-3',
+    prompt: 'Choose the correct synonym for the word "EPHEMERAL":',
+    choices: ['Permanent', 'Transitory', 'Luminous', 'Enigmatic'],
+    answer: 1,
+    explanation: 'Ephemeral denotes lasting for a very short time; transitory, fleeting.',
+    category_id: 'english',
+    status: 'pending',
+    exam_target: ['CSS'],
+    created_at: new Date(Date.now() - 86400000).toISOString(),
+    created_by_name: 'Zainab Qureshi',
+  },
+  {
+    id: 'sample-approved-1',
+    prompt: 'The Indus Waters Treaty was signed between Pakistan and India in 1960 under the mediation of which organization?',
+    choices: ['United Nations', 'World Bank', 'International Court of Justice', 'Commonwealth'],
+    answer: 1,
+    explanation: 'The Indus Waters Treaty was signed on September 19, 1960 with the World Bank as mediator and signatory.',
+    category_id: 'pakistan-affairs',
+    status: 'approved',
+    exam_target: ['CSS', 'PMS'],
+    created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
+    created_by_name: 'Dr. Tariq Mahmood',
+  },
+]
+
+function formatGroupDate(dateStr) {
+  if (!dateStr) return 'Earlier'
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return 'Earlier'
+
+  const today = new Date()
+  const isToday =
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  if (isToday) return 'Today'
+
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+  const isYesterday =
+    date.getDate() === yesterday.getDate() &&
+    date.getMonth() === yesterday.getMonth() &&
+    date.getFullYear() === yesterday.getFullYear()
+  if (isYesterday) return 'Yesterday'
+
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined,
+  })
 }
 
 export default function AdminScreen() {
-  const { categories, customQuestions, refresh, tracks } = useContent()
-  const {
-    role,
-    setDevRole,
-    canAddQuestion,
-    canEditQuestion,
-    canDeleteQuestion,
-    user,
-    profile,
-    loading: authLoading,
-    signIn,
-    signOut,
-  } = useAuth()
+  const { refresh } = useContent()
+  const { role, setDevRole, profile, user, isStaff, signIn, signOut } = useAuth()
 
-  // Live Supabase Telemetry state
-  const [telemetry, setTelemetry] = useState({
-    totalUsers: null,
-    totalCompletions: null,
-    cloudQuestions: null,
-    connected: isSupabaseConfigured(),
-    loading: false,
-  })
+  // Security Gate State for isolated staff access
+  const [gateEmail, setGateEmail] = useState('')
+  const [gatePassword, setGatePassword] = useState('')
+  const [gateError, setGateError] = useState(null)
+  const [gateLoading, setGateLoading] = useState(false)
 
-  // Isolated Admin Login State
-  const [loginEmail, setLoginEmail] = useState('')
-  const [loginPassword, setLoginPassword] = useState('')
-  const [loginLoading, setLoginLoading] = useState(false)
-  const [loginError, setLoginError] = useState(null)
-  const [isDevLoggedIn, setIsDevLoggedIn] = useState(() => {
-    return typeof sessionStorage !== 'undefined' && sessionStorage.getItem('mpt_dev_logged_in') === 'true'
-  })
-
-  // User Management State (RBAC Provisioning)
-  const [usersList, setUsersList] = useState([])
-  const [usersLoading, setUsersLoading] = useState(false)
-  const [userSearch, setUserSearch] = useState('')
-  const [userRoleFilter, setUserRoleFilter] = useState('all')
-  const [isProvisionModalOpen, setIsProvisionModalOpen] = useState(false)
-  const [provisionForm, setProvisionForm] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    role: 'contributor',
-    assignedCategories: [],
-  })
-  const [provisionLoading, setProvisionLoading] = useState(false)
-  const [provisionError, setProvisionError] = useState(null)
-
-  // Fetch live Supabase telemetry
-  useEffect(() => {
-    let mounted = true
-    async function fetchTelemetry() {
-      if (!isSupabaseConfigured()) return
-      setTelemetry((prev) => ({ ...prev, loading: true }))
-      try {
-        const [profilesRes, progressRes, questionsRes] = await Promise.all([
-          supabase.from('profiles').select('id', { count: 'exact', head: true }),
-          supabase.from('user_progress').select('id', { count: 'exact', head: true }),
-          supabase.from('questions').select('id', { count: 'exact', head: true }),
-        ])
-        if (mounted) {
-          setTelemetry({
-            totalUsers: profilesRes.count ?? 0,
-            totalCompletions: progressRes.count ?? 0,
-            cloudQuestions: questionsRes.count ?? 0,
-            connected: true,
-            loading: false,
-          })
-        }
-      } catch (err) {
-        console.warn('Supabase telemetry fetch notice:', err)
-        if (mounted) setTelemetry((prev) => ({ ...prev, loading: false }))
+  const handleStaffLogin = async (e) => {
+    e.preventDefault()
+    setGateError(null)
+    const cleanEmail = gateEmail.trim()
+    if (!cleanEmail || !gatePassword) {
+      setGateError('Email and password are required.')
+      return
+    }
+    setGateLoading(true)
+    try {
+      const res = await signIn(cleanEmail, gatePassword)
+      if (res.error) {
+        setGateError(res.error.message || 'Invalid staff credentials.')
+        setGateLoading(false)
+        return
       }
+      setGateLoading(false)
+    } catch (err) {
+      setGateError(err.message || 'Failed to authenticate.')
+      setGateLoading(false)
     }
-    fetchTelemetry()
-    return () => {
-      mounted = false
-    }
-  }, [])
+  }
 
-  // Active navigation tab
-  const [activeTab, setActiveTab] = useState('overview') // 'overview' | 'questions' | 'tracks' | 'generator' | 'audit' | 'import-export' | 'users'
-  const currentTab = role !== 'admin' && activeTab === 'users' ? 'overview' : activeTab
+  // Navigation: exactly 4 tabs
+  // 'dashboard' | 'add-question' | 'review-queue' | 'users'
+  const [activeTab, setActiveTab] = useState('dashboard')
 
-  // Load team profiles when User Management tab is opened
-  useEffect(() => {
-    let mounted = true
-    async function loadUsers() {
-      if (currentTab === 'users' && role === 'admin') {
-        setUsersLoading(true)
-        try {
-          if (isSupabaseConfigured()) {
-            const list = await fetchProfilesList()
-            if (mounted) {
-              setUsersList(list.length > 0 ? list : DEFAULT_DEV_USERS)
-            }
-          } else {
-            if (mounted && usersList.length === 0) {
-              setUsersList(DEFAULT_DEV_USERS)
-            }
-          }
-        } catch (err) {
-          console.warn('Error fetching profiles:', err)
-          if (mounted && usersList.length === 0) {
-            setUsersList(DEFAULT_DEV_USERS)
-          }
-        } finally {
-          if (mounted) setUsersLoading(false)
-        }
-      }
-    }
-    loadUsers()
-    return () => {
-      mounted = false
-    }
-  }, [currentTab, role, usersList.length])
-
-  // Question Management state with Server-Side Pagination & 300ms Debounce
-  const [questionSearch, setQuestionSearch] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [filterExam, setFilterExam] = useState('all')
-  const [filterCategory, setFilterCategory] = useState('all')
-  const [filterQuality, setFilterQuality] = useState('all') // 'all' | 'needs-key' | 'missing-exp'
-  const [page, setPage] = useState(1)
-  const [paginatedQuestions, setPaginatedQuestions] = useState([])
-  const [totalQuestionsCount, setTotalQuestionsCount] = useState(0)
-  const [questionsLoading, setQuestionsLoading] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isEditorOpen, setIsEditorOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState(null)
-  const [questionForm, setQuestionForm] = useState(BLANK_QUESTION)
-  const [targetCategory, setTargetCategory] = useState(categories[0]?.id || '')
-
-  // 300ms Search Debounce to prevent UI freezing & wasteful requests
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(questionSearch)
-      setPage(1)
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [questionSearch])
-
-  // Category creation modal
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
-  const [categoryForm, setCategoryForm] = useState({ title: '', tagline: '', exam: 'Custom' })
-
-  // Paper Generator state
-  const [selectedBlueprint, setSelectedBlueprint] = useState(BLUEPRINT_PRESETS[0])
-  const [generatedPaper, setGeneratedPaper] = useState(null)
-
-  // Quality Auditor state
-  const [auditResults, setAuditResults] = useState(null)
-
-  // Batch import text state
-  const [batchText, setBatchText] = useState('')
-  const [isParsingPdf, setIsParsingPdf] = useState(false)
-  const [feedback, setFeedback] = useState(null)
-  const [error, setError] = useState(null)
-
-  // Console Lock & Modern 4-Theme Switching
+  // Theme switcher: cycles all 4 themes (Light, Dark, Zen, Midnight)
   const [currentTheme, setCurrentTheme] = useState(() => settingsStore.load().theme)
-  const [isConsoleLocked, setIsConsoleLocked] = useState(false)
-
-  const fileRef = useRef(null)
-  const csvFileRef = useRef(null)
-  const pdfRef = useRef(null)
 
   const handleCycleTheme = () => {
     const current = settingsStore.load()
-    let next = THEMES.MIDNIGHT
-    if (current.theme === THEMES.LIGHT) next = THEMES.MIDNIGHT
-    else if (current.theme === THEMES.MIDNIGHT || current.theme === 'dark') next = THEMES.IVORY
-    else if (current.theme === THEMES.IVORY || current.theme === 'sepia') next = THEMES.OLED
-    else if (current.theme === THEMES.OLED) next = THEMES.LIGHT
+    let next = THEMES.DARK
+    if (current.theme === THEMES.LIGHT) next = THEMES.DARK
+    else if (current.theme === THEMES.DARK) next = THEMES.ZEN
+    else if (current.theme === THEMES.ZEN) next = THEMES.MIDNIGHT
+    else if (current.theme === THEMES.MIDNIGHT) next = THEMES.LIGHT
     else next = THEMES.LIGHT
 
     const updated = { ...current, theme: next }
@@ -289,2621 +215,1686 @@ export default function AdminScreen() {
     setCurrentTheme(next)
   }
 
-  // Handle staff login
-  const handleStaffLogin = async (e) => {
-    e.preventDefault()
-    setLoginError(null)
-    setLoginLoading(true)
+  // Active Questions State (combines Supabase & local ContentStore)
+  const [questions, setQuestions] = useState([])
+  const [loadingQuestions, setLoadingQuestions] = useState(true)
 
+  // Dynamic Subjects / Categories List
+  const [subjects, setSubjects] = useState(CORE_SUBJECTS)
+  const [showSubjectModal, setShowSubjectModal] = useState(false)
+  const [newSubjectName, setNewSubjectName] = useState('')
+  const [newSubjectTrack, setNewSubjectTrack] = useState('Both') // 'CSS' | 'PMS' | 'Both'
+  const [newSubjectTagline, setNewSubjectTagline] = useState('')
+  const [creatingSubject, setCreatingSubject] = useState(false)
+
+  // Users Management State
+  const [usersList, setUsersList] = useState([])
+  const [loadingUsers, setLoadingUsers] = useState(false)
+
+  // Review Queue Filter: 'pending' | 'rejected' | 'all'
+  const [reviewFilter, setReviewFilter] = useState('pending')
+
+  // Notice banners
+  const [notice, setNotice] = useState(null)
+
+  // Editing Modal State
+  const [editingQuestion, setEditingQuestion] = useState(null)
+
+  // ==========================================
+  // Form State: The 3-Step Question Flow
+  // Step 1: Subject
+  // Step 2: Exam Target (CSS, PMS, Both)
+  // Step 3: Question Details
+  // ==========================================
+  const [formSubject, setFormSubject] = useState(CORE_SUBJECTS[0].id)
+  const [formExamTarget, setFormExamTarget] = useState('Both') // 'CSS' | 'PMS' | 'Both'
+  const [formPrompt, setFormPrompt] = useState('')
+  const [formChoices, setFormChoices] = useState(['', '', '', ''])
+  const [formAnswer, setFormAnswer] = useState(0)
+  const [formExplanation, setFormExplanation] = useState('')
+  const [formSubmitting, setFormSubmitting] = useState(false)
+
+  // Load dynamic subjects from Supabase categories table & local content store
+  const loadDynamicSubjects = useCallback(async () => {
     try {
+      let dbCats = []
       if (isSupabaseConfigured()) {
-        const res = await signIn(loginEmail.trim(), loginPassword)
-        if (res.error) {
-          setLoginError(res.error.message || 'Invalid credentials for staff portal.')
-        } else {
-          notify('Authenticated successfully.')
-        }
-      } else {
-        // Offline / dev login
-        setIsDevLoggedIn(true)
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.setItem('mpt_dev_logged_in', 'true')
-        }
-        notify(`Logged in as dev role: ${role.toUpperCase()}`)
-      }
-    } catch (err) {
-      setLoginError(err.message || 'Authentication failed.')
-    } finally {
-      setLoginLoading(false)
-    }
-  }
-
-  const handleDevLogin = (targetRole) => {
-    setDevRole(targetRole)
-    setIsDevLoggedIn(true)
-    if (typeof sessionStorage !== 'undefined') {
-      sessionStorage.setItem('mpt_dev_logged_in', 'true')
-    }
-    notify(`Entered Examiner Studio as '${targetRole.toUpperCase()}'.`)
-  }
-
-  const handleSignOutOrLock = async () => {
-    if (isSupabaseConfigured()) {
-      await signOut()
-    }
-    setIsDevLoggedIn(false)
-    setIsConsoleLocked(true)
-    if (typeof sessionStorage !== 'undefined') {
-      sessionStorage.removeItem('mpt_dev_logged_in')
-    }
-  }
-
-  // Provisioning new team members
-  const handleProvisionSubmit = async (e) => {
-    e.preventDefault()
-    setProvisionError(null)
-    setProvisionLoading(true)
-
-    try {
-      const res = await createStaffAccount({
-        email: provisionForm.email.trim(),
-        password: provisionForm.password,
-        fullName: provisionForm.fullName.trim(),
-        role: provisionForm.role,
-        assignedCategories: provisionForm.assignedCategories,
-      })
-
-      if (res.error) {
-        setProvisionError(res.error.message)
-        return
+        const { data, error } = await supabase
+          .from('categories')
+          .select('id, title, tagline, track_id')
+          .order('title', { ascending: true })
+        if (!error && data) dbCats = data
       }
 
-      const newMember = {
-        id: res.data?.id || `user-${Date.now()}`,
-        email: provisionForm.email.trim(),
-        full_name: provisionForm.fullName.trim() || provisionForm.email.split('@')[0],
-        role: provisionForm.role,
-        assigned_categories: provisionForm.assignedCategories,
-        created_at: new Date().toISOString(),
+      const local = await contentStore.load()
+      const localCats = local.categories || []
+
+      const map = new Map()
+      // Seed core subjects first
+      for (const cs of CORE_SUBJECTS) {
+        map.set(cs.id, cs)
       }
-
-      setUsersList((prev) => [newMember, ...prev])
-      setIsProvisionModalOpen(false)
-      setProvisionForm({
-        fullName: '',
-        email: '',
-        password: '',
-        role: 'contributor',
-        assignedCategories: [],
-      })
-      notify(`Account created for ${newMember.email} with role '${newMember.role.toUpperCase()}'.`)
-    } catch (err) {
-      setProvisionError(err.message || 'Failed to provision team member.')
-    } finally {
-      setProvisionLoading(false)
-    }
-  }
-
-  const handleRoleChange = async (userId, newRole) => {
-    try {
-      await updateProfileRole(userId, newRole)
-      setUsersList((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)),
-      )
-      notify(`Updated user role to '${newRole.toUpperCase()}'.`)
-    } catch (err) {
-      setError(`Failed to update role: ${err.message}`)
-    }
-  }
-
-  const handleRevokeUser = async (userId, userEmail) => {
-    if (!window.confirm(`Revoke staff credentials for "${userEmail}" permanently?`)) return
-    try {
-      await deleteStaffProfile(userId)
-      setUsersList((prev) => prev.filter((u) => u.id !== userId))
-      notify(`Staff access revoked for ${userEmail}.`)
-    } catch (err) {
-      setError(`Failed to revoke user: ${err.message}`)
-    }
-  }
-
-  // Filtered staff users for User Management table
-  const filteredUsers = useMemo(() => {
-    return usersList.filter((u) => {
-      const matchSearch =
-        !userSearch.trim() ||
-        (u.full_name && u.full_name.toLowerCase().includes(userSearch.toLowerCase())) ||
-        (u.email && u.email.toLowerCase().includes(userSearch.toLowerCase()))
-      const matchRole = userRoleFilter === 'all' || u.role === userRoleFilter
-      return matchSearch && matchRole
-    })
-  }, [usersList, userSearch, userRoleFilter])
-
-  // Categories available to current active user based on RBAC clearance
-  const availableCategoriesForUser = useMemo(() => {
-    if (role === 'admin' || role === 'editor') return categories
-    if (role === 'contributor') {
-      const assigned = profile?.assigned_categories || []
-      if (assigned.length === 0) return categories
-      return categories.filter((c) => assigned.includes(c.id))
-    }
-    return categories
-  }, [categories, role, profile])
-
-  const notify = (msg) => {
-    setError(null)
-    setFeedback(msg)
-    setTimeout(() => setFeedback(null), 4000)
-  }
-
-  // Compile all questions across all tracks for unified administrative search
-  const allSystemQuestions = useMemo(() => {
-    const list = []
-    for (const track of tracks) {
-      for (const unit of track.units || []) {
-        for (const lesson of unit.lessons || []) {
-          for (const q of lesson.questions || []) {
-            if (q && q.prompt) {
-              list.push({
-                ...q,
-                _trackTitle: track.title,
-                _exam: track.exam,
-                _unitTitle: unit.title,
-                _isCustom: track.id.startsWith('custom:'),
-                _subject: classifyQuestionSubject(q, track.title, unit.title),
-              })
-            }
-          }
+      // Merge db and local categories
+      for (const cat of [...localCats, ...dbCats]) {
+        if (!map.has(cat.id)) {
+          map.set(cat.id, {
+            id: cat.id,
+            title: cat.title,
+            desc: cat.tagline || `${cat.title}`,
+            exam: cat.exam || (cat.track_id === 'pms-prelims' ? 'PMS' : 'CSS'),
+          })
         }
       }
+      setSubjects(Array.from(map.values()))
+    } catch (err) {
+      console.warn('Could not load dynamic subjects:', err)
     }
-    return list
-  }, [tracks])
+  }, [])
 
-  // System overview KPIs
-  const stats = useMemo(() => {
-    const total = allSystemQuestions.length
-    const withKey = allSystemQuestions.filter((q) => Number.isInteger(q.answer) && q.answer >= 0).length
-    const withExp = allSystemQuestions.filter((q) => q.explanation && q.explanation.trim().length > 0).length
-    const keyless = total - withKey
-    const customCount = customQuestions.length
-
-    // Subject breakdown
-    const subjectMap = {}
-    for (const q of allSystemQuestions) {
-      const sub = q._subject || 'General Knowledge'
-      subjectMap[sub] = (subjectMap[sub] || 0) + 1
-    }
-
-    // Commission breakdown
-    const examMap = {}
-    for (const q of allSystemQuestions) {
-      const ex = q._exam || 'Other'
-      examMap[ex] = (examMap[ex] || 0) + 1
-    }
-
-    return {
-      total,
-      withKey,
-      keyless,
-      withExp,
-      customCount,
-      tracksCount: tracks.length,
-      categoriesCount: categories.length,
-      healthPercent: total > 0 ? Math.round((withKey / total) * 100) : 100,
-      subjectBreakdown: Object.entries(subjectMap).sort((a, b) => b[1] - a[1]),
-      examBreakdown: Object.entries(examMap),
-    }
-  }, [allSystemQuestions, customQuestions, tracks, categories])
-
-  // Server-Side Paginated Question Fetching (Max 50 items per page with .range(from, to))
+  // Load questions from Supabase or ContentStore
   const loadQuestions = useCallback(async () => {
-    setQuestionsLoading(true)
+    setLoadingQuestions(true)
     try {
       if (isSupabaseConfigured()) {
-        const res = await fetchPaginatedQuestionsFromSupabase({
-          page,
-          pageSize: PAGE_SIZE,
-          search: debouncedSearch,
-          categoryId: filterCategory,
-          exam: filterExam,
-          quality: filterQuality,
-        })
-        if (res) {
-          setPaginatedQuestions(res.questions)
-          setTotalQuestionsCount(res.totalCount)
+        const { data, error } = await supabase
+          .from('questions')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          setQuestions(
+            data.map((q) => ({
+              id: q.id,
+              prompt: q.prompt,
+              choices: Array.isArray(q.choices) ? q.choices : [],
+              answer: q.answer,
+              explanation: q.explanation || '',
+              category_id: q.category_id,
+              status: q.status || (q.is_reviewed ? 'approved' : 'pending'),
+              exam_target: Array.isArray(q.exam_target) ? q.exam_target : ['CSS', 'PMS'],
+              created_at: q.created_at || new Date().toISOString(),
+              created_by_name: q.created_by ? 'Staff Contributor' : 'Admin',
+            })),
+          )
+          setLoadingQuestions(false)
           return
         }
       }
 
-      // Offline / Local Sandbox Fallback: paginate in-memory questions by 50 items
-      let filtered = allSystemQuestions
-      if (debouncedSearch.trim()) {
-        const query = debouncedSearch.toLowerCase()
-        filtered = filtered.filter((q) => {
-          const matchPrompt = q.prompt && q.prompt.toLowerCase().includes(query)
-          const matchChoices = (q.choices || []).some((c) => c && c.toLowerCase().includes(query))
-          const matchExp = q.explanation && q.explanation.toLowerCase().includes(query)
-          return matchPrompt || matchChoices || matchExp
-        })
-      }
-
-      if (filterExam !== 'all') {
-        filtered = filtered.filter((q) => q._exam === filterExam)
-      }
-
-      if (filterCategory !== 'all') {
-        filtered = filtered.filter(
-          (q) => q._unitTitle === filterCategory || q.categoryId === filterCategory,
+      // Local / Offline fallback
+      const local = await contentStore.load()
+      if (local.questions && local.questions.length > 0) {
+        setQuestions(
+          local.questions.map((q) => ({
+            id: q.id,
+            prompt: q.prompt,
+            choices: q.choices || [],
+            answer: q.answer,
+            explanation: q.explanation || '',
+            category_id: q.categoryId || 'general-abilities',
+            status: q.status || 'pending',
+            exam_target: q.exam_target || ['CSS', 'PMS'],
+            created_at: q.createdAt ? new Date(q.createdAt).toISOString() : new Date().toISOString(),
+            created_by_name: 'Local Author',
+          })),
         )
+      } else {
+        setQuestions(INITIAL_SAMPLE_QUESTIONS)
       }
-
-      if (filterQuality === 'needs-key') {
-        filtered = filtered.filter(
-          (q) => !Number.isInteger(q.answer) || q.answer < 0,
-        )
-      } else if (filterQuality === 'missing-exp') {
-        filtered = filtered.filter((q) => !q.explanation || !q.explanation.trim())
-      }
-
-      setTotalQuestionsCount(filtered.length)
-      const from = (page - 1) * PAGE_SIZE
-      setPaginatedQuestions(filtered.slice(from, from + PAGE_SIZE))
     } catch (err) {
-      console.warn('Error loading paginated questions:', err)
+      console.warn('Error loading admin questions:', err)
+      setQuestions(INITIAL_SAMPLE_QUESTIONS)
     } finally {
-      setQuestionsLoading(false)
+      setLoadingQuestions(false)
     }
-  }, [page, debouncedSearch, filterCategory, filterExam, filterQuality, allSystemQuestions])
+  }, [])
+
+  // Load staff users list
+  const loadUsers = useCallback(async () => {
+    if (role !== 'admin') return
+    setLoadingUsers(true)
+    try {
+      if (isSupabaseConfigured()) {
+        const profiles = await fetchProfilesList()
+        if (profiles.length > 0) {
+          setUsersList(profiles)
+          setLoadingUsers(false)
+          return
+        }
+      }
+      setUsersList(DEFAULT_DEV_USERS)
+    } catch {
+      setUsersList(DEFAULT_DEV_USERS)
+    } finally {
+      setLoadingUsers(false)
+    }
+  }, [role])
 
   useEffect(() => {
-    if (currentTab === 'questions') {
-      loadQuestions()
+    loadQuestions()
+    loadDynamicSubjects()
+  }, [loadQuestions, loadDynamicSubjects])
+
+  useEffect(() => {
+    if (activeTab === 'users' && role === 'admin') {
+      loadUsers()
     }
-  }, [loadQuestions, currentTab])
+  }, [activeTab, role, loadUsers])
 
-  const totalPages = Math.max(1, Math.ceil(totalQuestionsCount / PAGE_SIZE))
-
-  // Comprehensive Quality Auditor
-  const handleRunAudit = () => {
-    const issues = []
-    let validCount = 0
-
-    allSystemQuestions.forEach((q, idx) => {
-      let hasIssue = false
-      const choices = (q.choices || []).filter(Boolean)
-
-      // Check missing key
-      if (!Number.isInteger(q.answer) || q.answer < 0 || q.answer >= choices.length) {
-        issues.push({
-          id: q.id || `audit-${idx}`,
-          question: q,
-          type: 'missing-key',
-          severity: 'high',
-          message: 'Question has no valid answer key assigned.',
-        })
-        hasIssue = true
-      }
-
-      // Check choices count
-      if (choices.length < 2) {
-        issues.push({
-          id: q.id || `audit-${idx}`,
-          question: q,
-          type: 'few-choices',
-          severity: 'high',
-          message: `Only ${choices.length} options provided. At least 2 are required.`,
-        })
-        hasIssue = true
-      }
-
-      // Check duplicate choices
-      const uniqueChoices = new Set(choices.map((c) => c.toLowerCase()))
-      if (uniqueChoices.size < choices.length) {
-        issues.push({
-          id: q.id || `audit-${idx}`,
-          question: q,
-          type: 'duplicate-choices',
-          severity: 'medium',
-          message: 'Question has two or more identical options.',
-        })
-        hasIssue = true
-      }
-
-      // Check missing explanation
-      if (!q.explanation || q.explanation.trim().length === 0) {
-        issues.push({
-          id: q.id || `audit-${idx}`,
-          question: q,
-          type: 'missing-exp',
-          severity: 'low',
-          message: 'Question lacks an explanation for student feedback.',
-        })
-        hasIssue = true
-      }
-
-      if (!hasIssue) validCount++
-    })
-
-    const healthScore = allSystemQuestions.length > 0
-      ? Math.round((validCount / allSystemQuestions.length) * 100)
-      : 100
-
-    setAuditResults({
-      scannedCount: allSystemQuestions.length,
-      validCount,
-      healthScore,
-      issues,
-      auditedAt: new Date().toLocaleTimeString(),
-    })
-    notify('Quality audit completed.')
-  }
-
-  // Question modal handlers
-  const handleOpenNewQuestion = () => {
-    setEditingItem(null)
-    setQuestionForm(BLANK_QUESTION)
-    if (availableCategoriesForUser.length > 0 && !availableCategoriesForUser.some((c) => c.id === targetCategory)) {
-      setTargetCategory(availableCategoriesForUser[0].id)
+  // Computed counts for Dashboard & Badges
+  const stats = useMemo(() => {
+    const live = questions.filter((q) => q.status === 'approved').length
+    const pending = questions.filter((q) => q.status === 'pending').length
+    const rejected = questions.filter((q) => q.status === 'rejected').length
+    return {
+      live,
+      pending,
+      rejected,
+      total: questions.length,
+      users: usersList.length || DEFAULT_DEV_USERS.length,
     }
-    setIsEditorOpen(true)
-  }
+  }, [questions, usersList])
 
-  const handleEditQuestion = (item) => {
-    setEditingItem(item)
-    setQuestionForm({
-      prompt: item.prompt || '',
-      directive: item.directive || '',
-      statements: (item.statements || []).join('\n'),
-      closing: item.closing || '',
-      choices: [...(item.choices || []), '', '', '', ''].slice(0, Math.max(4, item.choices?.length || 4)),
-      answer: Number.isInteger(item.answer) ? item.answer : 0,
-      explanation: item.explanation || '',
-    })
-    if (item.categoryId) {
-      setTargetCategory(item.categoryId)
-    }
-    setIsEditorOpen(true)
-  }
-
-  const handleSaveQuestion = async (e) => {
+  // Create New Dynamic Subject (Admin)
+  const handleCreateSubjectSubmit = async (e) => {
     e.preventDefault()
-
-    // RBAC Permissions check
-    if (!editingItem && !canAddQuestion(targetCategory)) {
-      setError(`Permission Denied: Role '${role}' is not authorized to create questions in this category.`)
-      return
-    }
-    if (editingItem && !canEditQuestion(editingItem)) {
-      setError(`Permission Denied: Role '${role}' cannot edit questions. Requires Editor or Admin role.`)
+    if (!newSubjectName.trim()) {
+      alert('Please enter a subject name.')
       return
     }
 
-    if (!questionForm.prompt.trim()) {
-      setError('Question prompt cannot be empty.')
-      return
-    }
+    setCreatingSubject(true)
+    const title = newSubjectName.trim()
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
-    const filledChoices = questionForm.choices.map((c) => c.trim()).filter(Boolean)
-    if (filledChoices.length < 2) {
-      setError('Please provide at least two valid options.')
-      return
-    }
-
-    if (questionForm.answer < 0 || questionForm.answer >= filledChoices.length) {
-      setError('Please select a valid correct answer option.')
-      return
-    }
-
-    // Ensure we have a target custom category
-    let catId = targetCategory
-    if (!catId) {
-      if (categories.length > 0) {
-        catId = categories[0].id
-      } else {
-        const newCat = await contentStore.saveCategory({
-          title: 'Custom Question Bank',
-          tagline: 'Authored Questions',
-          exam: 'Custom',
+    try {
+      // 1. Insert into Supabase public.categories table
+      if (isSupabaseConfigured()) {
+        const { error } = await createCategory({
+          title,
+          id: slug,
+          examTrack: newSubjectTrack,
+          tagline: newSubjectTagline.trim(),
         })
-        catId = newCat.id
+        if (error) console.warn('Supabase createCategory warning:', error.message)
       }
+
+      // 2. Save into local contentStore
+      await contentStore.saveCategory({
+        id: slug,
+        title,
+        exam: newSubjectTrack === 'Both' ? 'CSS' : newSubjectTrack,
+        tagline: newSubjectTagline.trim() || `${title} (${newSubjectTrack})`,
+      })
+
+      invalidateCurriculumCache()
+      await refresh()
+
+      const newSubjectItem = {
+        id: slug,
+        title,
+        desc: newSubjectTagline.trim() || `${title} (${newSubjectTrack})`,
+        exam: newSubjectTrack,
+      }
+
+      setSubjects((prev) => {
+        if (prev.some((s) => s.id === slug)) return prev
+        return [...prev, newSubjectItem]
+      })
+
+      // Immediately select newly created subject
+      setFormSubject(slug)
+      setShowSubjectModal(false)
+      setNewSubjectName('')
+      setNewSubjectTagline('')
+      setNewSubjectTrack('Both')
+
+      setNotice({
+        type: 'success',
+        text: `Subject "${title}" created successfully and selected!`,
+      })
+    } catch (err) {
+      console.error('Error creating subject:', err)
+      alert('Failed to create subject: ' + err.message)
+    } finally {
+      setCreatingSubject(false)
+    }
+  }
+
+  // Question Submission Handler
+  const handleAddQuestionSubmit = async (e) => {
+    e.preventDefault()
+    if (!formPrompt.trim()) {
+      alert('Please enter a question prompt.')
+      return
+    }
+    const cleanChoices = formChoices.map((c) => c.trim())
+    if (cleanChoices.some((c) => !c)) {
+      alert('All four answer choices (A, B, C, D) are required.')
+      return
     }
 
-    const qId = editingItem ? editingItem.id : `question:${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
-    const statementList = questionForm.statements
-      ? questionForm.statements.split('\n').map((s) => s.trim()).filter(Boolean)
-      : undefined
+    setFormSubmitting(true)
+    const qId = `q-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+    const examTargetArray =
+      formExamTarget === 'Both' ? ['CSS', 'PMS'] : [formExamTarget]
 
-    // 1. Cloud-sync to Supabase if configured
-    if (isSupabaseConfigured()) {
-      try {
-        const { error: sbErr } = await supabase.from('questions').upsert({
-          id: qId,
-          category_id: catId,
-          prompt: questionForm.prompt.trim(),
-          directive: questionForm.directive.trim() || null,
-          statements: statementList || null,
-          closing: questionForm.closing.trim() || null,
-          choices: filledChoices,
-          answer: questionForm.answer,
-          explanation: questionForm.explanation.trim() || null,
-          display_order: Date.now(),
-          is_reviewed: true,
-        })
-        if (sbErr) {
-          console.warn('Supabase upsert warning:', sbErr.message)
-        } else {
-          invalidateCurriculumCache()
-        }
-      } catch (err) {
-        console.warn('Network error saving to Supabase:', err)
-      }
-    }
-
-    // 2. Also save to local contentStore for instant reactivity
-    await contentStore.saveQuestion({
+    const newQuestion = {
       id: qId,
-      categoryId: catId,
-      prompt: questionForm.prompt.trim(),
-      directive: questionForm.directive.trim() || undefined,
-      statements: statementList,
-      closing: questionForm.closing.trim() || undefined,
-      choices: filledChoices,
-      answer: questionForm.answer,
-      explanation: questionForm.explanation.trim() || undefined,
-      order: Date.now(),
-    })
-
-    await refresh()
-    await loadQuestions()
-    setIsEditorOpen(false)
-    notify(editingItem ? 'Question updated successfully.' : 'New question saved successfully.')
-  }
-
-  const handleDeleteQuestion = async (item) => {
-    // RBAC Permissions check
-    if (!canDeleteQuestion(item)) {
-      setError(`Permission Denied: Role '${role}' cannot delete questions. Requires Reviewer or Admin role.`)
-      return
+      prompt: formPrompt.trim(),
+      choices: cleanChoices,
+      answer: Number(formAnswer),
+      explanation: formExplanation.trim(),
+      category_id: formSubject,
+      status: 'pending', // Draft-to-Live default
+      exam_target: examTargetArray,
+      created_at: new Date().toISOString(),
+      created_by_name: profile?.full_name || user?.email?.split('@')[0] || 'You',
     }
 
-    if (!window.confirm('Delete this question permanently from database?')) return
-
-    // 1. Delete from Supabase if configured
-    if (isSupabaseConfigured() && item.id) {
-      try {
-        const { error: sbErr } = await supabase.from('questions').delete().eq('id', item.id)
-        if (sbErr) {
-          console.warn('Supabase deletion error:', sbErr.message)
-        } else {
-          invalidateCurriculumCache()
-        }
-      } catch (err) {
-        console.warn('Network error deleting from Supabase:', err)
+    try {
+      // 1. Supabase sync if configured
+      if (isSupabaseConfigured()) {
+        const { error: sbErr } = await supabase.from('questions').insert({
+          id: qId,
+          category_id: formSubject,
+          prompt: newQuestion.prompt,
+          choices: newQuestion.choices,
+          answer: newQuestion.answer,
+          explanation: newQuestion.explanation,
+          status: 'pending',
+          exam_target: examTargetArray,
+          is_reviewed: false,
+          created_at: newQuestion.created_at,
+        })
+        if (sbErr) console.warn('Supabase insert warning:', sbErr.message)
       }
-    }
 
-    // 2. Delete from local contentStore if present
-    if (item._isCustom) {
-      await contentStore.deleteQuestion(item.id)
-    }
-
-    await refresh()
-    await loadQuestions()
-    notify('Question deleted permanently.')
-  }
-
-  // Create category handler
-  const handleSaveCategory = async (e) => {
-    e.preventDefault()
-    if (!categoryForm.title.trim()) {
-      setError('Please enter a category title.')
-      return
-    }
-    const hue = Math.round(Math.random() * 360)
-    const saved = await contentStore.saveCategory({ ...categoryForm, hue })
-    await refresh()
-    setTargetCategory(saved.id)
-    setIsCategoryModalOpen(false)
-    setCategoryForm({ title: '', tagline: '', exam: 'Custom' })
-    notify(`Created exam track category "${saved.title}".`)
-  }
-
-  // Generator handler
-  const handleGeneratePaper = () => {
-    const paper = generateBalancedPaper(tracks, selectedBlueprint)
-    setGeneratedPaper(paper)
-    notify(`Generated balanced paper: ${paper.questions.length} MCQs.`)
-  }
-
-  const handleSaveGeneratedPaperAsTrack = async () => {
-    if (!generatedPaper) return
-    const cat = await contentStore.saveCategory({
-      title: `${selectedBlueprint.title} (Mock ${new Date().toLocaleDateString()})`,
-      tagline: `Full Mock Paper · ${generatedPaper.questions.length} MCQs · ${generatedPaper.durationMinutes}m`,
-      exam: selectedBlueprint.exam || 'Custom',
-      hue: 210,
-    })
-
-    for (let i = 0; i < generatedPaper.questions.length; i++) {
-      const q = generatedPaper.questions[i]
+      // 2. Local ContentStore sync
       await contentStore.saveQuestion({
-        prompt: q.prompt,
-        directive: q.directive,
-        statements: q.statements,
-        closing: q.closing,
-        choices: q.choices,
-        answer: q.answer,
-        explanation: q.explanation,
-        categoryId: cat.id,
-        order: i,
+        id: qId,
+        categoryId: formSubject,
+        prompt: newQuestion.prompt,
+        choices: newQuestion.choices,
+        answer: newQuestion.answer,
+        explanation: newQuestion.explanation,
+        status: 'pending',
+        exam_target: examTargetArray,
       })
+
+      setQuestions((prev) => [newQuestion, ...prev])
+      setNotice({
+        type: 'success',
+        text: 'Question submitted as Pending Draft. It has been routed to the Review Queue.',
+      })
+
+      // Reset prompt and choices for next input, maintaining subject context
+      setFormPrompt('')
+      setFormChoices(['', '', '', ''])
+      setFormAnswer(0)
+      setFormExplanation('')
+    } catch (err) {
+      console.error('Error submitting question:', err)
+      alert('Could not save question: ' + err.message)
+    } finally {
+      setFormSubmitting(false)
     }
-
-    await refresh()
-    notify(`Saved mock paper as custom category "${cat.title}".`)
   }
 
-  const handlePrintPaper = () => {
-    window.print()
-  }
-
-  // Import / Export handlers
-  const handleExportFullBackup = async () => {
-    const json = await backupManager.exportFullBackup()
-    const blob = new Blob([json], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `mpt-ai-examiner-backup-${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-    notify('Full system backup exported.')
-  }
-
-  const handleImportJsonFile = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const text = await file.text()
+  // Approval Pipeline Actions
+  const handleApproveQuestion = async (q) => {
     try {
-      const parsed = JSON.parse(text)
-      if (parsed.version && parsed.data) {
-        // It's a full backup
-        await backupManager.restoreBackup(text)
-        await refresh()
-        notify('System backup restored successfully.')
-      } else if (parsed.category && Array.isArray(parsed.questions)) {
-        // It's a single track export
-        const category = await contentStore.saveCategory(parsed.category)
-        for (const item of parsed.questions) {
-          await contentStore.saveQuestion({ ...item, categoryId: category.id })
-        }
-        await refresh()
-        notify(`Imported track "${category.title}" with ${parsed.questions.length} questions.`)
+      if (isSupabaseConfigured()) {
+        await updateQuestionStatus(q.id, 'approved')
+      }
+      await contentStore.updateQuestionStatus(q.id, 'approved')
+      invalidateCurriculumCache()
+      await refresh()
+
+      setQuestions((prev) =>
+        prev.map((item) => (item.id === q.id ? { ...item, status: 'approved' } : item)),
+      )
+      setNotice({
+        type: 'success',
+        text: `Question approved! It is now live in the student app.`,
+      })
+    } catch (err) {
+      alert('Could not approve question: ' + err.message)
+    }
+  }
+
+  const handleRejectQuestion = async (q) => {
+    try {
+      if (isSupabaseConfigured()) {
+        await updateQuestionStatus(q.id, 'rejected')
+      }
+      await contentStore.updateQuestionStatus(q.id, 'rejected')
+
+      setQuestions((prev) =>
+        prev.map((item) => (item.id === q.id ? { ...item, status: 'rejected' } : item)),
+      )
+      setNotice({
+        type: 'info',
+        text: `Question marked as rejected.`,
+      })
+    } catch (err) {
+      alert('Could not reject question: ' + err.message)
+    }
+  }
+
+  const handleDeleteQuestion = async (q) => {
+    if (!window.confirm('Delete this question permanently?')) return
+    try {
+      if (isSupabaseConfigured()) {
+        await supabase.from('questions').delete().eq('id', q.id)
+      }
+      await contentStore.deleteQuestion(q.id)
+      invalidateCurriculumCache()
+      await refresh()
+
+      setQuestions((prev) => prev.filter((item) => item.id !== q.id))
+      setNotice({
+        type: 'info',
+        text: 'Question deleted.',
+      })
+    } catch (err) {
+      alert('Could not delete question: ' + err.message)
+    }
+  }
+
+  // Save changes from Edit Modal
+  const handleSaveEditedQuestion = async (updated) => {
+    try {
+      if (isSupabaseConfigured()) {
+        await supabase
+          .from('questions')
+          .update({
+            prompt: updated.prompt,
+            choices: updated.choices,
+            answer: updated.answer,
+            explanation: updated.explanation,
+            category_id: updated.category_id,
+            exam_target: updated.exam_target,
+            status: updated.status,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', updated.id)
+      }
+      await contentStore.saveQuestion({
+        id: updated.id,
+        categoryId: updated.category_id,
+        prompt: updated.prompt,
+        choices: updated.choices,
+        answer: updated.answer,
+        explanation: updated.explanation,
+        status: updated.status,
+        exam_target: updated.exam_target,
+      })
+      invalidateCurriculumCache()
+      await refresh()
+
+      setQuestions((prev) => prev.map((q) => (q.id === updated.id ? updated : q)))
+      setEditingQuestion(null)
+      setNotice({
+        type: 'success',
+        text: 'Question updated successfully.',
+      })
+    } catch (err) {
+      alert('Failed to save edits: ' + err.message)
+    }
+  }
+
+  // Filter questions for Review Queue
+  const reviewQuestions = useMemo(() => {
+    if (reviewFilter === 'all') return questions
+    return questions.filter((q) => q.status === reviewFilter)
+  }, [questions, reviewFilter])
+
+  // Group questions by Date for Review Queue
+  const groupedReviewQuestions = useMemo(() => {
+    const groups = new Map()
+    for (const q of reviewQuestions) {
+      const label = formatGroupDate(q.created_at)
+      if (!groups.has(label)) {
+        groups.set(label, [])
+      }
+      groups.get(label).push(q)
+    }
+    return Array.from(groups.entries())
+  }, [reviewQuestions])
+
+  // New Staff Account Creation State
+  const [newStaffEmail, setNewStaffEmail] = useState('')
+  const [newStaffPassword, setNewStaffPassword] = useState('')
+  const [newStaffName, setNewStaffName] = useState('')
+  const [newStaffRole, setNewStaffRole] = useState('contributor')
+  const [creatingStaff, setCreatingStaff] = useState(false)
+
+  const handleCreateStaff = async (e) => {
+    e.preventDefault()
+    if (!newStaffEmail || !newStaffPassword) {
+      alert('Email and password are required.')
+      return
+    }
+    setCreatingStaff(true)
+    try {
+      const res = await createStaffAccount({
+        email: newStaffEmail.trim(),
+        password: newStaffPassword,
+        fullName: newStaffName.trim(),
+        role: newStaffRole,
+        assignedCategories: [],
+      })
+
+      if (res.error) {
+        alert('Could not create account: ' + res.error.message)
       } else {
-        setError('Unrecognized JSON format. Must be an MPT-AI backup or track export.')
-      }
-    } catch (err) {
-      setError(`JSON parse failed: ${err.message}`)
-    } finally {
-      if (fileRef.current) fileRef.current.value = ''
-    }
-  }
-
-  const handleExportCsvQuestions = () => {
-    const questionsToExport = paginatedQuestions.length > 0 ? paginatedQuestions : allSystemQuestions
-    const csvContent = exportQuestionsToCsv(questionsToExport)
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `mpt-ai-questions-${new Date().toISOString().slice(0, 10)}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
-    notify(`Exported ${questionsToExport.length} questions to CSV.`)
-  }
-
-  const handleImportCsvFile = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const text = await file.text()
-    try {
-      const parsed = parseCsvQuestions(text)
-      if (parsed.length === 0) {
-        setError('No valid questions found in CSV file. Check format header.')
-        return
-      }
-
-      let catId = targetCategory || categories[0]?.id
-      if (!catId) {
-        const cat = await contentStore.saveCategory({
-          title: 'CSV Imported Questions',
-          tagline: `Imported on ${new Date().toLocaleDateString()}`,
-          exam: 'Custom',
+        const newlyCreated = {
+          id: res.data?.id || `user-${Date.now()}`,
+          email: newStaffEmail.trim(),
+          full_name: newStaffName.trim() || newStaffEmail.split('@')[0],
+          role: newStaffRole,
+          assigned_categories: [],
+          created_at: new Date().toISOString(),
+        }
+        setUsersList((prev) => [newlyCreated, ...prev])
+        setNotice({
+          type: 'success',
+          text: `Staff account created for ${newStaffEmail} (${newStaffRole.toUpperCase()}).`,
         })
-        catId = cat.id
+        setNewStaffEmail('')
+        setNewStaffPassword('')
+        setNewStaffName('')
+        setNewStaffRole('contributor')
       }
-
-      for (const item of parsed) {
-        await contentStore.saveQuestion({ ...item, categoryId: catId })
-      }
-      await refresh()
-      notify(`Imported ${parsed.length} questions from CSV successfully.`)
     } catch (err) {
-      setError(`CSV import failed: ${err.message}`)
+      alert('Account creation error: ' + err.message)
     } finally {
-      if (csvFileRef.current) csvFileRef.current.value = ''
+      setCreatingStaff(false)
     }
   }
 
-  const handleImportPdf = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setIsParsingPdf(true)
-    setError(null)
+  const handleUpdateRole = async (userId, targetRole) => {
     try {
-      const parsed = await parsePdfInBrowser(file)
-      if (parsed.length === 0) {
-        setError('No MCQs could be extracted from PDF. Check format: "1. Prompt \\n A) Opt1 \\n B) Opt2 \\n Answer: A"')
-        return
-      }
-
-      let catId = targetCategory || categories[0]?.id
-      if (!catId) {
-        const cat = await contentStore.saveCategory({
-          title: file.name.replace(/\.pdf$/i, ''),
-          tagline: `PDF Extracted on ${new Date().toLocaleDateString()}`,
-          exam: 'Custom',
-        })
-        catId = cat.id
-      }
-
-      for (const item of parsed) {
-        await contentStore.saveQuestion({ ...item, categoryId: catId })
-      }
-      await refresh()
-      notify(`Extracted ${parsed.length} MCQs from PDF and saved to category.`)
-    } catch (err) {
-      setError(`PDF parse failed: ${err.message}`)
-    } finally {
-      setIsParsingPdf(false)
-      if (pdfRef.current) pdfRef.current.value = ''
-    }
-  }
-
-  const handleExportCategoryJson = async () => {
-    const cat = categories.find((c) => c.id === targetCategory) || categories[0]
-    if (!cat) {
-      setError('Please select a category to export.')
-      return
-    }
-    const catQuestions = customQuestions.filter((q) => q.categoryId === cat.id)
-    const exportData = {
-      category: cat,
-      questions: catQuestions,
-      exportedAt: new Date().toISOString(),
-      format: 'mpt-ai-track-v1',
-    }
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${cat.title.toLowerCase().replace(/\s+/g, '-')}-questions.json`
-    a.click()
-    URL.revokeObjectURL(url)
-    notify(`Exported standard JSON for "${cat.title}".`)
-  }
-
-  const handleImportTextBatch = async () => {
-    if (!batchText.trim()) return
-    const parsed = parsePlainTextQuestions(batchText)
-    if (parsed.length === 0) {
-      setError('Could not parse text. Ensure format: "1. Prompt \\n A) Opt1 \\n B) Opt2 \\n Answer: A"')
-      return
-    }
-
-    let catId = targetCategory || categories[0]?.id
-    if (!catId) {
-      const cat = await contentStore.saveCategory({
-        title: 'Batch Imported MCQs',
-        tagline: 'Plain text import',
-        exam: 'Custom',
+      await updateProfileRole(userId, targetRole)
+      setUsersList((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, role: targetRole } : u)),
+      )
+      setNotice({
+        type: 'info',
+        text: `Role updated to ${targetRole}.`,
       })
-      catId = cat.id
+    } catch (err) {
+      alert('Failed to update role: ' + err.message)
     }
-
-    for (const item of parsed) {
-      await contentStore.saveQuestion({ ...item, categoryId: catId })
-    }
-    await refresh()
-    setBatchText('')
-    notify(`Parsed and added ${parsed.length} questions.`)
   }
 
-  // Security Gate: Protect /admin with isolated staff login screen
-  const isSupabase = isSupabaseConfigured()
-  const isStaff = ['admin', 'editor', 'reviewer', 'contributor'].includes(role)
+  const handleDeleteStaff = async (userId) => {
+    if (!window.confirm('Revoke access and delete this staff account?')) return
+    try {
+      await deleteStaffProfile(userId)
+      setUsersList((prev) => prev.filter((u) => u.id !== userId))
+      setNotice({
+        type: 'info',
+        text: 'Staff account removed.',
+      })
+    } catch (err) {
+      alert('Failed to remove account: ' + err.message)
+    }
+  }
 
-  if (authLoading) {
+  // =========================================================================
+  // SECURITY GATE: RESTRICTED ACCESS
+  // 1. Unauthenticated -> Isolated Staff Login Screen
+  // 2. Authenticated but non-staff (e.g. Student) -> Access Restricted Screen
+  // =========================================================================
+  if (!user) {
     return (
-      <div className="admin-login-screen">
-        <div className="admin-login-card" style={{ textAlign: 'center' }}>
-          <div className="admin-login-badge" style={{ margin: '0 auto 1.25rem' }}>
-            <ShieldCheckIcon width="36" height="36" />
+      <div className="admin-gate-page">
+        <div className="admin-gate-card">
+          <div className="admin-gate-header">
+            <div className="admin-gate-badge">
+              <ShieldCheckIcon width="28" height="28" />
+            </div>
+            <h1 className="admin-gate-title">MPT·AI Staff Portal</h1>
+            <p className="admin-gate-subtitle">
+              Restricted administrative gateway. Authorized personnel only.
+            </p>
           </div>
-          <h2>Verifying Credentials…</h2>
-          <p>Connecting to Examiner Authentication gateway.</p>
+
+          <form onSubmit={handleStaffLogin} className="admin-gate-form">
+            {gateError && (
+              <div className="admin-gate-error" role="alert">
+                <AlertCircleIcon width="16" height="16" />
+                <span>{gateError}</span>
+              </div>
+            )}
+
+            <div className="field-group">
+              <label className="field-label" htmlFor="staff-gate-email">
+                Staff Email Address
+              </label>
+              <input
+                id="staff-gate-email"
+                type="email"
+                className="field-input"
+                value={gateEmail}
+                onChange={(e) => setGateEmail(e.target.value)}
+                placeholder="staff@mpt-ai.org"
+                required
+                autoFocus
+              />
+            </div>
+
+            <div className="field-group">
+              <label className="field-label" htmlFor="staff-gate-password">
+                Password
+              </label>
+              <input
+                id="staff-gate-password"
+                type="password"
+                className="field-input"
+                value={gatePassword}
+                onChange={(e) => setGatePassword(e.target.value)}
+                placeholder="••••••••••••"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn--primary admin-gate-btn"
+              disabled={gateLoading}
+            >
+              {gateLoading ? 'Authenticating…' : 'Sign In to Staff Console'}
+            </button>
+          </form>
+
+          <div className="admin-gate-footer">
+            <Link to="/" className="admin-gate-back-link">
+              <ArrowLeftIcon width="15" height="15" />
+              <span>Return to Student App</span>
+            </Link>
+          </div>
         </div>
       </div>
     )
   }
 
-  if (isSupabase) {
-    if (!user) {
-      return (
-        <div className="admin-login-screen">
-          <div className="admin-login-card">
-            <div className="admin-login-header">
-              <div className="admin-login-badge">
-                <ShieldCheckIcon width="36" height="36" />
-              </div>
-              <h2>Examiner Studio · Staff Portal</h2>
-              <p>Restricted administrative access. Authenticate with staff credentials.</p>
+  if (user && !isStaff) {
+    return (
+      <div className="admin-gate-page">
+        <div className="admin-gate-card">
+          <div className="admin-gate-header">
+            <div className="admin-gate-badge admin-gate-badge--denied">
+              <LockIcon width="28" height="28" />
             </div>
-
-            {loginError && <div className="admin-banner admin-banner--error">{loginError}</div>}
-
-            <form onSubmit={handleStaffLogin} className="admin-login-form">
-              <div className="admin-login-field">
-                <label>Email Address</label>
-                <input
-                  type="email"
-                  required
-                  autoFocus
-                  placeholder="examiner@mpt-ai.org"
-                  value={loginEmail}
-                  onChange={(e) => {
-                    setLoginEmail(e.target.value)
-                    setLoginError(null)
-                  }}
-                  className="admin-login-input"
-                />
-              </div>
-
-              <div className="admin-login-field">
-                <label>Password</label>
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={loginPassword}
-                  onChange={(e) => {
-                    setLoginPassword(e.target.value)
-                    setLoginError(null)
-                  }}
-                  className="admin-login-input"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="btn btn--primary admin-login-btn"
-                disabled={loginLoading}
-              >
-                {loginLoading ? 'Authenticating Staff…' : 'Sign In to Examiner Studio'}
-              </button>
-            </form>
-
-            <Link to="/" className="btn btn--ghost btn--small" style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-              ← Return to Candidate Application
-            </Link>
-          </div>
-        </div>
-      )
-    }
-
-    if (!isStaff) {
-      return (
-        <div className="admin-login-screen">
-          <div className="admin-login-card" style={{ textAlign: 'center' }}>
-            <div className="admin-login-badge" style={{ margin: '0 auto 1.25rem' }}>
-              <LockIcon width="36" height="36" />
-            </div>
-            <h2>Access Restricted</h2>
-            <p>
-              Signed in as <strong>{user.email}</strong>. Your account does not have staff permissions (Admin, Editor, Reviewer, Contributor).
+            <h1 className="admin-gate-title">Access Restricted</h1>
+            <p className="admin-gate-subtitle">
+              Signed in as <strong>{user.email}</strong>
             </p>
-            <p style={{ color: 'var(--muted)', fontSize: '0.8rem' }}>
-              Please contact the system administrator to provision examiner access for your account.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1.25rem' }}>
-              <button type="button" className="btn btn--primary" onClick={signOut}>
-                Sign Out
-              </button>
-              <Link to="/" className="btn btn--ghost btn--small">
-                ← Return to Candidate Application
-              </Link>
-            </div>
           </div>
-        </div>
-      )
-    }
-  } else {
-    // Offline / Local Development environment
-    if (!isDevLoggedIn || isConsoleLocked) {
-      return (
-        <div className="admin-login-screen">
-          <div className="admin-login-card">
-            <div className="admin-login-header">
-              <div className="admin-login-badge">
-                <ShieldCheckIcon width="36" height="36" />
-              </div>
-              <h2>Examiner Studio · Staff Portal</h2>
-              <p>Restricted administrative access. Authenticate with staff credentials.</p>
-            </div>
 
-            {loginError && <div className="admin-banner admin-banner--error">{loginError}</div>}
-
-            <form onSubmit={handleStaffLogin} className="admin-login-form">
-              <div className="admin-login-field">
-                <label>Email Address</label>
-                <input
-                  type="email"
-                  placeholder="admin@mpt-ai.internal"
-                  value={loginEmail}
-                  onChange={(e) => {
-                    setLoginEmail(e.target.value)
-                    setLoginError(null)
-                  }}
-                  className="admin-login-input"
-                />
-              </div>
-
-              <div className="admin-login-field">
-                <label>Password</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={loginPassword}
-                  onChange={(e) => {
-                    setLoginPassword(e.target.value)
-                    setLoginError(null)
-                  }}
-                  className="admin-login-input"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="btn btn--primary admin-login-btn"
-                disabled={loginLoading}
-              >
-                Sign In to Examiner Studio
-              </button>
-            </form>
-
-            <div className="admin-dev-notice-box">
-              <div className="admin-dev-notice-header">Offline Dev Environment</div>
-              <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: '0 0 0.75rem' }}>
-                Supabase credentials not configured in .env. Select a role below for instant preview:
+          <div className="admin-gate-denied-box">
+            <AlertCircleIcon width="20" height="20" />
+            <div>
+              <strong>Staff Privileges Required</strong>
+              <p>
+                This account does not have administrator, editor, or reviewer permissions.
+                Please sign in with authorized staff credentials to access the admin portal.
               </p>
-              <div className="admin-dev-role-grid">
-                <button
-                  type="button"
-                  className="admin-dev-role-btn"
-                  onClick={() => handleDevLogin('admin')}
-                >
-                  Enter as Admin
-                </button>
-                <button
-                  type="button"
-                  className="admin-dev-role-btn"
-                  onClick={() => handleDevLogin('editor')}
-                >
-                  Enter as Editor
-                </button>
-                <button
-                  type="button"
-                  className="admin-dev-role-btn"
-                  onClick={() => handleDevLogin('reviewer')}
-                >
-                  Enter as Reviewer
-                </button>
-                <button
-                  type="button"
-                  className="admin-dev-role-btn"
-                  onClick={() => handleDevLogin('contributor')}
-                >
-                  Enter as Contributor
-                </button>
-              </div>
             </div>
+          </div>
 
-            <Link to="/" className="btn btn--ghost btn--small" style={{ marginTop: '1.25rem', textAlign: 'center' }}>
-              ← Return to Candidate Application
+          <div className="admin-gate-actions">
+            <Link to="/" className="btn btn--primary">
+              Return to Student App
             </Link>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={async () => {
+                await signOut()
+              }}
+            >
+              Sign Out
+            </button>
           </div>
         </div>
-      )
-    }
+      </div>
+    )
   }
 
   return (
-    <div className="admin-layout">
-      {/* Mobile Header Bar (< 1024px) */}
-      <header className="admin-mobile-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={() => setMobileMenuOpen((o) => !o)}
-            aria-label="Toggle Navigation Menu"
-          >
-            <BookIcon width="18" height="18" />
-          </button>
-          <span style={{ fontWeight: 800, fontSize: '0.92rem' }}>MPT·AI Studio</span>
-        </div>
+    <div className="admin-page">
+      {/* Top Header */}
+      <header className="admin-header">
+        <div className="admin-header__inner">
+          <div className="admin-header__left">
+            <Link to="/" className="admin-back-btn" title="Back to Student Dashboard">
+              <ArrowLeftIcon width="16" height="16" />
+              <span>Student App</span>
+            </Link>
+            <div className="admin-header__divider" />
+            <div className="admin-brand">
+              <span className="admin-brand__badge">Admin</span>
+              <span className="admin-brand__title">MPT·AI Portal</span>
+            </div>
+          </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={handleCycleTheme}
-            title={`Theme: ${THEME_NAMES[currentTheme] || currentTheme}. Click to cycle.`}
-          >
-            {currentTheme === 'light' || currentTheme === 'ivory' || currentTheme === 'sepia' ? (
-              <SunIcon width="16" height="16" />
-            ) : (
-              <MoonIcon width="16" height="16" />
+          <div className="admin-header__right">
+            {/* Quick Dev Role Switcher */}
+            <div className="admin-role-switch" title="Active preview permissions">
+              <LockIcon width="13" height="13" />
+              <span className="role-switch-label">Role:</span>
+              <select
+                className="role-switch-select"
+                value={role}
+                onChange={(e) => setDevRole(e.target.value)}
+                aria-label="Simulate Role"
+              >
+                <option value="admin">Admin (Full Control)</option>
+                <option value="editor">Editor (Can Add & Edit)</option>
+                <option value="reviewer">Reviewer (Review Queue)</option>
+                <option value="contributor">Contributor (Draft Submissions)</option>
+              </select>
+            </div>
+
+            {/* Authenticated Staff User Pill */}
+            {user && (
+              <div className="admin-user-pill">
+                <span className="admin-user-email" title={user.email}>{user.email}</span>
+                <button
+                  type="button"
+                  className="admin-signout-btn"
+                  onClick={async () => {
+                    await signOut()
+                  }}
+                  title="Sign Out of Staff Portal"
+                >
+                  Sign Out
+                </button>
+              </div>
             )}
-          </button>
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={handleSignOutOrLock}
-            title="Lock Studio / Sign Out"
-          >
-            <LockIcon width="16" height="16" />
-          </button>
-        </div>
-      </header>
 
-      {/* Left-Hand Sidebar (Modern SaaS Layout) */}
-      {mobileMenuOpen && (
-        <div
-          className="admin-sidebar-backdrop"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
-      <aside className={`admin-sidebar ${mobileMenuOpen ? 'is-open' : ''}`}>
-        {/* Sidebar Brand Header */}
-        <div className="admin-sidebar__header">
-          <div className="admin-sidebar__brand">
-            <div className="admin-sidebar__badge">
-              <ShieldCheckIcon width="20" height="20" />
-            </div>
-            <div className="admin-sidebar__title-text">
-              <h1>MPT·AI Studio</h1>
-              <p>Examiner Console</p>
-            </div>
-          </div>
-
-          <div className={`admin-cloud-pill ${telemetry.connected ? 'is-connected' : 'is-offline'}`}>
-            <span className="cloud-pulse-dot" />
-            <span>{telemetry.connected ? 'Cloud Database Connected' : 'Local Offline Sandbox'}</span>
+            {/* Quick 4-Theme Switcher */}
+            <button
+              type="button"
+              className="admin-tool-btn"
+              onClick={handleCycleTheme}
+              title={`Theme: ${currentTheme.toUpperCase()}. Click to cycle (Light / Dark / Zen / Midnight).`}
+            >
+              {currentTheme === 'dark' || currentTheme === 'midnight' ? (
+                <MoonIcon width="16" height="16" />
+              ) : (
+                <SunIcon width="16" height="16" />
+              )}
+            </button>
           </div>
         </div>
 
-        {/* Sidebar Navigation */}
-        <nav className="admin-sidebar__nav" role="tablist" aria-label="Admin Sections">
-          <div className="admin-nav-group-label">Core Management</div>
+        {/* Tabbed Navigation Bar */}
+        <nav className="admin-tabs" role="tablist" aria-label="Portal Navigation">
           <button
             type="button"
-            className={`admin-nav-item ${currentTab === 'overview' ? 'is-active' : ''}`}
-            onClick={() => {
-              setActiveTab('overview')
-              setMobileMenuOpen(false)
-            }}
+            className={`admin-tab-btn ${activeTab === 'dashboard' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('dashboard')}
           >
-            <span className="admin-nav-item__left">
-              <BarChartIcon width="16" height="16" />
-              <span>Overview (Stats)</span>
-            </span>
+            <BarChartIcon width="16" height="16" />
+            <span>Dashboard</span>
           </button>
 
           <button
             type="button"
-            className={`admin-nav-item ${currentTab === 'questions' ? 'is-active' : ''}`}
-            onClick={() => {
-              setActiveTab('questions')
-              setMobileMenuOpen(false)
-            }}
+            className={`admin-tab-btn ${activeTab === 'add-question' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('add-question')}
           >
-            <span className="admin-nav-item__left">
-              <BookIcon width="16" height="16" />
-              <span>Manage Questions</span>
-            </span>
-            <span className="admin-nav-badge">{totalQuestionsCount || stats.total}</span>
+            <PlusIcon width="16" height="16" />
+            <span>Add Question</span>
           </button>
 
           <button
             type="button"
-            className={`admin-nav-item ${currentTab === 'tracks' ? 'is-active' : ''}`}
-            onClick={() => {
-              setActiveTab('tracks')
-              setMobileMenuOpen(false)
-            }}
+            className={`admin-tab-btn ${activeTab === 'review-queue' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('review-queue')}
           >
-            <span className="admin-nav-item__left">
-              <TargetIcon width="16" height="16" />
-              <span>Categories & Tracks</span>
-            </span>
-            <span className="admin-nav-badge">{tracks.length}</span>
-          </button>
-
-          <div className="admin-nav-group-label">Examiner Tools</div>
-          <button
-            type="button"
-            className={`admin-nav-item ${currentTab === 'generator' ? 'is-active' : ''}`}
-            onClick={() => {
-              setActiveTab('generator')
-              setMobileMenuOpen(false)
-            }}
-          >
-            <span className="admin-nav-item__left">
-              <ZapIcon width="16" height="16" />
-              <span>Paper Generator</span>
-            </span>
-          </button>
-
-          <button
-            type="button"
-            className={`admin-nav-item ${currentTab === 'audit' ? 'is-active' : ''}`}
-            onClick={() => {
-              setActiveTab('audit')
-              setMobileMenuOpen(false)
-            }}
-          >
-            <span className="admin-nav-item__left">
-              <ShieldCheckIcon width="16" height="16" />
-              <span>Quality Audit</span>
-            </span>
-          </button>
-
-          <button
-            type="button"
-            className={`admin-nav-item ${currentTab === 'import-export' ? 'is-active' : ''}`}
-            onClick={() => {
-              setActiveTab('import-export')
-              setMobileMenuOpen(false)
-            }}
-          >
-            <span className="admin-nav-item__left">
-              <UploadIcon width="16" height="16" />
-              <span>Import & Export</span>
-            </span>
+            <ShieldCheckIcon width="16" height="16" />
+            <span>Review Queue</span>
+            {stats.pending > 0 && (
+              <span className="admin-tab-badge is-pending">{stats.pending}</span>
+            )}
           </button>
 
           {role === 'admin' && (
-            <>
-              <div className="admin-nav-group-label">Administration</div>
-              <button
-                type="button"
-                className={`admin-nav-item ${currentTab === 'users' ? 'is-active' : ''}`}
-                onClick={() => {
-                  setActiveTab('users')
-                  setMobileMenuOpen(false)
-                }}
-              >
-                <span className="admin-nav-item__left">
-                  <UsersIcon width="16" height="16" />
-                  <span>Team Management</span>
-                </span>
-                <span className="admin-nav-badge">{usersList.length}</span>
-              </button>
-            </>
+            <button
+              type="button"
+              className={`admin-tab-btn ${activeTab === 'users' ? 'is-active' : ''}`}
+              onClick={() => setActiveTab('users')}
+            >
+              <UsersIcon width="16" height="16" />
+              <span>User Management</span>
+            </button>
           )}
         </nav>
+      </header>
 
-        {/* Sidebar Footer User & Controls */}
-        <div className="admin-sidebar__footer">
-          <div className="admin-sidebar-user">
-            <div className="admin-sidebar-avatar">
-              {(profile?.full_name || user?.email || role || 'A')[0].toUpperCase()}
-            </div>
-            <div className="admin-sidebar-user-info">
-              <div className="admin-sidebar-user-name">
-                {profile?.full_name || user?.email?.split('@')[0] || 'Staff Member'}
-              </div>
-              <span className="admin-sidebar-user-role">
-                {role.toUpperCase()}
-              </span>
-            </div>
-          </div>
-
-          {/* RBAC Role Preview Switcher */}
-          <div className="rbac-role-switcher" title="Switch active RBAC role to preview permissions">
-            <span className="rbac-switcher-lbl">Preview:</span>
-            {['admin', 'editor', 'reviewer', 'contributor'].map((r) => (
-              <button
-                key={r}
-                type="button"
-                className={`rbac-role-btn ${role === r ? 'is-active' : ''}`}
-                onClick={() => {
-                  setDevRole(r)
-                  notify(`Switched preview role to '${r.toUpperCase()}'.`)
-                }}
-              >
-                {r[0].toUpperCase()}
-              </button>
-            ))}
-          </div>
-
-          <div className="admin-sidebar-actions-row">
-            <Link to="/" className="btn btn--small btn--ghost" style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}>
-              <ArrowLeftIcon width="14" height="14" />
-              <span>Exit</span>
-            </Link>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={handleCycleTheme}
-                title={`Theme: ${THEME_NAMES[currentTheme] || currentTheme}. Click to cycle.`}
-              >
-                {currentTheme === 'light' || currentTheme === 'ivory' || currentTheme === 'sepia' ? (
-                  <SunIcon width="16" height="16" />
-                ) : (
-                  <MoonIcon width="16" height="16" />
-                )}
-              </button>
-
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={handleSignOutOrLock}
-                title="Lock Studio / Sign Out"
-              >
-                <LockIcon width="16" height="16" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Workspace */}
-      <div className="admin-main">
-        {/* Topbar */}
-        <header className="admin-topbar">
-          <div className="admin-topbar__title-group">
-            <h2>
-              {currentTab === 'overview' && 'System Overview & Stats'}
-              {currentTab === 'questions' && 'Manage Questions'}
-              {currentTab === 'tracks' && 'Categories & Syllabus Tracks'}
-              {currentTab === 'generator' && 'Paper Generator'}
-              {currentTab === 'audit' && 'Quality Assurance & Audit'}
-              {currentTab === 'import-export' && 'Bulk Import & Export'}
-              {currentTab === 'users' && 'Team Management & Roles'}
-            </h2>
-            <p>
-              {currentTab === 'overview' && 'Curriculum metrics, answer key verification ratio, and database telemetry.'}
-              {currentTab === 'questions' && 'Search, filter, author, and review question bank entries with server-side pagination.'}
-              {currentTab === 'tracks' && 'Commission guidelines, syllabi blueprints, and course units.'}
-              {currentTab === 'generator' && 'Generate balanced screening mock papers strictly according to syllabus.'}
-              {currentTab === 'audit' && 'Automated verification against answer keys, duplicates, and explanations.'}
-              {currentTab === 'import-export' && 'Extract past papers from PDF, Excel/CSV, and standard JSON formats.'}
-              {currentTab === 'users' && 'Manage team roles, access clearance, and staff credentials.'}
-            </p>
-          </div>
-
-          <div className="admin-topbar__actions">
-            <button
-              type="button"
-              className={`btn btn--small btn--primary ${!canAddQuestion(targetCategory) ? 'btn--disabled' : ''}`}
-              onClick={() => {
-                if (canAddQuestion(targetCategory)) {
-                  handleOpenNewQuestion()
-                } else {
-                  setError(`Role '${role}' cannot add questions. Contributor or Admin clearance required.`)
-                }
-              }}
-              title={canAddQuestion(targetCategory) ? 'Add New Question' : `Role '${role}' cannot add questions`}
-            >
-              <PlusIcon width="16" height="16" />
-              <span>Add New Question</span>
-            </button>
-
-            <button
-              type="button"
-              className="btn btn--small btn--ghost"
-              onClick={() => setIsCategoryModalOpen(true)}
-            >
-              <span>+ Add Track</span>
-            </button>
-          </div>
-        </header>
-
-        {/* Global Alerts */}
-        {feedback && <div className="admin-banner admin-banner--success">{feedback}</div>}
-        {error && <div className="admin-banner admin-banner--error">{error}</div>}
-
-        {/* Tab 1: Overview & KPIs */}
-        {currentTab === 'overview' && (
-          <main className="admin-content">
-            <div className="kpi-grid">
-              <div className="kpi-card">
-                <span className="kpi-label">Total Verified MCQs</span>
-                <strong className="kpi-value">{stats.total}</strong>
-                <span className="kpi-sub">
-                  {telemetry.connected && telemetry.cloudQuestions !== null
-                    ? `${telemetry.cloudQuestions} in Supabase cloud`
-                    : `${stats.customCount} custom user authored`}
-                </span>
-              </div>
-              <div className="kpi-card">
-                <span className="kpi-label">Registered Candidates</span>
-                <strong className="kpi-value">
-                  {telemetry.connected ? (telemetry.totalUsers ?? '—') : 'Local'}
-                </strong>
-                <span className="kpi-sub">
-                  {telemetry.connected ? 'Active profiles in Supabase' : 'Offline sandbox'}
-                </span>
-              </div>
-              <div className="kpi-card">
-                <span className="kpi-label">Completed Sessions</span>
-                <strong className="kpi-value">
-                  {telemetry.connected ? (telemetry.totalCompletions ?? '—') : stats.customCount}
-                </strong>
-                <span className="kpi-sub">
-                  {telemetry.connected ? 'Database synchronized' : 'Local sessions'}
-                </span>
-              </div>
-              <div className="kpi-card">
-                <span className="kpi-label">Exam Tracks Active</span>
-                <strong className="kpi-value">{stats.tracksCount}</strong>
-                <span className="kpi-sub">CSS, PMS, Compulsory & Custom</span>
-              </div>
-              <div className="kpi-card">
-                <span className="kpi-label">Keyed Questions Ratio</span>
-                <strong className="kpi-value">{stats.healthPercent}%</strong>
-                <span className="kpi-sub">{stats.withKey} / {stats.total} verified answers</span>
-              </div>
-              <div className="kpi-card">
-                <span className="kpi-label">Pedagogical Explanations</span>
-                <strong className="kpi-value">{stats.withExp}</strong>
-                <span className="kpi-sub">{Math.round((stats.withExp / (stats.total || 1)) * 100)}% coverage</span>
-              </div>
-            </div>
-
-            <div className="admin-section-grid">
-              {/* Subject Distribution */}
-              <div className="admin-card">
-                <h2 className="admin-card__title">Syllabus Subject Distribution</h2>
-                <div className="subject-list">
-                  {stats.subjectBreakdown.map(([sub, count]) => {
-                    const pct = Math.round((count / (stats.total || 1)) * 100)
-                    return (
-                      <div key={sub} className="subject-row">
-                        <div className="subject-row__header">
-                          <span className="subject-name">{sub}</span>
-                          <span className="subject-count"><strong>{count}</strong> ({pct}%)</span>
-                        </div>
-                        <div className="subject-bar">
-                          <span style={{ width: `${pct}%` }} />
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Commission Breakdown & Quick Actions */}
-              <div className="admin-card">
-                <h2 className="admin-card__title">Exam Commission Coverage</h2>
-                <div className="commission-grid">
-                  {stats.examBreakdown.map(([exam, count]) => (
-                    <div key={exam} className="commission-tile">
-                      <span className="commission-name">{exam}</span>
-                      <span className="commission-val">{count} MCQs</span>
-                    </div>
-                  ))}
-                </div>
-
-                <h2 className="admin-card__title" style={{ marginTop: '1.5rem' }}>Quick Studio Actions</h2>
-                <div className="quick-actions-list">
-                  <button
-                    type="button"
-                    className="quick-action-btn"
-                    onClick={() => {
-                      setActiveTab('questions')
-                      setFilterQuality('needs-key')
-                    }}
-                  >
-                    <span>Fix Questions Missing Key</span>
-                    <span className="badge badge--warning">{stats.keyless}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="quick-action-btn"
-                    onClick={() => {
-                      setActiveTab('questions')
-                      setFilterQuality('missing-exp')
-                    }}
-                  >
-                    <span>Add Explanations</span>
-                    <span className="badge badge--muted">{stats.total - stats.withExp}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="quick-action-btn"
-                    onClick={() => setActiveTab('generator')}
-                  >
-                    <span>Generate Blueprint Paper</span>
-                    <span>⚡</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="quick-action-btn"
-                    onClick={handleRunAudit}
-                  >
-                    <span>Run Complete Quality Audit</span>
-                    <span>🛡️</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </main>
-        )}
-
-        {/* Tab 2: Manage Questions (Server-Side Paginated with 300ms Debounced Search) */}
-        {currentTab === 'questions' && (
-          <main className="admin-content">
-            <div className="admin-toolbar">
-              <div className="admin-toolbar__search">
-                <SearchIcon width="16" height="16" />
-                <input
-                  type="search"
-                  placeholder="Search questions by prompt, choices, or explanation (300ms debounced)…"
-                  value={questionSearch}
-                  onChange={(e) => setQuestionSearch(e.target.value)}
-                />
-                {questionSearch && (
-                  <button
-                    type="button"
-                    className="icon-btn"
-                    style={{ padding: '0.2rem' }}
-                    onClick={() => setQuestionSearch('')}
-                    title="Clear search"
-                  >
-                    <CloseIcon width="14" height="14" />
-                  </button>
-                )}
-              </div>
-
-              <div className="admin-toolbar__filters">
-                <select
-                  value={filterExam}
-                  onChange={(e) => {
-                    setFilterExam(e.target.value)
-                    setPage(1)
-                  }}
-                  className="admin-select"
-                >
-                  <option value="all">All Exams</option>
-                  {EXAM_CHOICES.map((ex) => (
-                    <option key={ex} value={ex}>{ex}</option>
-                  ))}
-                </select>
-
-                <select
-                  value={filterCategory}
-                  onChange={(e) => {
-                    setFilterCategory(e.target.value)
-                    setPage(1)
-                  }}
-                  className="admin-select"
-                >
-                  <option value="all">All Subjects / Categories</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.title}>{c.title}</option>
-                  ))}
-                </select>
-
-                <select
-                  value={filterQuality}
-                  onChange={(e) => {
-                    setFilterQuality(e.target.value)
-                    setPage(1)
-                  }}
-                  className="admin-select"
-                >
-                  <option value="all">All Question Statuses</option>
-                  <option value="needs-key">Missing Answer Key</option>
-                  <option value="missing-exp">Missing Explanation</option>
-                </select>
-
-                <button
-                  type="button"
-                  className="btn btn--small btn--primary"
-                  onClick={handleOpenNewQuestion}
-                  disabled={!canAddQuestion(targetCategory)}
-                  title={canAddQuestion(targetCategory) ? 'Add New Question' : `Role '${role}' cannot add questions`}
-                >
-                  <PlusIcon width="16" height="16" />
-                  <span>Add New Question</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="admin-results-meta">
-              <span>
-                {questionsLoading ? (
-                  'Fetching questions from database…'
-                ) : (
-                  <>
-                    Showing{' '}
-                    <strong>
-                      {totalQuestionsCount === 0
-                        ? 0
-                        : `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, totalQuestionsCount)}`}
-                    </strong>{' '}
-                    of <strong>{totalQuestionsCount}</strong> questions (Max 50/page)
-                  </>
-                )}
-              </span>
-
-              {totalPages > 1 && (
-                <div className="admin-pagination">
-                  <button
-                    type="button"
-                    className="btn btn--small btn--ghost"
-                    disabled={page === 1 || questionsLoading}
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  >
-                    Previous
-                  </button>
-                  <span className="page-indicator">
-                    Page {page} of {totalPages}
-                  </span>
-                  <button
-                    type="button"
-                    className="btn btn--small btn--ghost"
-                    disabled={page >= totalPages || questionsLoading}
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="admin-q-list">
-              {questionsLoading ? (
-                <div className="admin-empty-state" style={{ padding: '3rem', textAlign: 'center' }}>
-                  <p>Loading questions from database…</p>
-                </div>
-              ) : paginatedQuestions.length === 0 ? (
-                <div className="admin-empty-state">
-                  <p>No questions matched your active search and filters.</p>
-                </div>
-              ) : (
-                paginatedQuestions.map((item, idx) => {
-                  const hasValidKey = Number.isInteger(item.answer) && item.answer >= 0
-                  const hasExplanation = Boolean(item.explanation && item.explanation.trim())
-
-                  return (
-                    <div key={item.id || idx} className="admin-q-card">
-                      <div className="admin-q-header">
-                        <div className="admin-status-pills">
-                          {hasValidKey ? (
-                            <span className="status-pill status-pill--reviewed" title="Answer key assigned and ready">
-                              <CheckCircleIcon width="13" height="13" />
-                              <span>Reviewed</span>
-                            </span>
-                          ) : (
-                            <span className="status-pill status-pill--error" title="Missing valid answer key">
-                              <AlertTriangleIcon width="13" height="13" />
-                              <span>Needs Answer Key</span>
-                            </span>
-                          )}
-
-                          {!hasExplanation && (
-                            <span className="status-pill status-pill--warning" title="No pedagogical explanation provided">
-                              <AlertCircleIcon width="13" height="13" />
-                              <span>Missing Explanation</span>
-                            </span>
-                          )}
-
-                          <span className="status-pill status-pill--exam">{item._exam || 'CSS'}</span>
-                          <span className="status-pill status-pill--subject">{item._subject || item._unitTitle || 'General'}</span>
-                          {item._isCustom && <span className="status-pill status-pill--custom">Custom Authored</span>}
-                        </div>
-
-                        <div className="admin-q-actions">
-                          {/* Edit Action: Restricted to Editor and Admin */}
-                          {canEditQuestion(item) && (
-                            <button
-                              type="button"
-                              className="btn btn--small btn--ghost"
-                              onClick={() => handleEditQuestion(item)}
-                              title="Edit Question in Slide-Out Drawer"
-                              style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
-                            >
-                              <EditIcon width="14" height="14" />
-                              <span>Edit</span>
-                            </button>
-                          )}
-
-                          {/* Delete Action: Restricted to Reviewer and Admin */}
-                          {(item._isCustom || isSupabaseConfigured()) && canDeleteQuestion(item) && (
-                            <button
-                              type="button"
-                              className="btn btn--small btn--ghost btn--danger"
-                              onClick={() => handleDeleteQuestion(item)}
-                              title="Delete Question"
-                              style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
-                            >
-                              <TrashIcon width="14" height="14" />
-                              <span>Delete</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      <p className="admin-q-prompt">{item.prompt}</p>
-
-                      {item.directive && (
-                        <p style={{ fontSize: '0.8rem', fontStyle: 'italic', color: 'var(--muted)', margin: '0 0 0.5rem' }}>
-                          Directive: {item.directive}
-                        </p>
-                      )}
-
-                      <div className="admin-q-choices">
-                        {(item.choices || []).map((choice, cIdx) => {
-                          const isCorrect = item.answer === cIdx
-                          const letter = String.fromCharCode(65 + cIdx)
-                          return (
-                            <div
-                              key={cIdx}
-                              className={`admin-choice-chip ${isCorrect ? 'is-correct' : ''}`}
-                            >
-                              <strong>{letter}:</strong> {choice}
-                              {isCorrect && <span className="key-check">✓ Official Key</span>}
-                            </div>
-                          )
-                        })}
-                      </div>
-
-                      {!hasValidKey && (
-                        <div className="admin-q-warning">
-                          ⚠️ Warning: Question does not have a verified answer key assigned!
-                        </div>
-                      )}
-
-                      {item.explanation && (
-                        <div className="admin-q-explanation">
-                          <strong>Explanation:</strong> {item.explanation}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })
-              )}
-            </div>
-
-            {/* Bottom Pagination Bar */}
-            {!questionsLoading && totalPages > 1 && (
-              <div className="admin-pagination" style={{ marginTop: '2rem' }}>
-                <button
-                  type="button"
-                  className="btn btn--small btn--ghost"
-                  disabled={page === 1}
-                  onClick={() => {
-                    setPage((p) => Math.max(1, p - 1))
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                  }}
-                >
-                  Previous Page
-                </button>
-                <span className="page-indicator">
-                  Page {page} of {totalPages}
-                </span>
-                <button
-                  type="button"
-                  className="btn btn--small btn--ghost"
-                  disabled={page >= totalPages}
-                  onClick={() => {
-                    setPage((p) => Math.min(totalPages, p + 1))
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                  }}
-                >
-                  Next Page
-                </button>
-              </div>
-            )}
-          </main>
-        )}
-
-      {/* Tab 3: Tracks & Blueprint Studio */}
-      {currentTab === 'tracks' && (
-        <main className="admin-content">
-          <div className="tracks-manager-header">
-            <div>
-              <h2>Configured Syllabus Tracks</h2>
-              <p>Independent syllabi structures and Commission guidelines</p>
-            </div>
-            <button
-              type="button"
-              className="btn btn--primary btn--small"
-              onClick={() => setIsCategoryModalOpen(true)}
-            >
-              <PlusIcon width="16" height="16" />
-              <span>Create New Track</span>
-            </button>
-          </div>
-
-          <div className="tracks-grid">
-            {tracks.map((track) => {
-              const isCustom = track.id.startsWith('custom:')
-              return (
-                <div key={track.id} className="track-admin-card">
-                  <div className="track-admin-header">
-                    <span className="badge badge--primary">{track.exam}</span>
-                    {isCustom && <span className="badge badge--accent">Custom Created</span>}
-                  </div>
-                  <h3 className="track-admin-title">{track.title}</h3>
-                  <p className="track-admin-tagline">{track.tagline}</p>
-
-                  <div className="track-blueprint-specs">
-                    <div className="spec-item">
-                      <span>Total MCQs:</span>
-                      <strong>{track.blueprint?.totalMcqs || 100}</strong>
-                    </div>
-                    <div className="spec-item">
-                      <span>Time Allowed:</span>
-                      <strong>{track.blueprint?.minutes || 100}m</strong>
-                    </div>
-                    <div className="spec-item">
-                      <span>Passing Marks:</span>
-                      <strong>{track.blueprint?.passingMarks || 40}</strong>
-                    </div>
-                    <div className="spec-item">
-                      <span>Negative Marking:</span>
-                      <strong>{track.blueprint?.negativeMarking ? `-${track.blueprint.negativeMarking}` : 'None'}</strong>
-                    </div>
-                  </div>
-
-                  <div className="track-units-preview">
-                    <strong>Syllabus Units ({track.units?.length || 0}):</strong>
-                    <ul>
-                      {(track.units || []).map((u) => (
-                        <li key={u.id}>
-                          <span>{u.title}</span>
-                          <span className="unit-qcount">{u.questionCount} MCQs</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {isCustom && (
-                    <div className="track-card-actions">
-                      <button
-                        type="button"
-                        className="btn btn--small btn--ghost btn--danger"
-                        onClick={async () => {
-                          if (confirm(`Delete track "${track.title}" and its questions?`)) {
-                            await contentStore.deleteCategory(track.id.replace('custom:', ''))
-                            await refresh()
-                            notify('Track deleted.')
-                          }
-                        }}
-                      >
-                        Delete Track
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </main>
-      )}
-
-      {/* Tab 4: Paper Generator */}
-      {currentTab === 'generator' && (
-        <main className="admin-content">
-          <div className="generator-layout">
-            {/* Blueprint Controls */}
-            <div className="generator-controls">
-              <h2>Official Blueprint Presets</h2>
-              <p>Generate authentic, balanced papers strictly aligned with Commission guidelines.</p>
-
-              <div className="blueprint-chips">
-                {BLUEPRINT_PRESETS.map((bp) => (
-                  <button
-                    key={bp.id}
-                    type="button"
-                    className={`blueprint-preset-card ${selectedBlueprint.id === bp.id ? 'is-selected' : ''}`}
-                    onClick={() => {
-                      setSelectedBlueprint(bp)
-                      setGeneratedPaper(null)
-                    }}
-                  >
-                    <div className="bp-header">
-                      <span className="badge badge--small">{bp.exam}</span>
-                      <span className="bp-time">{bp.durationMinutes} mins</span>
-                    </div>
-                    <h3 className="bp-title">{bp.title}</h3>
-                    <p className="bp-sub">{bp.description}</p>
-                    <div className="bp-footer">
-                      <span>{bp.totalQuestions} Questions</span>
-                      <span>Pass: {bp.passingMarks}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              <div className="generator-actions">
-                <button
-                  type="button"
-                  className="btn btn--primary"
-                  onClick={handleGeneratePaper}
-                >
-                  <SparklesIcon width="16" height="16" />
-                  <span>Generate Balanced Paper Now</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Generated Paper Preview */}
-            <div className="generator-preview">
-              {generatedPaper ? (
-                <div className="generated-paper-card">
-                  <div className="paper-print-header">
-                    <div className="paper-seal">MPT-AI EXAMINER CONSOLE</div>
-                    <h2>{generatedPaper.blueprintTitle}</h2>
-                    <p>Official Screening Paper Blueprint · {generatedPaper.exam} Commission</p>
-                    <div className="paper-meta-row">
-                      <span>Total Time: {generatedPaper.durationMinutes} Minutes</span>
-                      <span>Total Marks: {generatedPaper.questions.length}</span>
-                      <span>Negative Marking: {generatedPaper.negativeMarking ? `Yes (-${generatedPaper.negativeMarking})` : 'No'}</span>
-                    </div>
-                  </div>
-
-                  <div className="paper-action-bar">
-                    <button
-                      type="button"
-                      className="btn btn--small btn--primary"
-                      onClick={handlePrintPaper}
-                    >
-                      <PrinterIcon width="16" height="16" />
-                      <span>Print Official Paper</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn--small btn--ghost"
-                      onClick={handleSaveGeneratedPaperAsTrack}
-                    >
-                      <TargetIcon width="16" height="16" />
-                      <span>Save as Playable Track</span>
-                    </button>
-                  </div>
-
-                  <div className="paper-questions-list">
-                    {generatedPaper.questions.map((q, qIndex) => (
-                      <div key={q.id || qIndex} className="paper-question-item">
-                        <div className="paper-q-stem">
-                          <strong>Q{qIndex + 1}.</strong> {q.prompt}
-                        </div>
-                        <div className="paper-q-choices">
-                          {(q.choices || []).map((ch, cIndex) => {
-                            const letter = String.fromCharCode(65 + cIndex)
-                            return (
-                              <div key={cIndex} className="paper-q-choice">
-                                <strong>{letter})</strong> {ch}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Print Key at Bottom */}
-                  <div className="paper-key-section">
-                    <h3>Confidential Examiner Answer Key</h3>
-                    <div className="paper-key-grid">
-                      {generatedPaper.questions.map((q, qIndex) => (
-                        <div key={qIndex} className="key-item">
-                          <span>Q{qIndex + 1}:</span>
-                          <strong>{String.fromCharCode(65 + (q.answer ?? 0))}</strong>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="generator-placeholder">
-                  <ZapIcon width="48" height="48" />
-                  <h3>No Paper Generated Yet</h3>
-                  <p>Choose an authentic blueprint preset on the left and click &apos;Generate Balanced Paper&apos; to assemble a complete exam paper.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </main>
-      )}
-
-      {/* Tab 5: Quality Audit */}
-      {currentTab === 'audit' && (
-        <main className="admin-content">
-          <div className="audit-header">
-            <div>
-              <h2>Question Bank Quality Assurance Engine</h2>
-              <p>Automated verification against answer keys, duplicate choices, and pedagogical depth.</p>
-            </div>
-            <button
-              type="button"
-              className="btn btn--primary"
-              onClick={handleRunAudit}
-            >
-              <ShieldCheckIcon width="16" height="16" />
-              <span>Run Automated Audit</span>
-            </button>
-          </div>
-
-          {auditResults && (
-            <div className="audit-results-panel">
-              <div className="audit-score-card">
-                <div className="audit-score-badge">
-                  <span className="score-val">{auditResults.healthScore}%</span>
-                  <span className="score-lbl">Quality Index</span>
-                </div>
-                <div className="audit-score-summary">
-                  <h3>Audit Completed at {auditResults.auditedAt}</h3>
-                  <p>
-                    Verified <strong>{auditResults.validCount}</strong> out of{' '}
-                    <strong>{auditResults.scannedCount}</strong> questions without any detected issues.
-                  </p>
-                </div>
-              </div>
-
-              <div className="audit-issues-list">
-                <h3>Detected Issues ({auditResults.issues.length})</h3>
-                {auditResults.issues.length === 0 ? (
-                  <div className="audit-clean-state">
-                    <CheckCircleIcon width="32" height="32" />
-                    <h4>Flawless Question Bank!</h4>
-                    <p>All scanned MCQs have verified keys, distinct choices, and explanation metadata.</p>
-                  </div>
-                ) : (
-                  auditResults.issues.map((issue) => (
-                    <div key={issue.id} className={`audit-issue-card audit-issue--${issue.severity}`}>
-                      <div className="issue-header">
-                        <span className={`badge badge--${issue.severity}`}>{issue.type}</span>
-                        <span className="issue-msg">{issue.message}</span>
-                      </div>
-                      <p className="issue-prompt">{issue.question.prompt}</p>
-                      <button
-                        type="button"
-                        className="btn btn--small btn--ghost"
-                        onClick={() => handleEditQuestion(issue.question)}
-                      >
-                        Fix in Editor →
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
-        </main>
-      )}
-
-      {/* Tab 6: Import & Export Studio */}
-      {currentTab === 'import-export' && (
-        <main className="admin-content">
-          <div className="import-grid">
-            {/* Target Category Selector */}
-            <div className="import-card target-picker-card">
-              <h3>Target Category for Imports</h3>
-              <p>Select which exam category new questions will be deposited into:</p>
-              <select
-                value={targetCategory}
-                onChange={(e) => setTargetCategory(e.target.value)}
-                className="admin-select"
-                style={{ width: '100%' }}
-              >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.title} ({c.exam})</option>
-                ))}
-              </select>
-            </div>
-
-            {/* In-Browser PDF Parser */}
-            <div className="import-card">
-              <div className="card-icon-header">
-                <FileTextIcon width="24" height="24" />
-                <h3>PDF Past Paper Extractor</h3>
-              </div>
-              <p>Upload official past-paper PDFs. The browser extracts numbered MCQs and bolded answer keys automatically.</p>
-              <button
-                type="button"
-                className="btn btn--primary"
-                disabled={isParsingPdf}
-                onClick={() => pdfRef.current?.click()}
-              >
-                <UploadIcon width="16" height="16" />
-                <span>{isParsingPdf ? 'Extracting Questions…' : 'Upload Past Paper PDF'}</span>
-              </button>
-              <input
-                ref={pdfRef}
-                type="file"
-                accept="application/pdf,.pdf"
-                hidden
-                onChange={handleImportPdf}
-              />
-            </div>
-
-            {/* CSV Question Import / Export */}
-            <div className="import-card">
-              <div className="card-icon-header">
-                <DownloadIcon width="24" height="24" />
-                <h3>Bulk CSV / Excel Format</h3>
-              </div>
-              <p>Import questions from Excel CSV spreadsheets (Prompt, A, B, C, D, Key, Explanation).</p>
-              <div className="card-btn-row">
-                <button
-                  type="button"
-                  className="btn btn--primary"
-                  onClick={() => csvFileRef.current?.click()}
-                >
-                  <UploadIcon width="16" height="16" />
-                  <span>Import CSV File</span>
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--ghost"
-                  onClick={handleExportCsvQuestions}
-                >
-                  <DownloadIcon width="16" height="16" />
-                  <span>Export CSV File</span>
-                </button>
-              </div>
-              <input
-                ref={csvFileRef}
-                type="file"
-                accept=".csv,text/csv"
-                hidden
-                onChange={handleImportCsvFile}
-              />
-            </div>
-
-            {/* JSON Full Backup & Restore */}
-            <div className="import-card">
-              <div className="card-icon-header">
-                <DownloadIcon width="24" height="24" />
-                <h3>Database Backup & Migration</h3>
-              </div>
-              <p>Export standard curriculum JSON packages or generate a complete offline snapshot backup of all IndexedDB data.</p>
-              <div className="card-btn-row" style={{ flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  className="btn btn--primary"
-                  onClick={handleExportFullBackup}
-                >
-                  <DownloadIcon width="16" height="16" />
-                  <span>Full DB Backup</span>
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--ghost"
-                  onClick={handleExportCategoryJson}
-                >
-                  <DownloadIcon width="16" height="16" />
-                  <span>Export Track JSON</span>
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--ghost"
-                  onClick={() => fileRef.current?.click()}
-                >
-                  <UploadIcon width="16" height="16" />
-                  <span>Restore JSON</span>
-                </button>
-              </div>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="application/json,.json"
-                hidden
-                onChange={handleImportJsonFile}
-              />
-            </div>
-
-            {/* Plain Text Parser */}
-            <div className="import-card import-card--full">
-              <div className="card-icon-header">
-                <EditIcon width="24" height="24" />
-                <h3>Bulk Plain Text & Markdown MCQ Parser</h3>
-              </div>
-              <p>Paste formatted questions below. The parser auto-detects standard formats (`1. Question \n A) ... \n B) ... \n Answer: A \n Explanation: ...`).</p>
-              <textarea
-                className="batch-text-area"
-                rows={8}
-                placeholder="1. Who was the first Governor-General of Pakistan?&#10;A) Liaquat Ali Khan&#10;B) Quaid-e-Azam Muhammad Ali Jinnah&#10;C) Khawaja Nazimuddin&#10;D) Ghulam Muhammad&#10;Answer: B&#10;Explanation: Quaid-e-Azam served from August 1947 until September 1948."
-                value={batchText}
-                onChange={(e) => setBatchText(e.target.value)}
-              />
-              <button
-                type="button"
-                className="btn btn--primary"
-                onClick={handleImportTextBatch}
-                disabled={!batchText.trim()}
-              >
-                <span>Parse and Import Batch</span>
-              </button>
-            </div>
-          </div>
-        </main>
-      )}
-
-      {/* Tab 7: User Management & RBAC Dashboard (Strictly for Super Admin) */}
-      {currentTab === 'users' && role === 'admin' && (
-        <main className="admin-content users-dashboard">
-          {/* Staff Summary KPIs */}
-          <div className="users-kpi-bar">
-            <div className="users-kpi-card">
-              <span className="users-kpi-label">Total Staff Accounts</span>
-              <strong className="users-kpi-value">{usersList.length}</strong>
-            </div>
-            <div className="users-kpi-card">
-              <span className="users-kpi-label">Super Admins</span>
-              <strong className="users-kpi-value" style={{ color: '#f87171' }}>
-                {usersList.filter((u) => u.role === 'admin').length}
-              </strong>
-            </div>
-            <div className="users-kpi-card">
-              <span className="users-kpi-label">Content Editors</span>
-              <strong className="users-kpi-value" style={{ color: '#fbbf24' }}>
-                {usersList.filter((u) => u.role === 'editor').length}
-              </strong>
-            </div>
-            <div className="users-kpi-card">
-              <span className="users-kpi-label">Quality Reviewers</span>
-              <strong className="users-kpi-value" style={{ color: '#60a5fa' }}>
-                {usersList.filter((u) => u.role === 'reviewer').length}
-              </strong>
-            </div>
-            <div className="users-kpi-card">
-              <span className="users-kpi-label">Contributors</span>
-              <strong className="users-kpi-value" style={{ color: '#34d399' }}>
-                {usersList.filter((u) => u.role === 'contributor').length}
-              </strong>
-            </div>
-          </div>
-
-          {/* Search, Filter & Provision Action */}
-          <div className="users-toolbar">
-            <div className="users-toolbar__filters">
-              <input
-                type="search"
-                placeholder="Search staff by name or email…"
-                value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
-                className="users-search-input"
-              />
-              <select
-                value={userRoleFilter}
-                onChange={(e) => setUserRoleFilter(e.target.value)}
-                className="admin-select"
-              >
-                <option value="all">All Staff Roles</option>
-                <option value="admin">Super Admin</option>
-                <option value="editor">Editor</option>
-                <option value="reviewer">Reviewer</option>
-                <option value="contributor">Contributor</option>
-              </select>
-            </div>
-
-            <button
-              type="button"
-              className="btn btn--primary btn--small"
-              onClick={() => {
-                setProvisionError(null)
-                setIsProvisionModalOpen(true)
-              }}
-            >
-              <UserPlusIcon width="16" height="16" />
-              <span>+ Provision Team Member</span>
-            </button>
-          </div>
-
-          {/* Team Members Data Grid */}
-          <div className="users-table-container">
-            {usersLoading ? (
-              <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--muted)' }}>
-                Loading staff profiles from database…
-              </div>
-            ) : filteredUsers.length === 0 ? (
-              <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--muted)' }}>
-                No team members match current filter criteria.
-              </div>
+      {/* Global Notice Toast */}
+      {notice && (
+        <div className={`admin-notice-bar admin-notice-bar--${notice.type}`}>
+          <div className="admin-notice-content">
+            {notice.type === 'success' ? (
+              <CheckCircleIcon width="16" height="16" />
             ) : (
-              <table className="users-table">
-                <thead>
-                  <tr>
-                    <th>Staff Member</th>
-                    <th>RBAC Role & Permissions</th>
-                    <th>Category Clearance</th>
-                    <th>Date Added</th>
-                    <th style={{ textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map((u) => {
-                    const initials = (u.full_name || u.email || 'U')
-                      .split(' ')
-                      .map((n) => n[0])
-                      .slice(0, 2)
-                      .join('')
-                      .toUpperCase()
-                    const isSelf = user?.id === u.id || user?.email === u.email
-
-                    return (
-                      <tr key={u.id}>
-                        <td>
-                          <div className="user-cell-meta">
-                            <div className="user-avatar">{initials}</div>
-                            <div>
-                              <div className="user-meta-name">
-                                {u.full_name || 'Staff Member'}
-                                {isSelf && (
-                                  <span style={{ marginLeft: '0.4rem', fontSize: '0.72rem', color: 'var(--primary)', fontWeight: 800 }}>
-                                    (You)
-                                  </span>
-                                )}
-                              </div>
-                              <div className="user-meta-email">{u.email}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span className={`role-badge role-badge--${u.role}`}>
-                              {u.role}
-                            </span>
-                            <select
-                              value={u.role}
-                              disabled={isSelf}
-                              onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                              className="role-select-inline"
-                              title={isSelf ? 'Cannot demote own active session' : 'Change staff role'}
-                            >
-                              <option value="admin">Admin (Full DB)</option>
-                              <option value="editor">Editor (Edit MCQs)</option>
-                              <option value="reviewer">Reviewer (Audit & Delete)</option>
-                              <option value="contributor">Contributor (Add MCQs)</option>
-                            </select>
-                          </div>
-                        </td>
-                        <td>
-                          {u.role === 'contributor' ? (
-                            <div className="category-tags-list">
-                              {u.assigned_categories && u.assigned_categories.length > 0 ? (
-                                u.assigned_categories.map((catId) => {
-                                  const catName = categories.find((c) => c.id === catId)?.title || catId
-                                  return (
-                                    <span key={catId} className="category-tag-chip">
-                                      {catName}
-                                    </span>
-                                  )
-                                })
-                              ) : (
-                                <span className="category-tag-chip category-tag-chip--all">
-                                  All Categories (Unrestricted)
-                                </span>
-                              )}
-                            </div>
-                          ) : (
-                            <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontStyle: 'italic' }}>
-                              Full System Clearance
-                            </span>
-                          )}
-                        </td>
-                        <td>
-                          <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
-                            {u.created_at
-                              ? new Date(u.created_at).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                })
-                              : '—'}
-                          </span>
-                        </td>
-                        <td style={{ textAlign: 'right' }}>
-                          {!isSelf && (
-                            <button
-                              type="button"
-                              className="icon-btn icon-btn--danger"
-                              onClick={() => handleRevokeUser(u.id, u.email)}
-                              title="Revoke staff credentials"
-                            >
-                              <TrashIcon width="16" height="16" />
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+              <AlertCircleIcon width="16" height="16" />
             )}
+            <span>{notice.text}</span>
           </div>
-        </main>
+          <button
+            type="button"
+            className="notice-dismiss-btn"
+            onClick={() => setNotice(null)}
+          >
+            <CloseIcon width="14" height="14" />
+          </button>
+        </div>
       )}
 
-      </div> {/* End .admin-main */}
-
-      {/* Question Editor Slide-Out Drawer (Spacious Full-Height SaaS Experience) */}
-      {isEditorOpen && (
-        <>
-          <div
-            className="admin-drawer-backdrop"
-            onClick={() => setIsEditorOpen(false)}
-            aria-hidden="true"
-          />
-          <aside
-            className="admin-drawer"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="drawer-title"
-          >
-            <div className="admin-drawer__header">
-              <div className="admin-drawer__title-text">
-                <h3 id="drawer-title">{editingItem ? 'Edit Question' : 'Add New Question'}</h3>
-                <p>Provide question details, multiple choice options, and explanation below.</p>
+      {/* Main Tab Content */}
+      <main className="admin-container">
+        {/* ========================================================
+            TAB 1: DASHBOARD
+           ======================================================== */}
+        {activeTab === 'dashboard' && (
+          <div className="tab-pane dashboard-pane">
+            <div className="pane-header">
+              <div>
+                <h2>Overview & Health</h2>
+                <p className="pane-desc">
+                  Curriculum staging pipeline metrics and student release status.
+                </p>
               </div>
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={() => setIsEditorOpen(false)}
-                aria-label="Close Editor Drawer"
-              >
-                <CloseIcon width="20" height="20" />
-              </button>
             </div>
 
-            <form onSubmit={handleSaveQuestion} className="admin-drawer__body">
-              {/* Subject Categorization */}
-              <div className="drawer-section">
-                <div className="drawer-section-title">
-                  <TargetIcon width="16" height="16" />
-                  <span>Subject & Categorization</span>
+            {/* Minimal Stats Grid */}
+            <div className="minimal-stats-grid">
+              <div className="metric-card is-success">
+                <div className="metric-card__header">
+                  <span className="metric-label">Total Live Questions</span>
+                  <CheckCircleIcon width="18" height="18" className="metric-icon" />
                 </div>
-                <div className="drawer-field">
-                  <label>Subject Category *</label>
+                <div className="metric-value">{stats.live}</div>
+                <div className="metric-subtext">Approved and practicing in student app</div>
+              </div>
+
+              <div className="metric-card is-amber">
+                <div className="metric-card__header">
+                  <span className="metric-label">Pending Reviews</span>
+                  <AlertTriangleIcon width="18" height="18" className="metric-icon" />
+                </div>
+                <div className="metric-value">{stats.pending}</div>
+                <div className="metric-subtext">Drafts awaiting reviewer verification</div>
+              </div>
+
+              <div className="metric-card is-blue">
+                <div className="metric-card__header">
+                  <span className="metric-label">Total Users</span>
+                  <UsersIcon width="18" height="18" className="metric-icon" />
+                </div>
+                <div className="metric-value">{stats.users}</div>
+                <div className="metric-subtext">Authorized staff & contributors</div>
+              </div>
+            </div>
+
+            {/* Quick Actions Shortcuts */}
+            <div className="dashboard-shortcuts">
+              <div
+                className="action-card"
+                onClick={() => setActiveTab('add-question')}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="action-card__icon is-blue">
+                  <PlusIcon width="20" height="20" />
+                </div>
+                <div className="action-card__body">
+                  <h3>Submit New Question</h3>
+                  <p>Follow the 3-step structured draft workflow.</p>
+                </div>
+              </div>
+
+              <div
+                className="action-card"
+                onClick={() => setActiveTab('review-queue')}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="action-card__icon is-amber">
+                  <ShieldCheckIcon width="20" height="20" />
+                </div>
+                <div className="action-card__body">
+                  <h3>Review Queue ({stats.pending})</h3>
+                  <p>Verify, edit, and approve incoming draft questions.</p>
+                </div>
+              </div>
+
+              {role === 'admin' && (
+                <div
+                  className="action-card"
+                  onClick={() => setActiveTab('users')}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="action-card__icon is-indigo">
+                    <UsersIcon width="20" height="20" />
+                  </div>
+                  <div className="action-card__body">
+                    <h3>Manage Staff Roles</h3>
+                    <p>Invite examiners, assign roles, and grant subject permissions.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Staging Pipeline Visual Guide */}
+            <div className="pipeline-guide-card">
+              <h3>Draft-to-Live Staging Pipeline</h3>
+              <div className="pipeline-stepper">
+                <div className="stepper-step">
+                  <div className="stepper-bubble">1</div>
+                  <div className="stepper-info">
+                    <strong>Contributor Draft</strong>
+                    <span>Saved with status "pending". Students cannot see this item.</span>
+                  </div>
+                </div>
+                <div className="stepper-arrow">→</div>
+                <div className="stepper-step">
+                  <div className="stepper-bubble">2</div>
+                  <div className="stepper-info">
+                    <strong>Review & Quality Check</strong>
+                    <span>Reviewer or Admin inspects prompt, choices, answer key, and explanation.</span>
+                  </div>
+                </div>
+                <div className="stepper-arrow">→</div>
+                <div className="stepper-step">
+                  <div className="stepper-bubble is-live">3</div>
+                  <div className="stepper-info">
+                    <strong>Approved Live Release</strong>
+                    <span>Question marked "approved". Instantly queryable in student tests & drills.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 2: ADD QUESTION (Structured 3-Step Flow)
+           ======================================================== */}
+        {activeTab === 'add-question' && (
+          <div className="tab-pane add-question-pane">
+            <div className="pane-header">
+              <div>
+                <h2>New Question Workflow</h2>
+                <p className="pane-desc">
+                  Questions are staged as <strong>Pending Drafts</strong> by default for reviewer verification.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleAddQuestionSubmit} className="question-workflow-form">
+              {/* STEP 1: SELECT SUBJECT (With Dynamic Subject Creation) */}
+              <div className="form-step-card">
+                <div className="step-card-header">
+                  <div>
+                    <div className="step-tag">Step 1</div>
+                    <label className="step-label" htmlFor="subject-select">
+                      Select Core Subject
+                    </label>
+                    <p className="step-hint">
+                      Pick the syllabus area this question belongs to, or create a new subject dynamically.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="btn btn--small btn--ghost create-subject-trigger-btn"
+                    onClick={() => setShowSubjectModal(true)}
+                    title="Add a new academic subject to the curriculum"
+                  >
+                    <PlusIcon width="14" height="14" />
+                    <span>Create New Subject</span>
+                  </button>
+                </div>
+
+                <div className="subject-select-row">
                   <select
-                    value={targetCategory}
-                    onChange={(e) => setTargetCategory(e.target.value)}
+                    id="subject-select"
+                    className="step-select"
+                    value={formSubject}
+                    onChange={(e) => setFormSubject(e.target.value)}
                     required
                   >
-                    {availableCategoriesForUser.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.title} ({c.exam || 'Custom'})
+                    {subjects.map((sub) => (
+                      <option key={sub.id} value={sub.id}>
+                        {sub.title} {sub.desc ? `— ${sub.desc}` : ''}
                       </option>
                     ))}
                   </select>
-                  {role === 'contributor' && profile?.assigned_categories?.length > 0 && (
-                    <span className="drawer-field-hint">
-                      Cleared subject categories assigned by Super Admin.
-                    </span>
-                  )}
                 </div>
               </div>
 
-              {/* Question Statement & Directive */}
-              <div className="drawer-section">
-                <div className="drawer-section-title">
-                  <BookIcon width="16" height="16" />
-                  <span>Question Prompt & Directive</span>
+              {/* STEP 2: SELECT EXAM TARGET */}
+              <div className="form-step-card">
+                <div className="step-tag">Step 2</div>
+                <label className="step-label">Select Exam Target</label>
+                <p className="step-hint">
+                  Where should this question appear? Choose PMS, CSS, or Both.
+                </p>
+                <div className="exam-toggle-group">
+                  <button
+                    type="button"
+                    className={`exam-toggle-btn ${formExamTarget === 'CSS' ? 'is-active' : ''}`}
+                    onClick={() => setFormExamTarget('CSS')}
+                  >
+                    <span className="exam-toggle-title">CSS</span>
+                    <span className="exam-toggle-sub">FPSC Federal MPT</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`exam-toggle-btn ${formExamTarget === 'PMS' ? 'is-active' : ''}`}
+                    onClick={() => setFormExamTarget('PMS')}
+                  >
+                    <span className="exam-toggle-title">PMS</span>
+                    <span className="exam-toggle-sub">PPSC Provincial Screening</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`exam-toggle-btn ${formExamTarget === 'Both' ? 'is-active' : ''}`}
+                    onClick={() => setFormExamTarget('Both')}
+                  >
+                    <span className="exam-toggle-title">Both (CSS & PMS)</span>
+                    <span className="exam-toggle-sub">High-yield overlapping content</span>
+                  </button>
                 </div>
-                <div className="drawer-field">
-                  <label>Question Prompt / Stem *</label>
-                  <span className="drawer-field-hint">
-                    Type or paste the complete question as it appears on official papers.
-                  </span>
+              </div>
+
+              {/* STEP 3: QUESTION DETAILS */}
+              <div className="form-step-card">
+                <div className="step-tag">Step 3</div>
+                <label className="step-label">Question Details</label>
+
+                {/* Prompt */}
+                <div className="field-group">
+                  <label className="field-label" htmlFor="q-prompt">
+                    Question Prompt <span className="field-req">*</span>
+                  </label>
                   <textarea
+                    id="q-prompt"
+                    className="field-textarea"
+                    rows={3}
+                    placeholder="Enter the question text clearly..."
+                    value={formPrompt}
+                    onChange={(e) => setFormPrompt(e.target.value)}
                     required
-                    rows={4}
-                    value={questionForm.prompt}
-                    onChange={(e) => setQuestionForm({ ...questionForm, prompt: e.target.value })}
-                    placeholder="Enter the question prompt statement..."
                   />
                 </div>
-                <div className="drawer-field">
-                  <label>Special Instruction / Directive (Optional)</label>
-                  <span className="drawer-field-hint">
-                    e.g. &apos;Select the correct antonym&apos; or &apos;Identify the grammatically correct sentence&apos;
-                  </span>
-                  <input
-                    type="text"
-                    value={questionForm.directive}
-                    onChange={(e) => setQuestionForm({ ...questionForm, directive: e.target.value })}
-                    placeholder="Directive text..."
-                  />
-                </div>
-              </div>
 
-              {/* Answer Choices & Verified Answer Key */}
-              <div className="drawer-section">
-                <div className="drawer-section-title">
-                  <CheckCircleIcon width="16" height="16" />
-                  <span>Answer Choices & Verified Answer Key *</span>
-                </div>
-                <span className="drawer-field-hint">
-                  Fill in the options below and select the radio button next to the verified correct answer:
-                </span>
-                <div className="drawer-choices-list">
-                  {questionForm.choices.map((choice, cIdx) => {
-                    const letter = String.fromCharCode(65 + cIdx)
-                    const isCorrect = questionForm.answer === cIdx
-                    return (
+                {/* Choices (4 Options with radio for answer) */}
+                <div className="field-group">
+                  <label className="field-label">
+                    Choices & Answer Key <span className="field-req">*</span>
+                  </label>
+                  <p className="step-hint">
+                    Provide 4 choices and click the radio button beside the correct answer.
+                  </p>
+
+                  <div className="choices-stack">
+                    {['A', 'B', 'C', 'D'].map((letter, idx) => (
                       <div
-                        key={cIdx}
-                        className={`drawer-choice-row ${isCorrect ? 'is-selected' : ''}`}
+                        key={letter}
+                        className={`choice-input-row ${formAnswer === idx ? 'is-selected' : ''}`}
                       >
-                        <label className="drawer-choice-radio" title="Mark as correct answer">
-                          <input
-                            type="radio"
-                            name="drawerCorrectAnswer"
-                            checked={isCorrect}
-                            onChange={() => setQuestionForm({ ...questionForm, answer: cIdx })}
-                          />
-                          <span className="drawer-choice-letter">{letter}</span>
-                        </label>
+                        <button
+                          type="button"
+                          className={`choice-key-indicator ${formAnswer === idx ? 'is-correct' : ''}`}
+                          onClick={() => setFormAnswer(idx)}
+                          title={`Set option ${letter} as correct answer`}
+                        >
+                          {formAnswer === idx ? (
+                            <CheckIcon width="16" height="16" />
+                          ) : (
+                            <span>{letter}</span>
+                          )}
+                        </button>
                         <input
                           type="text"
-                          className="drawer-choice-input"
-                          placeholder={`Option ${letter} text...`}
-                          value={choice}
+                          className="field-input choice-text"
+                          placeholder={`Option ${letter}...`}
+                          value={formChoices[idx]}
                           onChange={(e) => {
-                            const newChoices = [...questionForm.choices]
-                            newChoices[cIdx] = e.target.value
-                            setQuestionForm({ ...questionForm, choices: newChoices })
+                            const next = [...formChoices]
+                            next[idx] = e.target.value
+                            setFormChoices(next)
                           }}
+                          required
                         />
-                        {isCorrect && (
-                          <span className="drawer-choice-key-tag">✓ Official Key</span>
-                        )}
                       </div>
-                    )
-                  })}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Pedagogical Explanation */}
-              <div className="drawer-section">
-                <div className="drawer-section-title">
-                  <SparklesIcon width="16" height="16" />
-                  <span>Pedagogical Explanation & Historical Context</span>
-                </div>
-                <div className="drawer-field">
-                  <label>Explanation & Verification Provenance (Optional)</label>
-                  <span className="drawer-field-hint">
-                    Provide background facts, historical context, or calculation steps to aid candidates in learning:
-                  </span>
+                {/* Explanation */}
+                <div className="field-group">
+                  <label className="field-label" htmlFor="q-explanation">
+                    Detailed Explanation & Key Reference
+                  </label>
                   <textarea
-                    rows={4}
-                    value={questionForm.explanation}
-                    onChange={(e) => setQuestionForm({ ...questionForm, explanation: e.target.value })}
-                    placeholder="Explain why the answer is correct and cite the official paper year..."
+                    id="q-explanation"
+                    className="field-textarea"
+                    rows={3}
+                    placeholder="Cite relevant constitutional article, historical context, or mathematical steps..."
+                    value={formExplanation}
+                    onChange={(e) => setFormExplanation(e.target.value)}
                   />
                 </div>
-              </div>
 
-              {/* Drawer Sticky Footer */}
-              <div className="admin-drawer__footer">
-                <button
-                  type="button"
-                  className="btn btn--ghost"
-                  onClick={() => setIsEditorOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn--primary">
-                  {editingItem ? 'Update Question' : 'Save Question to Bank'}
-                </button>
-              </div>
-            </form>
-          </aside>
-        </>
-      )}
-
-      {/* New Category Modal */}
-      {isCategoryModalOpen && (
-        <div className="admin-modal-backdrop" onClick={() => setIsCategoryModalOpen(false)}>
-          <div className="admin-modal admin-modal--small" onClick={(e) => e.stopPropagation()}>
-            <div className="admin-modal-header">
-              <h3>Create New Exam Track Category</h3>
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={() => setIsCategoryModalOpen(false)}
-                aria-label="Close"
-              >
-                <CloseIcon width="18" height="18" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveCategory} className="admin-editor-form">
-              <div className="form-row">
-                <label>Category Title *</label>
-                <input
-                  type="text"
-                  required
-                  value={categoryForm.title}
-                  onChange={(e) => setCategoryForm({ ...categoryForm, title: e.target.value })}
-                  placeholder="e.g. FPSC CSS MPT 2027 Mock Bank"
-                />
-              </div>
-
-              <div className="form-row">
-                <label>Tagline / Description</label>
-                <input
-                  type="text"
-                  value={categoryForm.tagline}
-                  onChange={(e) => setCategoryForm({ ...categoryForm, tagline: e.target.value })}
-                  placeholder="e.g. Coached test series"
-                />
-              </div>
-
-              <div className="form-row">
-                <label>Exam Commission Group</label>
-                <select
-                  value={categoryForm.exam}
-                  onChange={(e) => setCategoryForm({ ...categoryForm, exam: e.target.value })}
-                  className="admin-select"
-                >
-                  {EXAM_CHOICES.map((ex) => (
-                    <option key={ex} value={ex}>{ex}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="admin-modal-actions">
-                <button
-                  type="button"
-                  className="btn btn--ghost"
-                  onClick={() => setIsCategoryModalOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn--primary">
-                  Create Track Category
-                </button>
+                {/* Submit Actions */}
+                <div className="form-submit-row">
+                  <div className="form-submit-note">
+                    Default status: <span className="badge-pending">pending</span>
+                  </div>
+                  <button
+                    type="submit"
+                    className="btn btn--primary"
+                    disabled={formSubmitting}
+                  >
+                    {formSubmitting ? 'Saving Draft…' : 'Submit Question for Review'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Provision New Team Member Modal */}
-      {isProvisionModalOpen && (
-        <div className="admin-modal-backdrop" onClick={() => setIsProvisionModalOpen(false)}>
-          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="admin-modal-header">
-              <h3>Provision New Team Member</h3>
+        {/* ========================================================
+            TAB 3: REVIEW QUEUE (Grouped by Date Added)
+           ======================================================== */}
+        {activeTab === 'review-queue' && (
+          <div className="tab-pane review-queue-pane">
+            <div className="pane-header">
+              <div>
+                <h2>Review Queue</h2>
+                <p className="pane-desc">
+                  Inspect incoming questions, check answer keys, and click <strong>Approve</strong> to release them live to students.
+                </p>
+              </div>
+
+              {/* Status Filter Chips */}
+              <div className="filter-chips">
+                <button
+                  type="button"
+                  className={`filter-chip ${reviewFilter === 'pending' ? 'is-active' : ''}`}
+                  onClick={() => setReviewFilter('pending')}
+                >
+                  Pending ({stats.pending})
+                </button>
+                <button
+                  type="button"
+                  className={`filter-chip ${reviewFilter === 'rejected' ? 'is-active' : ''}`}
+                  onClick={() => setReviewFilter('rejected')}
+                >
+                  Rejected ({stats.rejected})
+                </button>
+                <button
+                  type="button"
+                  className={`filter-chip ${reviewFilter === 'all' ? 'is-active' : ''}`}
+                  onClick={() => setReviewFilter('all')}
+                >
+                  All Questions ({stats.total})
+                </button>
+              </div>
+            </div>
+
+            {loadingQuestions ? (
+              <div className="loading-state">Loading questions from repository…</div>
+            ) : groupedReviewQuestions.length === 0 ? (
+              <div className="empty-state-card">
+                <CheckCircleIcon width="36" height="36" className="empty-icon" />
+                <h3>No questions in this view</h3>
+                <p>
+                  {reviewFilter === 'pending'
+                    ? 'All caught up! No pending drafts await review.'
+                    : 'No questions match the current filter criteria.'}
+                </p>
+              </div>
+            ) : (
+              <div className="queue-groups">
+                {groupedReviewQuestions.map(([dateGroup, items]) => (
+                  <div key={dateGroup} className="date-group-section">
+                    <div className="date-group-header">
+                      <span className="date-group-title">{dateGroup}</span>
+                      <span className="date-group-count">{items.length} questions</span>
+                    </div>
+
+                    <div className="queue-cards-stack">
+                      {items.map((q) => (
+                        <div key={q.id} className={`queue-card is-status-${q.status}`}>
+                          {/* Card Header */}
+                          <div className="queue-card__header">
+                            <div className="queue-card__badges">
+                              <span className="subject-pill">
+                                {subjects.find((s) => s.id === q.category_id)?.title ||
+                                  q.category_id}
+                              </span>
+                              <span className="exam-target-pill">
+                                {Array.isArray(q.exam_target)
+                                  ? q.exam_target.join(' & ')
+                                  : 'CSS & PMS'}
+                              </span>
+                              <span className={`status-pill status-pill--${q.status}`}>
+                                {q.status.toUpperCase()}
+                              </span>
+                            </div>
+
+                            <span className="queue-card__author">
+                              By {q.created_by_name || 'Staff Contributor'}
+                            </span>
+                          </div>
+
+                          {/* Card Body */}
+                          <div className="queue-card__body">
+                            <h4 className="queue-prompt">{q.prompt}</h4>
+
+                            <div className="queue-choices-grid">
+                              {q.choices.map((choice, cIdx) => (
+                                <div
+                                  key={cIdx}
+                                  className={`queue-choice-pill ${
+                                    q.answer === cIdx ? 'is-correct' : ''
+                                  }`}
+                                >
+                                  <span className="choice-letter">
+                                    {String.fromCharCode(65 + cIdx)}
+                                  </span>
+                                  <span className="choice-text">{choice}</span>
+                                  {q.answer === cIdx && (
+                                    <span className="key-tag">✓ Correct Key</span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+
+                            {q.explanation && (
+                              <div className="queue-explanation">
+                                <strong>Explanation:</strong> {q.explanation}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Card Actions */}
+                          <div className="queue-card__actions">
+                            <div className="actions-left">
+                              <button
+                                type="button"
+                                className="action-btn is-edit"
+                                onClick={() => setEditingQuestion(q)}
+                                title="Edit prompt, choices, or explanation"
+                              >
+                                <EditIcon width="14" height="14" />
+                                <span>Edit</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className="action-btn is-delete"
+                                onClick={() => handleDeleteQuestion(q)}
+                                title="Delete question"
+                              >
+                                <TrashIcon width="14" height="14" />
+                                <span>Delete</span>
+                              </button>
+                            </div>
+
+                            <div className="actions-right">
+                              {q.status !== 'rejected' && (
+                                <button
+                                  type="button"
+                                  className="action-btn is-reject"
+                                  onClick={() => handleRejectQuestion(q)}
+                                >
+                                  <XCircleIcon width="14" height="14" />
+                                  <span>Reject</span>
+                                </button>
+                              )}
+
+                              {q.status !== 'approved' && (
+                                <button
+                                  type="button"
+                                  className="action-btn is-approve"
+                                  onClick={() => handleApproveQuestion(q)}
+                                >
+                                  <CheckCircleIcon width="14" height="14" />
+                                  <span>Approve (Make Live)</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 4: USER MANAGEMENT (Super Admin Only)
+           ======================================================== */}
+        {activeTab === 'users' && role === 'admin' && (
+          <div className="tab-pane users-pane">
+            <div className="pane-header">
+              <div>
+                <h2>User Management & Staff Roles</h2>
+                <p className="pane-desc">
+                  Provision new team members and assign RBAC roles (Admin, Editor, Reviewer, Contributor).
+                </p>
+              </div>
+            </div>
+
+            {/* Create Account Form */}
+            <div className="create-user-card">
+              <div className="create-user-card__header">
+                <UserPlusIcon width="18" height="18" />
+                <h3>Create New Staff Account</h3>
+              </div>
+
+              <form onSubmit={handleCreateStaff} className="create-user-form">
+                <div className="create-user-grid">
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="staff-email">
+                      Username / Email <span className="field-req">*</span>
+                    </label>
+                    <input
+                      id="staff-email"
+                      type="email"
+                      className="field-input"
+                      placeholder="e.g. examiner@fpsc.gov.pk"
+                      value={newStaffEmail}
+                      onChange={(e) => setNewStaffEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="staff-pass">
+                      Temporary Password <span className="field-req">*</span>
+                    </label>
+                    <input
+                      id="staff-pass"
+                      type="password"
+                      className="field-input"
+                      placeholder="Minimum 6 characters"
+                      value={newStaffPassword}
+                      onChange={(e) => setNewStaffPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="staff-name">
+                      Full Name
+                    </label>
+                    <input
+                      id="staff-name"
+                      type="text"
+                      className="field-input"
+                      placeholder="e.g. Dr. Salman Khan"
+                      value={newStaffName}
+                      onChange={(e) => setNewStaffName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="staff-role">
+                      Designated Role <span className="field-req">*</span>
+                    </label>
+                    <select
+                      id="staff-role"
+                      className="field-input"
+                      value={newStaffRole}
+                      onChange={(e) => setNewStaffRole(e.target.value)}
+                      required
+                    >
+                      <option value="contributor">Contributor (Drafts questions)</option>
+                      <option value="reviewer">Reviewer (Verifies & approves)</option>
+                      <option value="editor">Editor (Updates & manages bank)</option>
+                      <option value="admin">Admin (Full system control)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="create-user-submit">
+                  <button
+                    type="submit"
+                    className="btn btn--primary"
+                    disabled={creatingStaff}
+                  >
+                    {creatingStaff ? 'Creating Account…' : 'Create Staff Member'}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Staff Members Table */}
+            <div className="users-table-card">
+              <div className="table-header">
+                <h3>Authorized Staff Members ({usersList.length})</h3>
+              </div>
+
+              {loadingUsers ? (
+                <div className="loading-state">Loading staff profiles…</div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="staff-table">
+                    <thead>
+                      <tr>
+                        <th>Member</th>
+                        <th>Email</th>
+                        <th>Current Role</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {usersList.map((st) => (
+                        <tr key={st.id}>
+                          <td>
+                            <div className="staff-member-cell">
+                              <div className="staff-avatar">
+                                {(st.full_name || st.email || 'U')[0].toUpperCase()}
+                              </div>
+                              <span className="staff-name">
+                                {st.full_name || st.email.split('@')[0]}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="staff-email-cell">{st.email}</td>
+                          <td>
+                            <select
+                              className={`role-badge-select role-${st.role}`}
+                              value={st.role}
+                              onChange={(e) => handleUpdateRole(st.id, e.target.value)}
+                              aria-label="Change Role"
+                            >
+                              <option value="admin">Admin</option>
+                              <option value="editor">Editor</option>
+                              <option value="reviewer">Reviewer</option>
+                              <option value="contributor">Contributor</option>
+                            </select>
+                          </td>
+                          <td className="staff-date-cell">
+                            {formatGroupDate(st.created_at)}
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              className="staff-delete-btn"
+                              onClick={() => handleDeleteStaff(st.id)}
+                              title="Revoke and delete account"
+                            >
+                              <TrashIcon width="14" height="14" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Dynamic Subject Creation Modal */}
+      {showSubjectModal && (
+        <div
+          className="modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowSubjectModal(false)}
+        >
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Create New Subject</h2>
               <button
                 type="button"
                 className="icon-btn"
-                onClick={() => setIsProvisionModalOpen(false)}
-                aria-label="Close"
+                onClick={() => setShowSubjectModal(false)}
               >
                 <CloseIcon width="18" height="18" />
               </button>
             </div>
 
-            <form onSubmit={handleProvisionSubmit} className="admin-modal-form">
-              {provisionError && (
-                <div className="admin-banner admin-banner--error">{provisionError}</div>
-              )}
-
-              <div className="form-row">
-                <label>Full Name *</label>
+            <form onSubmit={handleCreateSubjectSubmit} className="modal-form">
+              <div className="field-group">
+                <label className="field-label" htmlFor="new-sub-name">
+                  Subject Name <span className="field-req">*</span>
+                </label>
                 <input
+                  id="new-sub-name"
                   type="text"
+                  className="field-input"
+                  placeholder="e.g. Sociology, International Relations, Economics"
+                  value={newSubjectName}
+                  onChange={(e) => setNewSubjectName(e.target.value)}
                   required
-                  placeholder="e.g. Dr. Ayesha Khan"
-                  value={provisionForm.fullName}
-                  onChange={(e) => setProvisionForm({ ...provisionForm, fullName: e.target.value })}
                 />
               </div>
 
-              <div className="form-row">
-                <label>Email Address (Username) *</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="examiner@mpt-ai.org"
-                  value={provisionForm.email}
-                  onChange={(e) => setProvisionForm({ ...provisionForm, email: e.target.value })}
-                />
-              </div>
-
-              <div className="form-row">
-                <label>Temporary Password *</label>
-                <input
-                  type="password"
-                  required
-                  minLength={6}
-                  placeholder="At least 6 characters"
-                  value={provisionForm.password}
-                  onChange={(e) => setProvisionForm({ ...provisionForm, password: e.target.value })}
-                />
-              </div>
-
-              <div className="form-row">
-                <label>Assign RBAC Staff Role *</label>
-                <select
-                  value={provisionForm.role}
-                  onChange={(e) => setProvisionForm({ ...provisionForm, role: e.target.value })}
-                  className="admin-select"
-                >
-                  <option value="contributor">Contributor — Can only ADD questions into assigned categories</option>
-                  <option value="editor">Editor — Can edit and update existing questions</option>
-                  <option value="reviewer">Reviewer — Can review and DELETE questions</option>
-                  <option value="admin">Super Admin — Full unrestricted access to all questions & users</option>
-                </select>
-              </div>
-
-              {provisionForm.role === 'contributor' && (
-                <div className="form-row">
-                  <label>Assigned Categories (Leave blank for all categories):</label>
-                  <div className="category-checkboxes-grid">
-                    {categories.map((cat) => {
-                      const isChecked = provisionForm.assignedCategories.includes(cat.id)
-                      return (
-                        <label key={cat.id} className="category-checkbox-item">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={(e) => {
-                              const updated = e.target.checked
-                                ? [...provisionForm.assignedCategories, cat.id]
-                                : provisionForm.assignedCategories.filter((id) => id !== cat.id)
-                              setProvisionForm({ ...provisionForm, assignedCategories: updated })
-                            }}
-                          />
-                          <span>{cat.title} ({cat.exam || 'Custom'})</span>
-                        </label>
-                      )
-                    })}
-                  </div>
+              <div className="field-group">
+                <label className="field-label">Exam Track <span className="field-req">*</span></label>
+                <div className="exam-toggle-group is-compact">
+                  <button
+                    type="button"
+                    className={`exam-toggle-btn ${newSubjectTrack === 'CSS' ? 'is-active' : ''}`}
+                    onClick={() => setNewSubjectTrack('CSS')}
+                  >
+                    <span className="exam-toggle-title">CSS</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`exam-toggle-btn ${newSubjectTrack === 'PMS' ? 'is-active' : ''}`}
+                    onClick={() => setNewSubjectTrack('PMS')}
+                  >
+                    <span className="exam-toggle-title">PMS</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`exam-toggle-btn ${newSubjectTrack === 'Both' ? 'is-active' : ''}`}
+                    onClick={() => setNewSubjectTrack('Both')}
+                  >
+                    <span className="exam-toggle-title">Both (CSS & PMS)</span>
+                  </button>
                 </div>
-              )}
+              </div>
 
-              <div className="admin-modal-actions" style={{ marginTop: '1.25rem' }}>
+              <div className="field-group">
+                <label className="field-label" htmlFor="new-sub-tagline">
+                  Description / Tagline (Optional)
+                </label>
+                <input
+                  id="new-sub-tagline"
+                  type="text"
+                  className="field-input"
+                  placeholder="e.g. Social theories, culture and institutions"
+                  value={newSubjectTagline}
+                  onChange={(e) => setNewSubjectTagline(e.target.value)}
+                />
+              </div>
+
+              <div className="modal-actions">
                 <button
                   type="button"
                   className="btn btn--ghost"
-                  onClick={() => setIsProvisionModalOpen(false)}
+                  onClick={() => setShowSubjectModal(false)}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   className="btn btn--primary"
-                  disabled={provisionLoading}
+                  disabled={creatingSubject}
                 >
-                  {provisionLoading ? 'Provisioning Account…' : 'Generate Staff Account'}
+                  {creatingSubject ? 'Creating…' : 'Create Subject'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Question Modal */}
+      {editingQuestion && (
+        <div
+          className="modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setEditingQuestion(null)}
+        >
+          <div className="modal edit-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Edit Question</h2>
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => setEditingQuestion(null)}
+              >
+                <CloseIcon width="18" height="18" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                handleSaveEditedQuestion(editingQuestion)
+              }}
+              className="modal-form"
+            >
+              <div className="field-group">
+                <label className="field-label">Subject</label>
+                <select
+                  className="field-input"
+                  value={editingQuestion.category_id}
+                  onChange={(e) =>
+                    setEditingQuestion({ ...editingQuestion, category_id: e.target.value })
+                  }
+                >
+                  {subjects.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="field-group">
+                <label className="field-label">Exam Target</label>
+                <select
+                  className="field-input"
+                  value={
+                    editingQuestion.exam_target?.length === 2
+                      ? 'Both'
+                      : editingQuestion.exam_target?.[0] || 'Both'
+                  }
+                  onChange={(e) => {
+                    const val = e.target.value
+                    setEditingQuestion({
+                      ...editingQuestion,
+                      exam_target: val === 'Both' ? ['CSS', 'PMS'] : [val],
+                    })
+                  }}
+                >
+                  <option value="CSS">CSS</option>
+                  <option value="PMS">PMS</option>
+                  <option value="Both">Both (CSS & PMS)</option>
+                </select>
+              </div>
+
+              <div className="field-group">
+                <label className="field-label">Question Prompt</label>
+                <textarea
+                  className="field-textarea"
+                  rows={3}
+                  value={editingQuestion.prompt}
+                  onChange={(e) =>
+                    setEditingQuestion({ ...editingQuestion, prompt: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="field-group">
+                <label className="field-label">Choices</label>
+                {['A', 'B', 'C', 'D'].map((letter, idx) => (
+                  <div key={letter} className="choice-input-row is-modal">
+                    <button
+                      type="button"
+                      className={`choice-key-indicator ${
+                        editingQuestion.answer === idx ? 'is-correct' : ''
+                      }`}
+                      onClick={() =>
+                        setEditingQuestion({ ...editingQuestion, answer: idx })
+                      }
+                    >
+                      {editingQuestion.answer === idx ? (
+                        <CheckIcon width="16" height="16" />
+                      ) : (
+                        <span>{letter}</span>
+                      )}
+                    </button>
+                    <input
+                      type="text"
+                      className="field-input choice-text"
+                      value={editingQuestion.choices[idx] || ''}
+                      onChange={(e) => {
+                        const next = [...editingQuestion.choices]
+                        next[idx] = e.target.value
+                        setEditingQuestion({ ...editingQuestion, choices: next })
+                      }}
+                      required
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="field-group">
+                <label className="field-label">Explanation</label>
+                <textarea
+                  className="field-textarea"
+                  rows={2}
+                  value={editingQuestion.explanation || ''}
+                  onChange={(e) =>
+                    setEditingQuestion({ ...editingQuestion, explanation: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn btn--ghost"
+                  onClick={() => setEditingQuestion(null)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn--primary">
+                  Save Changes
                 </button>
               </div>
             </form>

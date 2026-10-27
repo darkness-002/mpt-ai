@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
     <title>MPT-AI - CSS Preliminary Test Trainer</title>
@@ -21,10 +21,12 @@
       (function () {
         try {
           var s = JSON.parse(localStorage.getItem('mpt_ai_settings') || '{}');
-          var t = s.theme || 'system';
+          var t = s.theme || 'light';
+          if (t === 'oled') t = 'dark';
+          if (t === 'sepia' || t === 'ivory') t = 'zen';
           var isDark =
             t === 'dark' ||
-            t === 'oled' ||
+            t === 'midnight' ||
             (t === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
           if (t !== 'system') document.documentElement.setAttribute('data-theme', t);
           if (isDark) document.documentElement.classList.add('dark');

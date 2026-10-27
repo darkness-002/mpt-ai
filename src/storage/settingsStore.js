@@ -1,21 +1,22 @@
 const SETTINGS_KEY = 'mpt_ai_settings'
 
 export const THEMES = {
-  LIGHT: 'light',          // 1. Minimal Light (Default)
-  MIDNIGHT: 'midnight',    // 2. Midnight Slate
-  IVORY: 'ivory',          // 3. Warm Ivory
-  OLED: 'oled',            // 4. OLED Console
+  LIGHT: 'light',          // 1. Light: Pure white & slate-50
+  DARK: 'dark',            // 2. Dark (Fixed): Truly dark zinc-950 & charcoal
+  ZEN: 'zen',              // 3. Zen: Calming gray-blue & soft indigo
+  MIDNIGHT: 'midnight',    // 4. Midnight: Deep navy blue & sky cyan
   // Backward compatibility aliases
-  DARK: 'midnight',
-  SEPIA: 'ivory',
+  OLED: 'dark',
+  SEPIA: 'zen',
+  IVORY: 'zen',
   SYSTEM: 'system',
 }
 
 export const THEME_LIST = [
-  { id: THEMES.LIGHT, label: 'Minimal Light', desc: 'Pure white & slate-50 (Default)' },
-  { id: THEMES.MIDNIGHT, label: 'Midnight Slate', desc: 'Modern slate dark mode' },
-  { id: THEMES.IVORY, label: 'Warm Ivory', desc: 'Reading cream & warm sepia' },
-  { id: THEMES.OLED, label: 'OLED Console', desc: 'True black & neon accents' },
+  { id: THEMES.LIGHT, label: 'Light', desc: 'Pure white & slate-50' },
+  { id: THEMES.DARK, label: 'Dark', desc: 'Zinc-950 deep charcoal' },
+  { id: THEMES.ZEN, label: 'Zen', desc: 'Calming gray-blue' },
+  { id: THEMES.MIDNIGHT, label: 'Midnight', desc: 'Deep navy & sky blue' },
 ]
 
 export const FONT_SCALES = {
@@ -58,7 +59,9 @@ export const settingsStore = {
     if (typeof document === 'undefined') return
     const root = document.documentElement
 
-    const theme = settings.theme || THEMES.LIGHT
+    let theme = settings.theme || THEMES.LIGHT
+    if (theme === 'oled') theme = THEMES.DARK
+    if (theme === 'sepia' || theme === 'ivory' || theme === 'warm-ivory') theme = THEMES.ZEN
 
     // Theme application
     if (theme === THEMES.SYSTEM) {
@@ -72,9 +75,8 @@ export const settingsStore = {
       window.matchMedia?.('(prefers-color-scheme: dark)').matches
 
     const isDark =
+      theme === THEMES.DARK ||
       theme === THEMES.MIDNIGHT ||
-      theme === THEMES.OLED ||
-      theme === 'dark' ||
       (theme === THEMES.SYSTEM && isSystemDark)
 
     if (isDark) {
