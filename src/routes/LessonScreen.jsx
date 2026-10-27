@@ -300,7 +300,7 @@ export default function LessonScreen({ lessonId }) {
           {question.prompt}
         </h1>
 
-        {/* UPSC/CSS-style items: stem, statement list, closing ask */}
+        {/* Multi-statement items: stem, statement list, closing ask */}
         {question.statements && question.statements.length > 0 && (
           <ol className="statements">
             {question.statements.map((statement, i) => (

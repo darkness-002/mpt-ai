@@ -167,6 +167,7 @@
   box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.6);
 }
 
+[data-theme='midnight'] .omr-bubble.is-filled,
 [data-theme='dark'] .omr-bubble.is-filled,
 [data-theme='oled'] .omr-bubble.is-filled {
   background: #38bdf8;

@@ -1,12 +1,22 @@
 const SETTINGS_KEY = 'mpt_ai_settings'
 
 export const THEMES = {
+  LIGHT: 'light',          // 1. Minimal Light (Default)
+  MIDNIGHT: 'midnight',    // 2. Midnight Slate
+  IVORY: 'ivory',          // 3. Warm Ivory
+  OLED: 'oled',            // 4. OLED Console
+  // Backward compatibility aliases
+  DARK: 'midnight',
+  SEPIA: 'ivory',
   SYSTEM: 'system',
-  LIGHT: 'light',
-  DARK: 'dark',
-  OLED: 'oled',
-  SEPIA: 'sepia',
 }
+
+export const THEME_LIST = [
+  { id: THEMES.LIGHT, label: 'Minimal Light', desc: 'Pure white & slate-50 (Default)' },
+  { id: THEMES.MIDNIGHT, label: 'Midnight Slate', desc: 'Modern slate dark mode' },
+  { id: THEMES.IVORY, label: 'Warm Ivory', desc: 'Reading cream & warm sepia' },
+  { id: THEMES.OLED, label: 'OLED Console', desc: 'True black & neon accents' },
+]
 
 export const FONT_SCALES = {
   COMPACT: 0.9,
@@ -16,7 +26,7 @@ export const FONT_SCALES = {
 }
 
 const DEFAULT_SETTINGS = {
-  theme: THEMES.SYSTEM,
+  theme: THEMES.LIGHT,
   fontScale: FONT_SCALES.NORMAL,
   soundEnabled: true,
   hapticsEnabled: true,
@@ -48,11 +58,13 @@ export const settingsStore = {
     if (typeof document === 'undefined') return
     const root = document.documentElement
 
+    const theme = settings.theme || THEMES.LIGHT
+
     // Theme application
-    if (settings.theme === THEMES.SYSTEM) {
+    if (theme === THEMES.SYSTEM) {
       root.removeAttribute('data-theme')
     } else {
-      root.setAttribute('data-theme', settings.theme)
+      root.setAttribute('data-theme', theme)
     }
 
     const isSystemDark =
@@ -60,9 +72,10 @@ export const settingsStore = {
       window.matchMedia?.('(prefers-color-scheme: dark)').matches
 
     const isDark =
-      settings.theme === THEMES.DARK ||
-      settings.theme === THEMES.OLED ||
-      (settings.theme === THEMES.SYSTEM && isSystemDark)
+      theme === THEMES.MIDNIGHT ||
+      theme === THEMES.OLED ||
+      theme === 'dark' ||
+      (theme === THEMES.SYSTEM && isSystemDark)
 
     if (isDark) {
       root.classList.add('dark')

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { CloseIcon, SettingsIcon } from './icons.jsx'
-import { FONT_SCALES, THEMES, settingsStore } from '../storage/settingsStore.js'
+import { FONT_SCALES, THEMES, THEME_LIST, settingsStore } from '../storage/settingsStore.js'
 import './SettingsModal.css'
 
 export default function SettingsModal({ isOpen, onClose }) {
@@ -33,24 +33,19 @@ export default function SettingsModal({ isOpen, onClose }) {
         </header>
 
         <main className="settings-modal__body">
-          {/* Theme Selector */}
+          {/* Theme Selector: 4 Optimized Modern Themes */}
           <section className="settings-section">
             <label className="settings-label">Color Theme</label>
             <div className="theme-grid">
-              {[
-                { id: THEMES.SYSTEM, label: 'System' },
-                { id: THEMES.LIGHT, label: 'Light' },
-                { id: THEMES.DARK, label: 'Dark' },
-                { id: THEMES.OLED, label: 'OLED Black' },
-                { id: THEMES.SEPIA, label: 'Sepia' },
-              ].map((t) => (
+              {THEME_LIST.map((t) => (
                 <button
                   key={t.id}
                   type="button"
                   className={`theme-chip ${settings.theme === t.id ? 'is-active' : ''}`}
                   onClick={() => update({ theme: t.id })}
                 >
-                  {t.label}
+                  <span className="theme-chip-title">{t.label}</span>
+                  <span className="theme-chip-desc">{t.desc}</span>
                 </button>
               ))}
             </div>

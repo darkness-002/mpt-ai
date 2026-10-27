@@ -82,7 +82,7 @@ describe('Negative Marking Calculation (curriculum.js calculateScore)', () => {
     expect(result.netScore).toBe(3.5)
   })
 
-  it('deducts 0.33 marks per wrong answer for UPSC exams and prevents negative total', () => {
+  it('deducts 0.33 marks per wrong answer with negative penalty and prevents negative total', () => {
     const allWrong = [
       { correct: false },
       { correct: false },

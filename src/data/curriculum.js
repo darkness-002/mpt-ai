@@ -80,7 +80,6 @@ const SOURCES = {
   pms2025: () => import('./questions/pms-prelims/2025.json').then((m) => m.default),
   pmsPakStudies: () => import('./questions/pms-compulsory/pakistan-studies.json').then((m) => m.default),
   pmsIslamic: () => import('./questions/pms-compulsory/islamic-studies.json').then((m) => m.default),
-  upsc2025: () => import('./questions/upsc-prelims/2025-gs1.json').then((m) => m.default),
 }
 
 export const TRACK_CONFIGS = [
@@ -206,29 +205,11 @@ export const TRACK_CONFIGS = [
       },
     ],
   },
-  {
-    id: 'upsc-prelims',
-    exam: 'UPSC',
-    title: 'CSE Prelims — General Studies',
-    tagline: 'Civil Services (Preliminary) Examination Paper I',
-    blueprint: { totalMcqs: 100, minutes: 120, passingMarks: 66, negativeMarking: 0.33 },
-    note: 'Real questions from UPSC CSE Prelims 2025 GS Paper I with verified keys. Negative marking: 1/3 (0.33) marks deducted per incorrect answer.',
-    units: [
-      {
-        id: 'upsc-2025-gs1',
-        title: 'UPSC CSE 2025',
-        tagline: 'General Studies Paper I',
-        hue: 35,
-        sourceLoaders: [SOURCES.upsc2025],
-      },
-    ],
-  },
 ]
 
 export const EXAM_META = {
   CSS: { title: 'CSS', blurb: 'Central Superior Services — FPSC' },
   PMS: { title: 'PMS', blurb: 'Provincial Management Service — PPSC' },
-  UPSC: { title: 'UPSC', blurb: 'Civil Services Examination — UPSC Prelims' },
 }
 
 import {
@@ -237,8 +218,13 @@ import {
   isAnswerable,
   keyNoteQuestion,
 } from './questionModel.js'
+import { isSupabaseConfigured, fetchFullCurriculumFromSupabase } from '../lib/supabase.js'
 
 export { calculateScore, explainQuestion, isAnswerable, keyNoteQuestion }
+
+export function invalidateCurriculumCache() {
+  cachedCurriculum = null
+}
 
 function buildUnit(unit, track, sources) {
   const rtl = sources.some((source) => source.rtl)
@@ -278,6 +264,20 @@ let cachedCurriculum = null
 export async function loadBundledCurriculum() {
   if (cachedCurriculum) return cachedCurriculum
 
+  // Priority 1: Cloud-connected live curriculum via Supabase
+  if (isSupabaseConfigured()) {
+    try {
+      const remoteCurriculum = await fetchFullCurriculumFromSupabase()
+      if (remoteCurriculum && remoteCurriculum.tracks?.length > 0) {
+        cachedCurriculum = remoteCurriculum
+        return cachedCurriculum
+      }
+    } catch (err) {
+      console.warn('Falling back to local question files due to Supabase fetch error:', err)
+    }
+  }
+
+  // Priority 2: Local fallback / offline question banks
   const tracks = await Promise.all(
     TRACK_CONFIGS.map(async (track) => {
       const units = await Promise.all(

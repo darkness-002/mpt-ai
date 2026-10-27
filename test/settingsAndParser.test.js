@@ -23,7 +23,7 @@ describe('settingsStore', () => {
 
   it('loads default settings when empty', () => {
     const s = settingsStore.load()
-    expect(s.theme).toBe(THEMES.SYSTEM)
+    expect(s.theme).toBe(THEMES.LIGHT)
     expect(s.fontScale).toBe(FONT_SCALES.NORMAL)
     expect(s.soundEnabled).toBe(true)
     expect(s.hapticsEnabled).toBe(true)

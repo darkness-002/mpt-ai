@@ -63,11 +63,11 @@
 }
 
 .papers-title-wrap h1 {
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: inherit;
   font-size: clamp(1.6rem, 3.5vw, 2.4rem);
   font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
   margin: 0;
   color: var(--text);
 }
@@ -109,12 +109,12 @@
 }
 
 .papers-stat-num {
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: inherit;
   font-size: 1.4rem;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   color: var(--text);
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .papers-stat-lbl {
@@ -444,10 +444,10 @@
 }
 
 .paper-title {
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: inherit;
   font-size: 1.22rem;
   font-weight: 700;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.018em;
   color: var(--text);
   margin: 0 0 0.4rem;
   line-height: 1.3;
@@ -583,8 +583,9 @@
 
 .papers-empty-card h3 {
   margin: 0;
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: inherit;
   font-size: 1.3rem;
+  letter-spacing: -0.018em;
   color: var(--text);
 }
 

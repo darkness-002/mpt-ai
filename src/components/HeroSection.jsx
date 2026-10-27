@@ -10,7 +10,7 @@ import {
  * HeroSection Component
  * Implements anti-generic design constraints:
  * - Asymmetric layout: 7-col / 5-col grid split breaking symmetry
- * - Left-aligned editorial typography (Space Grotesk + Plus Jakarta Sans)
+ * - Left-aligned editorial typography (Plus Jakarta Sans)
  * - Strict geometry: rounded-2xl containers, rounded-full pills and buttons
  * - Subtle hairline borders (border-black/[0.06] / border-white/[0.08])
  * - Multi-layered diffused ambient shadows (shadow-diffused)

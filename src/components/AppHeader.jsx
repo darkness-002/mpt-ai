@@ -32,16 +32,25 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus })
 
   const handleCycleTheme = () => {
     const current = settingsStore.load()
-    let next = THEMES.DARK
-    if (current.theme === THEMES.DARK) next = THEMES.SEPIA
-    else if (current.theme === THEMES.SEPIA) next = THEMES.LIGHT
-    else if (current.theme === THEMES.LIGHT) next = THEMES.OLED
-    else if (current.theme === THEMES.OLED) next = THEMES.SYSTEM
-    else next = THEMES.DARK
+    let next = THEMES.MIDNIGHT
+    if (current.theme === THEMES.LIGHT) next = THEMES.MIDNIGHT
+    else if (current.theme === THEMES.MIDNIGHT || current.theme === 'dark') next = THEMES.IVORY
+    else if (current.theme === THEMES.IVORY || current.theme === 'sepia') next = THEMES.OLED
+    else if (current.theme === THEMES.OLED) next = THEMES.LIGHT
+    else next = THEMES.LIGHT
 
     const updated = { ...current, theme: next }
     settingsStore.save(updated)
     setCurrentTheme(next)
+  }
+
+  const themeDisplayNames = {
+    [THEMES.LIGHT]: 'Minimal Light',
+    [THEMES.MIDNIGHT]: 'Midnight Slate',
+    [THEMES.IVORY]: 'Warm Ivory',
+    [THEMES.OLED]: 'OLED Console',
+    dark: 'Midnight Slate',
+    sepia: 'Warm Ivory',
   }
 
   return (
@@ -60,25 +69,19 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus })
           </div>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="header-desktop-nav" aria-label="Main Desktop Navigation">
+        {/* Clean, Non-Cluttered Desktop Navigation */}
+        <nav className="header-desktop-nav" aria-label="Main Navigation">
           <NavLink to="/" className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`} end>
             Curriculum
           </NavLink>
           <NavLink to="/drill" className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`}>
-            Drill
+            Practice Drill
           </NavLink>
           <NavLink to="/daily" className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`}>
-            Daily
+            Daily Sprint
           </NavLink>
-          <NavLink to="/flashcards" className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`}>
-            Flashcards
-          </NavLink>
-          <NavLink to="/readiness" className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`}>
-            Readiness
-          </NavLink>
-          <NavLink to="/papers" className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`}>
-            Past Papers
+          <NavLink to="/mistakes" className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`}>
+            Mistakes Bank
           </NavLink>
         </nav>
 
@@ -87,18 +90,18 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus })
           type="button"
           className="header-search-trigger"
           onClick={onOpenSearch}
-          title="Search topics, questions, past papers (Ctrl+K)"
+          title="Search topics, questions, syllabus (Ctrl+K)"
           aria-label="Global Search"
         >
           <SearchIcon width="15" height="15" className="header-search-icon" />
-          <span className="header-search-text">Search topics or tools…</span>
+          <span className="header-search-text">Search topics…</span>
           <kbd className="header-search-kbd">Ctrl K</kbd>
         </button>
 
         {/* Action Controls */}
         <div className="site-header__controls">
-          {/* Daily Streak Pill */}
-          <Link to="/daily" className="header-streak-pill" title="Daily Streak & Challenge">
+          {/* Daily Streak */}
+          <Link to="/daily" className="header-streak-pill" title="Daily Streak">
             <FlameIcon width="16" height="16" className="header-streak-flame" />
             <span className="header-streak-count">{streak.currentStreak}</span>
           </Link>
@@ -108,8 +111,8 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus })
             type="button"
             className="icon-btn header-tool-btn"
             onClick={onOpenFocus}
-            title="Pomodoro Study Focus Timer"
-            aria-label="Study Timer"
+            title="Focus Timer"
+            aria-label="Focus Timer"
           >
             <TimerIcon width="18" height="18" />
           </button>
@@ -119,10 +122,10 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus })
             type="button"
             className="icon-btn header-tool-btn"
             onClick={handleCycleTheme}
-            title={`Theme: ${currentTheme}. Click to cycle themes.`}
+            title={`Theme: ${themeDisplayNames[currentTheme] || currentTheme}. Click to cycle.`}
             aria-label="Switch Theme"
           >
-            {currentTheme === 'light' || currentTheme === 'sepia' ? (
+            {currentTheme === 'light' || currentTheme === 'ivory' || currentTheme === 'sepia' ? (
               <SunIcon width="18" height="18" />
             ) : (
               <MoonIcon width="18" height="18" />

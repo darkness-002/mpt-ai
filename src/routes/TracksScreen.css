@@ -1,150 +1,123 @@
-.tracks-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+/* Radically Simplified Student Dashboard */
+
+.simple-dashboard {
+  min-height: calc(100vh - 4.5rem);
+  background: var(--bg);
+  color: var(--text);
+  padding: 1.5rem 1rem 4rem;
 }
 
-.tracks-hero {
-  width: min(94rem, 100%);
-  margin: 0 auto;
-  padding: 1.25rem 1.25rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-@media (min-width: 1024px) {
-  .tracks-hero {
-    padding: 1.5rem 2.5rem 0;
+@media (min-width: 768px) {
+  .simple-dashboard {
+    padding: 2.5rem 2rem 5rem;
   }
 }
 
-.install-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  background: var(--blue-subtle);
-  border: 1px solid var(--blue);
-  border-radius: var(--radius);
-  padding: 0.6rem 1rem;
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-/* Streak and Stats Ribbon */
-
-.streak-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.85rem 1.15rem;
-  margin-top: 1.25rem;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  flex-wrap: wrap;
-  box-shadow: var(--shadow-sm);
-}
-
-.streak-bar__item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.streak-flame-disc {
-  display: grid;
-  place-items: center;
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: 50%;
-  background: var(--gold-subtle);
-  color: var(--gold-dark);
-  flex-shrink: 0;
-}
-
-.streak-info {
+.simple-dashboard__container {
+  max-width: 56rem;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
+  gap: 2rem;
 }
 
-.streak-title {
-  font-size: 0.92rem;
-  color: var(--text);
-}
-
-.streak-subtitle {
-  font-size: 0.78rem;
-  color: var(--muted);
-  font-weight: 600;
-}
-
-.streak-bar__links {
+/* Install Notice */
+.simple-install-bar {
   display: flex;
-  gap: 0.5rem;
   align-items: center;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.75rem;
-  background: var(--surface-2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-full);
-  text-decoration: none;
-  font-weight: 800;
-  font-size: 0.8rem;
-  color: var(--text);
+.simple-btn {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
   transition: all 0.15s ease;
 }
 
-.chip:hover {
-  border-color: var(--blue);
-  color: var(--blue);
-  transform: translateY(-1px);
-}
-
-.chip--accent {
-  background: var(--blue-subtle);
-  border-color: rgba(14, 165, 233, 0.3);
-  color: var(--blue-dark);
-}
-
-.chip__badge {
-  display: inline-grid;
-  place-items: center;
-  background: var(--red);
+.simple-btn--primary {
+  background: var(--primary);
   color: #fff;
-  font-size: 0.68rem;
-  font-weight: 900;
-  padding: 0 0.4rem;
-  border-radius: 999px;
-  min-width: 1.1rem;
-  height: 1.1rem;
-  line-height: 1.1rem;
 }
 
-/* Resume Hero Banner */
-.resume-hero-card {
-  margin-top: 1.25rem;
-  padding: 1.35rem 1.5rem;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--blue) 12%, var(--surface)), var(--surface));
-  border: 1.5px solid color-mix(in srgb, var(--blue) 35%, var(--border));
-  border-radius: var(--radius-lg);
+.simple-btn--primary:hover {
+  background: var(--primary-dark);
+}
+
+/* Student Greeting Header */
+.student-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 1.25rem;
+  gap: 1.5rem;
   flex-wrap: wrap;
-  box-shadow: var(--shadow-md);
+  padding-bottom: 0.5rem;
+}
+
+.student-greeting-sub {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.student-greeting-title {
+  font-family: inherit;
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin: 0.25rem 0 0;
+  line-height: 1.25;
+}
+
+@media (min-width: 768px) {
+  .student-greeting-title {
+    font-size: 2.25rem;
+  }
+}
+
+.student-streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 0.4rem 0.9rem;
+  font-size: 0.84rem;
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.student-streak-flame {
+  color: var(--gold);
+}
+
+/* The Active Lesson Hero Card */
+.resume-hero-card {
+  background: var(--surface-raised);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
+  transition: border-color 0.15s ease;
 }
 
 .resume-hero-card::before {
@@ -153,523 +126,385 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--blue), var(--green));
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--teal));
 }
 
-.resume-hero-card__content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  flex: 1;
-  min-width: 14rem;
-}
-
-.resume-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.75rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--blue-dark);
-}
-
-.resume-title {
-  margin: 0;
-  font-size: 1.35rem;
-  font-weight: 900;
-}
-
-.resume-subtitle {
-  margin: 0;
-  font-size: 0.88rem;
-  color: var(--muted);
-}
-
-/* Quick Study Modes Grid */
-.quick-modes-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.quick-mode-card {
+.resume-hero-card__header {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem 1.15rem;
-  text-decoration: none;
-  color: var(--text);
-  box-shadow: var(--shadow-diffused);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.quick-mode-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-diffused-lg);
-  border-color: rgba(79, 70, 229, 0.3);
-}
-
-.quick-mode-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.quick-mode-card--gold .quick-mode-icon {
-  background: var(--gold-subtle);
-  color: var(--gold-dark);
-}
-
-.quick-mode-card--blue .quick-mode-icon {
-  background: var(--primary-subtle);
-  color: var(--primary);
-}
-
-.quick-mode-card--green .quick-mode-icon {
-  background: var(--green-subtle);
-  color: var(--green);
-}
-
-.quick-mode-card--teal .quick-mode-icon,
-.quick-mode-card--purple .quick-mode-icon {
-  background: var(--teal-subtle);
-  color: var(--teal-dark);
-}
-
-.quick-mode-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.quick-mode-text strong {
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.88rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.25;
-}
-
-.quick-mode-text span {
-  font-size: 0.76rem;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 0.15rem;
-}
-
-@media (max-width: 768px) {
-  .quick-modes-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Segmented Exam Filter Bar */
-.exam-filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: 1.75rem;
-  padding: 0.35rem;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.exam-filter-bar::-webkit-scrollbar {
-  display: none;
-}
-
-.filter-tab {
-  padding: 0.5rem 1.15rem;
-  border-radius: var(--radius-full);
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--muted);
-  font-size: 0.84rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-}
-
-.filter-tab:hover {
-  color: var(--text);
-}
-
-.filter-tab.is-active {
-  background: var(--surface);
-  color: var(--text);
-  border-color: var(--border);
-  box-shadow: var(--shadow-sm);
-}
-
-.tracks {
-  width: min(94rem, 100%);
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem 2rem;
-  flex: 1;
-}
-
-@media (min-width: 1024px) {
-  .tracks {
-    padding: 3rem 2.5rem 2rem;
-  }
-}
-
-.exam {
-  margin-bottom: 3.5rem;
-}
-
-.exam__heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
-}
-
-.exam__heading-left h2 {
-  margin: 0;
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 1.65rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--text);
-}
-
-.exam__heading-left p {
-  margin: 0.35rem 0 0;
-  font-size: 0.92rem;
-  color: var(--muted);
-  line-height: 1.45;
-}
-
-.exam-track-count {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--muted);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  padding: 0.3rem 0.85rem;
-  border-radius: var(--radius-full);
-}
-
-.exam__tracks {
-  display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
-}
-
-@media (min-width: 1280px) {
-  .exam__tracks {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.track {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 1.75rem 1.85rem;
-  text-decoration: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  min-height: 12.5rem;
-  box-shadow: var(--shadow-diffused);
-}
-
-.track:hover {
-  transform: translateY(-3px);
-  border-color: rgba(79, 70, 229, 0.25);
-  box-shadow: var(--shadow-diffused-lg);
-}
-
-.track:active {
-  transform: translateY(0);
-}
-
-.track__top {
-  display: flex;
-  align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
 }
 
-.track__title-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.track h3 {
-  margin: 0;
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.3;
-  color: var(--text);
-}
-
-.track__exam-tag {
+.resume-hero-card__tag {
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.track__badge {
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 0.28rem 0.75rem;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.65rem;
   border-radius: var(--radius-full);
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-.track__badge--progress {
   background: var(--primary-subtle);
-  border-color: rgba(79, 70, 229, 0.2);
   color: var(--primary);
+  border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
-.track__badge--completed {
-  background: var(--green-subtle);
-  border-color: rgba(16, 185, 129, 0.2);
-  color: var(--green-dark);
-}
-
-.track__tagline {
-  margin: 0.65rem 0 1rem;
-  font-size: 0.88rem;
-  color: var(--text-body);
-  line-height: 1.5;
-}
-
-.track__rules-pill {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.45rem 0.85rem;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--muted);
-  margin-bottom: 1rem;
-}
-
-.track__bar {
-  height: 0.55rem;
-  border-radius: var(--radius-full);
-  background: var(--surface-3);
-  overflow: hidden;
-}
-
-.track__bar span {
-  display: block;
-  height: 100%;
-  border-radius: var(--radius-full);
-  background: linear-gradient(90deg, var(--blue), var(--green));
-  transition: width 0.4s ease;
-}
-
-.track__meta {
-  display: flex;
-  justify-content: space-between;
-  margin: 0.65rem 0 0;
+.resume-hero-card__percent {
   font-size: 0.82rem;
-  color: var(--muted);
-}
-
-.track__meta strong {
-  color: var(--text);
-}
-
-.tracks-footer {
-  width: min(94rem, 100%);
-  margin: 0 auto;
-  padding: 1.5rem 1.25rem 6.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  font-size: 0.86rem;
-  color: var(--muted);
-  border-top: 1.5px solid var(--border);
-}
-
-@media (min-width: 1024px) {
-  .tracks-footer {
-    padding: 2rem 2.5rem 6.5rem;
-  }
-}
-
-/* Homepage Dedicated Resume Lesson Banner */
-.homepage-resume-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  padding: 1.15rem 1.5rem;
-  background: var(--surface);
-  border: 1.5px solid var(--border-strong);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-  flex-wrap: wrap;
-}
-
-.homepage-resume-banner:hover {
-  border-color: var(--primary);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
-.homepage-resume-banner__left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex: 1;
-  min-width: 14rem;
-}
-
-.homepage-resume-banner__icon {
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: var(--radius-full);
-  background: var(--primary-subtle);
-  color: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.homepage-resume-banner__icon svg {
-  fill: currentColor;
-}
-
-.homepage-resume-banner__info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.homepage-resume-banner__tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--primary);
-}
-
-.homepage-resume-banner__title {
-  margin: 0;
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 1.05rem;
   font-weight: 700;
+  color: var(--teal);
+}
+
+.resume-hero-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.resume-hero-card__track {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.resume-hero-card__title {
+  font-family: inherit;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.018em;
   color: var(--text);
+  margin: 0;
   line-height: 1.25;
 }
 
-.homepage-resume-banner__meta {
+.resume-hero-card__subtitle {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.resume-hero-card__progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.resume-hero-card__progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--teal));
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.resume-hero-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 0.5rem;
+}
+
+.resume-hero-card__stats {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.resume-hero-card__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.65rem;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  transition: all 0.15s ease;
+}
+
+.resume-hero-card__btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+}
+
+/* Prompt Card (Daily Sprint or Mistakes) */
+.student-prompt-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.simple-prompt-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.15s ease;
+}
+
+.simple-prompt-card:hover {
+  border-color: var(--border-hover);
+  background: var(--surface-hover);
+  transform: translateY(-1px);
+}
+
+.simple-prompt-card__icon {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.simple-prompt-card--sprint .simple-prompt-card__icon {
+  background: var(--primary-subtle);
+  color: var(--primary);
+}
+
+.simple-prompt-card--review .simple-prompt-card__icon {
+  background: var(--red-subtle, rgba(220, 38, 38, 0.12));
+  color: var(--red);
+}
+
+.simple-prompt-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+.simple-prompt-card__content strong {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.simple-prompt-card__content span {
   font-size: 0.8rem;
   color: var(--muted);
 }
 
-.homepage-resume-banner__btn {
-  display: inline-flex;
+.simple-prompt-card__arrow {
+  color: var(--muted);
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+/* Exam Tracks Section */
+.student-tracks-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.student-tracks-header {
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1.4rem;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.student-section-title {
+  font-family: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  color: var(--text);
+  margin: 0;
+}
+
+.student-track-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.student-tab {
+  padding: 0.35rem 0.85rem;
   border-radius: var(--radius-full);
-  background: var(--primary);
-  color: #ffffff !important;
-  font-size: 0.86rem;
-  font-weight: 700;
-  text-decoration: none;
-  box-shadow: 0 4px 14px -2px rgba(37, 99, 235, 0.4);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.15s ease;
-  white-space: nowrap;
 }
 
-.homepage-resume-banner__btn svg {
-  fill: currentColor;
-  flex-shrink: 0;
+.student-tab:hover {
+  color: var(--text);
 }
 
-.homepage-resume-banner__btn:hover {
-  filter: brightness(1.08);
-  transform: translateY(-1px);
+.student-tab.is-active {
+  background: var(--surface-raised);
+  border-color: var(--border);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
 }
 
-.tracks-footer__stats {
+.student-tracks-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .student-tracks-grid {
+    grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
+  }
+}
+
+.student-track-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1.35rem;
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.15s ease;
+}
+
+.student-track-card:hover {
+  border-color: var(--border-hover);
+  background: var(--surface-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.06);
+}
+
+.student-track-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.student-track-card__badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  color: var(--primary);
+  border: 1px solid var(--border);
+}
+
+.student-track-card__count {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.student-track-card__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.student-track-card__desc {
+  font-size: 0.84rem;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.student-track-card__meta {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 700;
-  font-size: 0.82rem;
-  flex-wrap: wrap;
-  justify-content: center;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: auto;
+  padding-top: 0.5rem;
 }
 
-.tracks-footer__backup {
+.student-track-card__bar-wrap {
+  width: 100%;
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.student-track-card__bar {
+  height: 100%;
+  background: var(--primary);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+/* Minimalist Student Footer */
+.student-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
   display: flex;
-  gap: 0.6rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   flex-wrap: wrap;
-  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--muted);
 }
 
-.tracks-footer__admin {
-  font-weight: 800;
-  color: var(--blue);
-  text-decoration: none;
-  font-size: 0.86rem;
-  transition: color 0.12s ease;
+.student-footer__info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.tracks-footer__admin:hover {
+.student-footer__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.student-ghost-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
   text-decoration: underline;
+  transition: color 0.15s ease;
 }
 
-.tracks__status-alert {
-  margin-top: 1rem;
+.student-ghost-btn:hover {
+  color: var(--text);
+}
+
+.student-status-toast {
   padding: 0.75rem 1rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--primary);
   border-radius: var(--radius-sm);
-  background: var(--green-subtle);
-  border: 1.5px solid var(--green);
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: var(--green-dark);
+  font-size: 0.84rem;
+  color: var(--text);
 }
-

@@ -113,19 +113,6 @@ export default function PastPapersScreen() {
         trackId: 'pms-prelims',
         description: 'Verified 2023 PMS screening test with authentic answer key, negative marking calculations, and full detailed rationale.',
       },
-      {
-        id: 'upsc-prelims-2025-gs1',
-        title: 'UPSC CSE Prelims 2025 — General Studies Paper I',
-        exam: 'UPSC',
-        commission: 'Union Public Service Commission (UPSC)',
-        year: '2025',
-        totalMcqs: 100,
-        minutes: 120,
-        negativeMarking: 0.33,
-        provenance: 'Official UPSC Key',
-        trackId: 'upsc-prelims',
-        description: 'UPSC Civil Services Examination General Studies Paper I covering Indian Polity, Modern History, Geography, Environment, and Economics.',
-      },
     ],
     [],
   )
@@ -166,7 +153,6 @@ export default function PastPapersScreen() {
       all: pastPapersList.length,
       CSS: pastPapersList.filter((p) => p.exam === 'CSS').length,
       PMS: pastPapersList.filter((p) => p.exam === 'PMS').length,
-      UPSC: pastPapersList.filter((p) => p.exam === 'UPSC').length,
     }
   }, [pastPapersList])
 
@@ -206,7 +192,7 @@ export default function PastPapersScreen() {
               <span className="papers-stat-lbl">Verified MCQs</span>
             </div>
             <div className="papers-stat-card">
-              <span className="papers-stat-num">3</span>
+              <span className="papers-stat-num">2</span>
               <span className="papers-stat-lbl">Exam Boards</span>
             </div>
             <div className="papers-stat-card">
@@ -283,14 +269,6 @@ export default function PastPapersScreen() {
             >
               <span>PPSC PMS</span>
               <span className="tab-count">{examCounts.PMS}</span>
-            </button>
-            <button
-              type="button"
-              className={`paper-filter-tab ${filterExam === 'UPSC' ? 'is-active' : ''}`}
-              onClick={() => setFilterExam('UPSC')}
-            >
-              <span>UPSC CSE</span>
-              <span className="tab-count">{examCounts.UPSC}</span>
             </button>
           </div>
 

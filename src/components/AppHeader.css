@@ -57,11 +57,11 @@
 }
 
 .site-brand-title {
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: inherit;
   font-size: 1.15rem;
   font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
   color: var(--text);
 }
 
@@ -207,6 +207,66 @@
   background: var(--surface-3);
   color: var(--primary);
   border-color: var(--border-strong);
+}
+
+.header-nav-link--lab {
+  background: var(--primary-subtle);
+  color: var(--primary);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.header-nav-link--lab:hover {
+  background: rgba(37, 99, 235, 0.16);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.header-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-body);
+  transition: all 0.15s ease;
+}
+
+.header-role-badge:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.header-role-badge .role-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.header-role-badge--admin .role-dot {
+  background: var(--primary);
+  box-shadow: 0 0 6px var(--primary);
+}
+
+.header-role-badge--editor .role-dot {
+  background: var(--teal);
+}
+
+.header-role-badge--reviewer .role-dot {
+  background: var(--gold);
+}
+
+.header-role-badge--contributor .role-dot {
+  background: var(--green);
 }
 
 @media (max-width: 640px) {

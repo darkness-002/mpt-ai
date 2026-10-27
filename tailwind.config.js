@@ -51,7 +51,7 @@ export default {
         },
       },
       fontFamily: {
-        heading: ['"Space Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        heading: ['"Plus Jakarta Sans"', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         sans: ['"Plus Jakarta Sans"', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       boxShadow: {

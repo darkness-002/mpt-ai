@@ -7,7 +7,7 @@ import {
 
 describe('paperGenerator', () => {
   it('has valid blueprint presets with distributions summing to totalMcqs', () => {
-    expect(BLUEPRINT_PRESETS.length).toBeGreaterThanOrEqual(3)
+    expect(BLUEPRINT_PRESETS.length).toBeGreaterThanOrEqual(2)
 
     for (const bp of BLUEPRINT_PRESETS) {
       const sum = bp.distribution.reduce((acc, d) => acc + d.count, 0)

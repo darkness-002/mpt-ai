@@ -4,7 +4,6 @@ An offline-first, mobile-friendly Progressive Web App (PWA) designed for competi
 - **CSS MPT** (MCQ-Based Preliminary Test — FPSC)
 - **CSS Compulsory Subjects** (Part-I MCQs, 2013–2025)
 - **PMS Prelims & Compulsory** (Provincial Management Service — PPSC)
-- **UPSC CSE Prelims** (Civil Services Preliminary Exam — GS Paper I)
 
 ---
 
@@ -61,7 +60,7 @@ npm run build
    - Rapid-fire 60-second timer with streak combos, score multipliers (up to 3x), and time additions (`+3s` on correct, `-5s` on mistakes).
    - Optional Sudden Death mode (game over on the first mistake) with local high score leaderboards.
 8. **Past Papers Vault & Explorer (`/papers`)**
-   - Curated directory of official civil service papers: FPSC CSS MPT (2023–2026), PPSC PMS (2023–2025), CSS Compulsory Subjects (2013–2025), and UPSC CSE Prelims 2025.
+   - Curated directory of official civil service papers: FPSC CSS MPT (2023–2026), PPSC PMS (2023–2025), and CSS Compulsory Subjects (2013–2025).
    - Metadata breakdown including total questions, duration, negative marking deductions, and direct links to simulate or print worksheets.
 9. **Printable Offline Exam Worksheets & OMR PDF Generator (`/worksheet`)**
    - Clean 2-column printable paper layout with candidate roll number blocks, test instructions, and answer keys.
@@ -106,7 +105,7 @@ A full-fledged civil service curriculum and examination management studio built 
 1. **System Overview & Telemetry Metrics (`overview`)**:
    - Live metrics: Total questions in database, custom authored count, active exam tracks, keyed question ratio (%), and explanation coverage.
    - Syllabus subject distribution charts (English, General Abilities, Science, Pakistan Affairs, Islamiat, Urdu).
-   - Exam commission breakdown (FPSC CSS, PPSC PMS, UPSC Prelims).
+   - Exam commission breakdown (FPSC CSS, PPSC PMS).
 2. **Question Bank Explorer & Live MCQ Editor (`questions`)**:
    - Universal search across prompts, choices, and explanations.
    - Filter by Exam, Track/Category, and Status (*Needs Answer Key*, *Missing Explanation*).
@@ -120,7 +119,6 @@ A full-fledged civil service curriculum and examination management studio built 
    - Official blueprint presets:
      - **FPSC CSS MPT 200-MCQ Blueprint** (English 50, Math/Ability 60, Science 30, Pak Affairs 20, Current Affairs 20, Islamic Studies 20).
      - **PPSC PMS 100-MCQ Blueprint** (Pak Studies 20, Islamiat 20, GK 20, English 20, Urdu 20).
-     - **UPSC GS-I 100-MCQ Blueprint** (Polity 25, History 25, Geography 25, Economy/Science 25).
    - **Generate Balanced Paper**: Samples non-duplicated, answerable questions according to official weightages.
    - **Printable OMR Test Paper**: Browser print-to-PDF layout with candidate roll number block.
    - **Save as Playable Track**: Immediately publish generated mock exams as interactive in-app test tracks!
@@ -141,5 +139,5 @@ A full-fledged civil service curriculum and examination management studio built 
 - **Duolingo-style Learning Path**: 10-MCQ bite-sized lessons that unlock unit-by-unit with question shuffling on every attempt.
 - **Option Elimination (Strike-Through Mode)**: Rule out distractors with a dedicated scissor/slash action before committing to an answer.
 - **Leitner Spaced Repetition (SRS)**: Automatic scheduling and interval expansion for missed questions until permanent mastery.
-- **Negative Marking Support**: Configurable per-exam deduction rules (0 for MPT, 0.25 for PMS, 0.33 for UPSC).
+- **Negative Marking Support**: Configurable per-exam deduction rules (0 for MPT, 0.25 for PMS).
 - **Local-First & Offline**: Powered by IndexedDB v4 and Workbox Service Worker precaching (1.3 MB bundle).

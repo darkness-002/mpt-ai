@@ -1,14 +1,14 @@
 # MPT-AI — Engineering & Feature Implementation Summary
 
 **Date:** September 22, 2026  
-**Project:** MPT-AI (CSS / PMS / UPSC Civil Service Screening Trainer)  
+**Project:** MPT-AI (CSS / PMS Civil Service Screening Trainer)  
 **Stack:** React 19, Vite 8, VitePWA (Workbox), IndexedDB v4 (Local-First), Vitest, Oxlint
 
 ---
 
 ## 1. Executive Summary
 
-This document details the major architectural overhaul and feature implementation completed for **MPT-AI**. The application has been upgraded into a feature-rich, high-performance competitive civil service exam suite designed for FPSC CSS MPT, PPSC PMS, CSS Compulsory, and UPSC Prelims candidates.
+This document details the major architectural overhaul and feature implementation completed for **MPT-AI**. The application has been upgraded into a feature-rich, high-performance competitive civil service exam suite designed for FPSC CSS MPT, PPSC PMS, and CSS Compulsory candidates.
 
 A complete UI/UX layout transformation has been performed—introducing a persistent multi-tool App Header, a permanently accessible bottom navigation dock with a sliding "More Tools" drawer, and a dedicated Study Mode Hub on the main dashboard. Fifteen substantial, cohesive features were engineered and integrated with zero external UI dependencies (pure vanilla CSS + React 19), full offline capability, code-splitting via `React.lazy()`, and an expanded test suite of 50 unit tests across 14 test files.
 
@@ -63,7 +63,6 @@ A complete UI/UX layout transformation has been performed—introducing a persis
   - FPSC CSS MPT (2023, 2024, 2025, 2026)
   - PPSC PMS Prelims (2023, 2024, 2025)
   - CSS Compulsory General Science & Ability, Current Affairs, Pakistan Affairs, Islamiat (2013–2025)
-  - UPSC CSE Prelims General Studies (2025)
 - Displays key metadata: total questions, time allowance, negative marking rules, and direct links to mock simulation and printable worksheets.
 
 ### Feature 9: Printable Offline Exam Worksheets & OMR PDF Generator (`/worksheet`)
@@ -126,7 +125,7 @@ A complete UI/UX layout transformation has been performed—introducing a persis
 | `/daily` | `DailySprintScreen.jsx` | Deterministic 10-MCQ daily sprint challenge with streak milestone tracking |
 | `/readiness` | `ReadinessScreen.jsx` | Civil Services Exam Readiness Diagnostic index (0-100%) and weak spot drill launcher |
 | `/speed-run` | `SpeedRunScreen.jsx` | 60-second rapid-fire speed run / sudden death challenge with combo multipliers |
-| `/papers` | `PastPapersScreen.jsx` | Curated past papers directory (CSS MPT, PPSC PMS, CSS Compulsory, UPSC) |
+| `/papers` | `PastPapersScreen.jsx` | Curated past papers directory (CSS MPT, PPSC PMS, CSS Compulsory) |
 | `/worksheet` | `WorksheetScreen.jsx` | Printable 2-column offline exam worksheets and printable OMR bubble sheets |
 | `/planner` | `StudyPlannerScreen.jsx` | Exam countdown pacing planner with daily target question quotas |
 | `/analytics` | `AnalyticsScreen.jsx` | Subject accuracy breakdown matrix, mastery tracking, and historical metrics |
@@ -164,7 +163,7 @@ A complete UI/UX layout transformation has been performed—introducing a persis
   - Blueprint rules: configurable negative marking penalty, exam duration, and passing threshold.
   - Custom track category creator.
 - **Tab 4: Intelligent Mock Exam Paper Generator (`generator`)**:
-  - Official syllabus blueprint presets (FPSC CSS MPT 200 MCQs, PPSC PMS 100 MCQs, UPSC 100 MCQs, and Custom Academy Blueprint).
+  - Official syllabus blueprint presets (FPSC CSS MPT 200 MCQs, PPSC PMS 100 MCQs, and Custom Academy Blueprint).
   - Algorithmic non-duplicative sampling across matching syllabus domains (`src/lib/paperGenerator.js`).
   - Printable OMR Test Sheet generator and 1-click "Save as Playable Track".
 - **Tab 5: Database Quality & Integrity Diagnostic Auditor (`audit`)**:

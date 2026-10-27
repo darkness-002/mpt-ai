@@ -37,21 +37,6 @@ export const BLUEPRINT_PRESETS = [
       { subject: 'Urdu Literature & Language', count: 20, keywords: ['urdu'] },
     ],
   },
-  {
-    id: 'upsc-gs1-100',
-    title: 'UPSC CSE Prelims GS-I Blueprint (100 MCQs)',
-    exam: 'UPSC',
-    totalMcqs: 100,
-    durationMinutes: 120,
-    negativeMarking: 0.33,
-    passingPercent: 33,
-    distribution: [
-      { subject: 'Indian Polity & Governance', count: 25, keywords: ['polity', 'constitution', 'governance'] },
-      { subject: 'History & Culture', count: 25, keywords: ['history', 'culture', 'modern india', 'ancient'] },
-      { subject: 'Geography & Environment', count: 25, keywords: ['geography', 'environment', 'ecology'] },
-      { subject: 'Economy & General Science', count: 25, keywords: ['economy', 'economic', 'science', 'technology'] },
-    ],
-  },
 ]
 
 /**

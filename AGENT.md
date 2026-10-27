@@ -6,7 +6,7 @@ This document is designed for AI coding assistants (Antigravity, Claude, Copilot
 
 ## 1. Project Philosophy & Architecture
 
-- **Project:** MPT-AI — An offline-first, mobile-friendly PWA for competitive civil service screening exams (FPSC CSS MPT, PPSC PMS Prelims, and UPSC CSE Prelims).
+- **Project:** MPT-AI — An offline-first, mobile-friendly PWA for competitive civil service screening exams (FPSC CSS MPT and PPSC PMS Prelims).
 - **Core Technology Stack:**
   - **Framework:** React 19 (Hooks, Context API, zero third-party UI/CSS frameworks)
   - **Bundler & Tooling:** Vite 8, VitePWA (`vite-plugin-pwa` with Workbox), Oxlint, Vitest
@@ -24,7 +24,7 @@ This document is designed for AI coding assistants (Antigravity, Claude, Copilot
    - **Rule:** Question JSON files in `src/data/questions/` must **always** be loaded via dynamic import functions (e.g. `() => import('./questions/coached/english.json').then((m) => m.default)`).
    - **Reason:** Static imports bundle hundreds of kilobytes of questions into `index.js`, triggering chunk-size warnings and slowing initial render. Dynamic imports allow Vite to split each paper into its own cacheable asset.
 2. **NEVER Bypass the `isAnswerable()` Quality Guard**:
-   - Staging questions (like `upsc-prelims/2025-gs1.staging.json`) carry `answer: null`.
+   - Draft staging questions carry `answer: null`.
    - In JavaScript, `null >= 0` evaluates to `true`. Without `Number.isInteger(q.answer) && q.answer >= 0 && q.answer < q.choices.length`, unkeyed questions would silently mark Option 1 as correct.
    - Always run question collections through `isAnswerable` before displaying them.
 3. **Preserve Answer Provenance**:
@@ -43,7 +43,7 @@ This document is designed for AI coding assistants (Antigravity, Claude, Copilot
 
 The curriculum follows a 5-tier hierarchy:
 ```
-Exam (e.g. CSS, PMS, UPSC)
+Exam (e.g. CSS, PMS)
  └── Track (e.g. CSS MPT, PMS Prelims)
       └── Unit (e.g. General Abilities, English, Urdu)
            └── Lesson (Bite-sized chunks of ~10 questions)
@@ -53,7 +53,7 @@ Exam (e.g. CSS, PMS, UPSC)
 ### The Question Schema
 ```typescript
 interface Question {
-  id: string;                      // e.g. "english-2026-1" or "upsc2025gs1-7"
+  id: string;                      // e.g. "english-2026-1" or "abilities-2023-14"
   prompt: string;                  // The question stem
   choices: string[];               // Minimum 2 choices (typically 4 choices)
   answer: number;                  // 0-indexed integer (0 = Choice 1, 1 = Choice 2)
@@ -62,7 +62,7 @@ interface Question {
   closing?: string;                // Optional closing ask ("Which of the above are correct?")
   explanation?: string;            // Pedagogical explanation shown after answering
   source?: {
-    paper: string;                 // e.g. "MPT 2026", "UPSC CSE Prelims 2025"
+    paper: string;                 // e.g. "MPT 2026", "PMS 2024"
     number?: number;               // Question number on the physical exam paper
     keyedBy?: 'mpt-ai' | 'author'; // Omit if official examiner key
     keySource?: string;            // Citation if sourced from an external publisher
@@ -76,7 +76,7 @@ interface Blueprint {
   totalMcqs: number;       // Exam capacity (e.g. 200 for MPT, 100 for PMS)
   minutes: number;         // Time allowed (e.g. 200 mins for MPT, 120 for PMS)
   passingMarks: number;    // Qualifying mark (e.g. 66 for MPT, 40 for PMS)
-  negativeMarking: number; // 0 for CSS MPT, 0.25 for PMS, 0.33 for UPSC
+  negativeMarking: number; // 0 for CSS MPT, 0.25 for PMS
 }
 ```
 
@@ -123,7 +123,7 @@ mpt-ai/
 │   ├── components/            # UI atoms & components (BottomNav, SettingsModal, LessonNode, icons.jsx)
 │   ├── content/               # ContentProvider, Context, buildCustom (author questions chunker)
 │   ├── data/                  # curriculum.js (track manifests and dynamic loaders)
-│   │   └── questions/         # JSON question banks (coached, past-papers, pms, upsc)
+│   │   └── questions/         # JSON question banks (coached, past-papers, pms)
 │   ├── lib/                   # Utilities (sound.js, confetti.js, browserPdfParser.js, shuffle.js, useInstallPrompt.js)
 │   ├── routes/                # Page screens (Tracks, Path, Lesson, CustomQuiz, Analytics, MockExam, Mistakes, Bookmarks, Admin)
 │   ├── storage/               # Storage layer (idb.js, adapter.js, contentStore, mistakesStore, bookmarksStore, streakStore, settingsStore)

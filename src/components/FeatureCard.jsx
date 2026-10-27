@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
  * - Strict geometric rule: rounded-2xl container, rounded-full badges
  * - Subtle hairline border (border-black/[0.06] / border-white/[0.08])
  * - Multi-layer ambient diffused shadow (shadow-diffused)
- * - Space Grotesk heading with tight tracking & Zinc-700 body text
+ * - Bold Plus Jakarta Sans heading with balanced tracking & Zinc-700 body text
  * - Left-aligned asymmetric layout with generous whitespace
  */
 export default function FeatureCard({
