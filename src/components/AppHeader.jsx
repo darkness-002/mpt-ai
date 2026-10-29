@@ -70,23 +70,23 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
   const isStaffUser = Boolean(user && isStaff)
 
   return (
-    <header className="site-header">
-      <div className="site-header__container">
+    <header className="site-header w-full max-w-full box-border px-4 md:px-8">
+      <div className="site-header__container w-full max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 min-w-0">
         {/* Brand */}
-        <Link to="/" className="site-header__brand" aria-label="MPT-AI Home">
-          <div className="site-brand-badge">
+        <Link to="/" className="site-header__brand flex items-center gap-2.5 min-w-0" aria-label="MPT-AI Home">
+          <div className="site-brand-badge shrink-0">
             <BookIcon width="18" height="18" />
           </div>
-          <div className="site-brand-text">
-            <span className="site-brand-title">
+          <div className="site-brand-text min-w-0 flex flex-col">
+            <span className="site-brand-title truncate">
               MPT<span className="brand-accent">·</span>AI
             </span>
-            <span className="site-brand-tag">Civil Service Prep</span>
+            <span className="site-brand-tag hidden sm:block truncate">Civil Service Prep</span>
           </div>
         </Link>
 
         {/* Clean, Non-Cluttered Desktop Navigation */}
-        <nav className="header-desktop-nav" aria-label="Main Navigation">
+        <nav className="header-desktop-nav hidden md:flex" aria-label="Main Navigation">
           <NavLink to="/" className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`} end>
             Curriculum
           </NavLink>
@@ -107,10 +107,10 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
           )}
         </nav>
 
-        {/* Global Search Bar Button */}
+        {/* Global Search Bar Button (Desktop only) */}
         <button
           type="button"
-          className="header-search-trigger"
+          className="header-search-trigger hidden md:flex"
           onClick={onOpenSearch}
           title="Search topics, questions, syllabus (Ctrl+K)"
           aria-label="Global Search"
@@ -121,17 +121,17 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
         </button>
 
         {/* Action Controls */}
-        <div className="site-header__controls">
-          {/* Daily Streak */}
-          <Link to="/daily" className="header-streak-pill" title="Daily Streak">
+        <div className="site-header__controls flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Daily Streak (hidden on mobile, visible on sm: and up) */}
+          <Link to="/daily" className="header-streak-pill hidden sm:flex" title="Daily Streak">
             <FlameIcon width="16" height="16" className="header-streak-flame" />
             <span className="header-streak-count">{streak.currentStreak}</span>
           </Link>
 
-          {/* Pomodoro Focus Timer */}
+          {/* Pomodoro Focus Timer (Desktop only) */}
           <button
             type="button"
-            className="icon-btn header-tool-btn"
+            className="icon-btn header-tool-btn hidden md:inline-flex min-h-[44px] min-w-[44px]"
             onClick={onOpenFocus}
             title="Focus Timer"
             aria-label="Focus Timer"
@@ -139,10 +139,10 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
             <TimerIcon width="18" height="18" />
           </button>
 
-          {/* Quick Theme Switcher */}
+          {/* Quick Theme Switcher (Mobile & Desktop) */}
           <button
             type="button"
-            className="icon-btn header-tool-btn"
+            className="icon-btn header-tool-btn inline-flex min-h-[44px] min-w-[44px]"
             onClick={handleCycleTheme}
             title={`Theme: ${themeDisplayNames[currentTheme] || currentTheme}. Click to cycle.`}
             aria-label="Switch Theme"
@@ -154,22 +154,22 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
             )}
           </button>
 
-          {/* Public Student Auth / Profile Button */}
+          {/* Public Student Auth / Profile Button (Mobile & Desktop) */}
           {!user ? (
             <button
               type="button"
-              className="header-auth-btn"
+              className="header-auth-btn inline-flex min-h-[44px] min-w-[44px]"
               onClick={onOpenAuth}
               title="Sign In or Create Account"
               aria-label="Sign In"
             >
               <UserIcon width="15" height="15" />
-              <span className="header-auth-btn__text">Sign In</span>
+              <span className="header-auth-btn__text hidden sm:inline">Sign In</span>
             </button>
           ) : (
             <button
               type="button"
-              className="header-user-btn"
+              className="header-user-btn inline-flex min-h-[44px] min-w-[44px]"
               onClick={onOpenSettings}
               title={`Logged in as ${user.email} (${displayRole}). Click to manage account.`}
               aria-label="Account Settings"
@@ -177,17 +177,17 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
               <div className="header-user-avatar">
                 {user.email ? user.email.charAt(0).toUpperCase() : 'S'}
               </div>
-              <span className="header-user-email">
+              <span className="header-user-email hidden md:inline">
                 {user.email ? user.email.split('@')[0] : 'Student'}
               </span>
             </button>
           )}
 
-          {/* Admin / Staff Shortcut */}
+          {/* Admin / Staff Shortcut (Desktop only) */}
           {isStaffUser && (
             <Link
               to="/admin"
-              className="header-admin-badge-btn"
+              className="header-admin-badge-btn hidden md:inline-flex min-h-[44px]"
               title="Open Admin & Staff Portal"
               aria-label="Admin Portal"
             >
@@ -196,10 +196,10 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
             </Link>
           )}
 
-          {/* Settings */}
+          {/* Settings (Desktop only) */}
           <button
             type="button"
-            className="icon-btn header-tool-btn"
+            className="icon-btn header-tool-btn hidden md:inline-flex min-h-[44px] min-w-[44px]"
             onClick={onOpenSettings}
             title="Settings"
             aria-label="App Settings"

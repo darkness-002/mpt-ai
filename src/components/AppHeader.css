@@ -1,24 +1,21 @@
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 900;
+  z-index: 40;
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border-bottom: 1px solid var(--border);
-  padding: 0.65rem 1rem;
+  box-sizing: border-box;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   transition: all 0.2s ease;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .site-header {
-    padding: 0.75rem 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .site-header {
-    padding: 0.75rem 2rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
   }
 }
 
@@ -32,7 +29,7 @@
   width: 100%;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .site-header__container {
     gap: 1.25rem;
   }
@@ -44,7 +41,7 @@
   gap: 0.65rem;
   text-decoration: none;
   color: inherit;
-  flex-shrink: 0;
+  min-width: 0;
   min-height: 44px;
 }
 
@@ -141,13 +138,6 @@
   color: #ffffff;
 }
 
-/* Hide top header navigation on mobile (< 768px / md:) */
-@media (max-width: 767px) {
-  .header-desktop-nav {
-    display: none !important;
-  }
-}
-
 .header-search-trigger {
   flex: 1;
   max-width: 22rem;
@@ -199,7 +189,7 @@
 .site-header__controls {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
 
@@ -236,7 +226,7 @@
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--text-body);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -259,6 +249,7 @@
   border-radius: var(--radius-full);
   padding: 0.45rem 0.9rem;
   min-height: 44px;
+  min-width: 44px;
   color: var(--text);
   font-size: 0.84rem;
   font-weight: 600;
@@ -318,6 +309,7 @@
   border-radius: var(--radius-full);
   padding: 0.3rem 0.75rem 0.3rem 0.4rem;
   min-height: 44px;
+  min-width: 44px;
   color: var(--text);
   font-size: 0.84rem;
   font-weight: 600;
@@ -353,27 +345,19 @@
   font-size: 0.8rem;
 }
 
-@media (max-width: 640px) {
-  .site-header {
-    padding: 0.5rem 0.75rem;
-  }
+/* On mobile (< 768px): clean, uncrowded header with ONLY Logo on left & Theme + Profile on right */
+@media (max-width: 767px) {
   .site-brand-tag {
     display: none;
   }
-  .header-search-text {
-    display: none;
+  .header-desktop-nav,
+  .header-search-trigger,
+  .header-streak-pill,
+  .header-admin-badge-btn {
+    display: none !important;
   }
-  .header-search-kbd {
+  .header-user-email {
     display: none;
-  }
-  .header-search-trigger {
-    padding: 0.5rem;
-    width: 2.75rem;
-    height: 2.75rem;
-    min-width: 44px;
-    min-height: 44px;
-    justify-content: center;
-    max-width: fit-content;
   }
   .header-auth-btn__text {
     display: none;
@@ -382,22 +366,12 @@
     padding: 0.5rem;
     width: 2.75rem;
     height: 2.75rem;
-    min-width: 44px;
-    min-height: 44px;
     justify-content: center;
-  }
-  .header-user-email {
-    display: none;
   }
   .header-user-btn {
     padding: 0.4rem;
     width: 2.75rem;
     height: 2.75rem;
-    min-width: 44px;
-    min-height: 44px;
     justify-content: center;
-  }
-  .header-streak-pill {
-    padding: 0.35rem 0.55rem;
   }
 }

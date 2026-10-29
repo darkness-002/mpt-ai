@@ -1003,7 +1003,7 @@ export default function AdminScreen() {
       )}
 
       {/* Main Tab Content */}
-      <main className="admin-container">
+      <main className="admin-container w-full max-w-7xl mx-auto p-4 md:p-8 flex-1">
         {/* ========================================================
             TAB 1: DASHBOARD
            ======================================================== */}
@@ -1813,7 +1813,7 @@ export default function AdminScreen() {
           aria-modal="true"
           onClick={() => setShowSubjectModal(false)}
         >
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal w-[95%] max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Create New Subject</h2>
               <button

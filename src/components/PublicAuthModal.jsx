@@ -115,7 +115,7 @@ export default function PublicAuthModal({ isOpen, onClose, initialMode = 'signin
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
-      <div className="public-auth-modal rounded-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="public-auth-modal w-[95%] max-w-md max-h-[90vh] overflow-y-auto rounded-2xl" onClick={(e) => e.stopPropagation()}>
         <header className="public-auth-modal__header">
           <div className="public-auth-modal__title-group">
             <div className="public-auth-modal__icon-badge">

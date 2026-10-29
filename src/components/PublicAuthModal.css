@@ -2,14 +2,15 @@
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: 1rem;
-  width: min(26rem, 92vw);
+  width: min(26rem, 95vw);
+  max-height: 90vh;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   position: relative;
   z-index: 100000;
   animation: modalSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
+  overflow-y: auto;
   font-family: inherit;
 }
 

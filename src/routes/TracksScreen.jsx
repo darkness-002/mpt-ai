@@ -70,7 +70,7 @@ export default function TracksScreen() {
   }, [tracks, selectedExamTab])
 
   return (
-    <div className="simple-dashboard w-full min-h-[calc(100vh-4.5rem)] px-4 py-4 sm:px-6 sm:py-8 lg:px-8">
+    <div className="simple-dashboard w-full min-h-[calc(100vh-4.5rem)] p-4 md:p-8">
       <div className="simple-dashboard__container w-full max-w-7xl mx-auto flex flex-col gap-5 sm:gap-7">
         {/* PWA Install Notice if promptable */}
         {canInstall && (
@@ -238,8 +238,8 @@ export default function TracksScreen() {
             </div>
           </div>
 
-          {/* Responsive CSS Grid: 1 column on mobile, 2 on tablet, 3 on desktop */}
-          <div className="student-tracks-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
+          {/* Responsive CSS Grid: strictly 1 column on mobile, expanding to md:grid-cols-2 on larger screens */}
+          <div className="student-tracks-grid grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 w-full">
             {filteredTracks.map((track) => {
               const allLessons = track.units.flatMap((u) => u.lessons)
               const done = allLessons.filter((l) => records[l.id]).length

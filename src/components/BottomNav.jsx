@@ -35,8 +35,8 @@ export default function BottomNav({ onOpenSettings }) {
   if (isImmersiveMode) return null
 
   return (
-    <nav className="bottom-nav" aria-label="Mobile Navigation Dock">
-      <div className="bottom-nav__dock">
+    <nav className="bottom-nav flex md:hidden fixed bottom-0 left-0 right-0 w-full z-50" aria-label="Mobile Navigation Dock">
+      <div className="bottom-nav__dock w-full grid grid-cols-4 items-center">
         <NavLink
           to="/"
           className={({ isActive }) => `bottom-nav__item ${isActive ? 'is-active' : ''}`}
@@ -65,7 +65,7 @@ export default function BottomNav({ onOpenSettings }) {
           <div className="bottom-nav__icon-box">
             <ZapIcon width="22" height="22" />
           </div>
-          <span className="bottom-nav__label">Daily</span>
+          <span className="bottom-nav__label">Daily Sprint</span>
         </NavLink>
 
         <button
