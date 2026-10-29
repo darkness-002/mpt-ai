@@ -237,8 +237,10 @@ export default function AdminScreen() {
   // Notice banners
   const [notice, setNotice] = useState(null)
 
-  // Editing Modal State
+  // Editing Modal State & Slide-out Drawers
   const [editingQuestion, setEditingQuestion] = useState(null)
+  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false)
+  const [reviewViewMode, setReviewViewMode] = useState('cards') // 'cards' | 'table'
 
   // ==========================================
   // Form State: The 3-Step Question Flow
@@ -533,6 +535,7 @@ export default function AdminScreen() {
       setFormChoices(['', '', '', ''])
       setFormAnswer(0)
       setFormExplanation('')
+      setIsAddDrawerOpen(false)
     } catch (err) {
       console.error('Error submitting question:', err)
       alert('Could not save question: ' + err.message)
@@ -1016,7 +1019,7 @@ export default function AdminScreen() {
             </div>
 
             {/* Minimal Stats Grid */}
-            <div className="minimal-stats-grid">
+            <div className="minimal-stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="metric-card is-success">
                 <div className="metric-card__header">
                   <span className="metric-label">Total Live Questions</span>
@@ -1046,10 +1049,10 @@ export default function AdminScreen() {
             </div>
 
             {/* Quick Actions Shortcuts */}
-            <div className="dashboard-shortcuts">
+            <div className="dashboard-shortcuts grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div
-                className="action-card"
-                onClick={() => setActiveTab('add-question')}
+                className="action-card cursor-pointer"
+                onClick={() => setIsAddDrawerOpen(true)}
                 role="button"
                 tabIndex={0}
               >
@@ -1058,7 +1061,7 @@ export default function AdminScreen() {
                 </div>
                 <div className="action-card__body">
                   <h3>Submit New Question</h3>
-                  <p>Follow the 3-step structured draft workflow.</p>
+                  <p>Open the slide-out 3-step draft drawer.</p>
                 </div>
               </div>
 
@@ -1323,7 +1326,7 @@ export default function AdminScreen() {
            ======================================================== */}
         {activeTab === 'review-queue' && (
           <div className="tab-pane review-queue-pane">
-            <div className="pane-header">
+            <div className="pane-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h2>Review Queue</h2>
                 <p className="pane-desc">
@@ -1331,28 +1334,70 @@ export default function AdminScreen() {
                 </p>
               </div>
 
-              {/* Status Filter Chips */}
-              <div className="filter-chips">
+              {/* Action Controls & Filters */}
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Status Filter Chips */}
+                <div className="filter-chips flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+                  <button
+                    type="button"
+                    className={`filter-chip min-h-[44px] px-3.5 py-2 rounded-full text-xs font-semibold ${reviewFilter === 'pending' ? 'is-active' : ''}`}
+                    onClick={() => setReviewFilter('pending')}
+                  >
+                    Pending ({stats.pending})
+                  </button>
+                  <button
+                    type="button"
+                    className={`filter-chip min-h-[44px] px-3.5 py-2 rounded-full text-xs font-semibold ${reviewFilter === 'rejected' ? 'is-active' : ''}`}
+                    onClick={() => setReviewFilter('rejected')}
+                  >
+                    Rejected ({stats.rejected})
+                  </button>
+                  <button
+                    type="button"
+                    className={`filter-chip min-h-[44px] px-3.5 py-2 rounded-full text-xs font-semibold ${reviewFilter === 'all' ? 'is-active' : ''}`}
+                    onClick={() => setReviewFilter('all')}
+                  >
+                    All ({stats.total})
+                  </button>
+                </div>
+
+                {/* View Switcher: Cards vs Table */}
+                <div className="flex items-center gap-1 p-1 bg-[var(--surface-2)] rounded-full border border-[var(--border)]">
+                  <button
+                    type="button"
+                    className={`min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                      reviewViewMode === 'cards'
+                        ? 'bg-[var(--surface)] text-[var(--text)] shadow-xs'
+                        : 'text-[var(--muted)] hover:text-[var(--text)]'
+                    }`}
+                    onClick={() => setReviewViewMode('cards')}
+                    title="View questions as stacked cards"
+                  >
+                    Cards
+                  </button>
+                  <button
+                    type="button"
+                    className={`min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                      reviewViewMode === 'table'
+                        ? 'bg-[var(--surface)] text-[var(--text)] shadow-xs'
+                        : 'text-[var(--muted)] hover:text-[var(--text)]'
+                    }`}
+                    onClick={() => setReviewViewMode('table')}
+                    title="View questions in a horizontally scrollable Question Grid"
+                  >
+                    Question Grid
+                  </button>
+                </div>
+
+                {/* Quick Add Question Drawer Trigger */}
                 <button
                   type="button"
-                  className={`filter-chip ${reviewFilter === 'pending' ? 'is-active' : ''}`}
-                  onClick={() => setReviewFilter('pending')}
+                  className="btn btn--primary min-h-[44px] px-4 py-2 text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5"
+                  onClick={() => setIsAddDrawerOpen(true)}
+                  title="Open Add Question Slide-out Drawer"
                 >
-                  Pending ({stats.pending})
-                </button>
-                <button
-                  type="button"
-                  className={`filter-chip ${reviewFilter === 'rejected' ? 'is-active' : ''}`}
-                  onClick={() => setReviewFilter('rejected')}
-                >
-                  Rejected ({stats.rejected})
-                </button>
-                <button
-                  type="button"
-                  className={`filter-chip ${reviewFilter === 'all' ? 'is-active' : ''}`}
-                  onClick={() => setReviewFilter('all')}
-                >
-                  All Questions ({stats.total})
+                  <PlusIcon width="16" height="16" />
+                  <span>Add Question</span>
                 </button>
               </div>
             </div>
@@ -1369,6 +1414,103 @@ export default function AdminScreen() {
                     : 'No questions match the current filter criteria.'}
                 </p>
               </div>
+            ) : reviewViewMode === 'table' ? (
+              /* Horizontally scrollable Question Grid Table */
+              <div className="queue-table-view space-y-6">
+                {groupedReviewQuestions.map(([dateGroup, items]) => (
+                  <div key={dateGroup} className="date-group-section">
+                    <div className="date-group-header flex items-center justify-between gap-2 mb-2">
+                      <span className="date-group-title text-sm sm:text-base font-bold text-[var(--text)]">{dateGroup}</span>
+                      <span className="date-group-count text-xs text-[var(--muted)]">{items.length} questions</span>
+                    </div>
+
+                    <div className="overflow-x-auto w-full border border-[var(--border)] rounded-2xl bg-[var(--surface)] shadow-xs">
+                      <table className="staff-table min-w-[760px] w-full text-left border-collapse">
+                        <thead>
+                          <tr>
+                            <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Subject</th>
+                            <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Question Prompt</th>
+                            <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Correct Key</th>
+                            <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Target</th>
+                            <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Status</th>
+                            <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Author</th>
+                            <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {items.map((q) => (
+                            <tr key={q.id}>
+                              <td className="px-4 py-3 border-b border-[var(--border)] text-xs font-semibold text-[var(--text)] whitespace-nowrap">
+                                {subjects.find((s) => s.id === q.category_id)?.title || q.category_id}
+                              </td>
+                              <td className="px-4 py-3 border-b border-[var(--border)] text-sm text-[var(--text)] max-w-xs truncate" title={q.prompt}>
+                                {q.prompt}
+                              </td>
+                              <td className="px-4 py-3 border-b border-[var(--border)] text-xs font-bold text-[var(--primary)] whitespace-nowrap">
+                                Option {String.fromCharCode(65 + q.answer)}
+                              </td>
+                              <td className="px-4 py-3 border-b border-[var(--border)] text-xs text-[var(--muted)] whitespace-nowrap">
+                                {Array.isArray(q.exam_target) ? q.exam_target.join(' & ') : 'CSS & PMS'}
+                              </td>
+                              <td className="px-4 py-3 border-b border-[var(--border)] whitespace-nowrap">
+                                <span className={`status-pill status-pill--${q.status} text-xs font-bold px-2 py-0.5 rounded-full uppercase`}>
+                                  {q.status}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 border-b border-[var(--border)] text-xs text-[var(--muted)] whitespace-nowrap">
+                                {q.created_by_name || 'Staff'}
+                              </td>
+                              <td className="px-4 py-3 border-b border-[var(--border)] whitespace-nowrap">
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    className="action-btn is-edit min-h-[36px] px-3 py-1 text-xs"
+                                    onClick={() => setEditingQuestion(q)}
+                                    title="Edit question"
+                                  >
+                                    <EditIcon width="13" height="13" />
+                                    <span>Edit</span>
+                                  </button>
+                                  {q.status !== 'approved' && (
+                                    <button
+                                      type="button"
+                                      className="action-btn is-approve min-h-[36px] px-3 py-1 text-xs"
+                                      onClick={() => handleApproveQuestion(q)}
+                                      title="Approve question"
+                                    >
+                                      <CheckCircleIcon width="13" height="13" />
+                                      <span>Approve</span>
+                                    </button>
+                                  )}
+                                  {q.status !== 'rejected' && (
+                                    <button
+                                      type="button"
+                                      className="action-btn is-reject min-h-[36px] px-3 py-1 text-xs"
+                                      onClick={() => handleRejectQuestion(q)}
+                                      title="Reject question"
+                                    >
+                                      <XCircleIcon width="13" height="13" />
+                                      <span>Reject</span>
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    className="action-btn is-delete min-h-[36px] px-2 py-1 text-xs"
+                                    onClick={() => handleDeleteQuestion(q)}
+                                    title="Delete question"
+                                  >
+                                    <TrashIcon width="13" height="13" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <div className="queue-groups">
                 {groupedReviewQuestions.map(([dateGroup, items]) => (
@@ -1382,8 +1524,8 @@ export default function AdminScreen() {
                       {items.map((q) => (
                         <div key={q.id} className={`queue-card is-status-${q.status}`}>
                           {/* Card Header */}
-                          <div className="queue-card__header">
-                            <div className="queue-card__badges">
+                          <div className="queue-card__header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div className="queue-card__badges flex flex-wrap items-center gap-1.5">
                               <span className="subject-pill">
                                 {subjects.find((s) => s.id === q.category_id)?.title ||
                                   q.category_id}
@@ -1398,20 +1540,20 @@ export default function AdminScreen() {
                               </span>
                             </div>
 
-                            <span className="queue-card__author">
+                            <span className="queue-card__author text-xs text-[var(--muted)]">
                               By {q.created_by_name || 'Staff Contributor'}
                             </span>
                           </div>
 
                           {/* Card Body */}
                           <div className="queue-card__body">
-                            <h4 className="queue-prompt">{q.prompt}</h4>
+                            <h4 className="queue-prompt text-base sm:text-lg font-bold text-[var(--text)]">{q.prompt}</h4>
 
-                            <div className="queue-choices-grid">
+                            <div className="queue-choices-grid grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
                               {q.choices.map((choice, cIdx) => (
                                 <div
                                   key={cIdx}
-                                  className={`queue-choice-pill ${
+                                  className={`queue-choice-pill min-h-[44px] ${
                                     q.answer === cIdx ? 'is-correct' : ''
                                   }`}
                                 >
@@ -1427,18 +1569,18 @@ export default function AdminScreen() {
                             </div>
 
                             {q.explanation && (
-                              <div className="queue-explanation">
+                              <div className="queue-explanation mt-3 p-3 rounded-xl bg-[var(--surface-2)] text-xs sm:text-sm text-[var(--muted)]">
                                 <strong>Explanation:</strong> {q.explanation}
                               </div>
                             )}
                           </div>
 
                           {/* Card Actions */}
-                          <div className="queue-card__actions">
-                            <div className="actions-left">
+                          <div className="queue-card__actions flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 pt-3 border-t border-[var(--border)]">
+                            <div className="actions-left flex items-center gap-2">
                               <button
                                 type="button"
-                                className="action-btn is-edit"
+                                className="action-btn is-edit min-h-[44px] px-3.5 py-2"
                                 onClick={() => setEditingQuestion(q)}
                                 title="Edit prompt, choices, or explanation"
                               >
@@ -1448,7 +1590,7 @@ export default function AdminScreen() {
 
                               <button
                                 type="button"
-                                className="action-btn is-delete"
+                                className="action-btn is-delete min-h-[44px] px-3.5 py-2"
                                 onClick={() => handleDeleteQuestion(q)}
                                 title="Delete question"
                               >
@@ -1457,11 +1599,11 @@ export default function AdminScreen() {
                               </button>
                             </div>
 
-                            <div className="actions-right">
+                            <div className="actions-right flex items-center gap-2">
                               {q.status !== 'rejected' && (
                                 <button
                                   type="button"
-                                  className="action-btn is-reject"
+                                  className="action-btn is-reject min-h-[44px] px-4 py-2"
                                   onClick={() => handleRejectQuestion(q)}
                                 >
                                   <XCircleIcon width="14" height="14" />
@@ -1472,7 +1614,7 @@ export default function AdminScreen() {
                               {q.status !== 'approved' && (
                                 <button
                                   type="button"
-                                  className="action-btn is-approve"
+                                  className="action-btn is-approve min-h-[44px] px-4 py-2"
                                   onClick={() => handleApproveQuestion(q)}
                                 >
                                   <CheckCircleIcon width="14" height="14" />
@@ -1599,34 +1741,36 @@ export default function AdminScreen() {
               {loadingUsers ? (
                 <div className="loading-state">Loading staff profiles…</div>
               ) : (
-                <div className="table-responsive">
-                  <table className="staff-table">
+                <div className="table-responsive overflow-x-auto w-full border border-[var(--border)] rounded-2xl bg-[var(--surface)] shadow-xs mt-3">
+                  <table className="staff-table min-w-[680px] w-full text-left border-collapse">
                     <thead>
                       <tr>
-                        <th>Member</th>
-                        <th>Email</th>
-                        <th>Current Role</th>
-                        <th>Joined</th>
-                        <th>Actions</th>
+                        <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Member</th>
+                        <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Email</th>
+                        <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Current Role</th>
+                        <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Joined</th>
+                        <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {usersList.map((st) => (
                         <tr key={st.id}>
-                          <td>
-                            <div className="staff-member-cell">
-                              <div className="staff-avatar">
+                          <td className="px-4 py-3 border-b border-[var(--border)] whitespace-nowrap">
+                            <div className="staff-member-cell flex items-center gap-2.5">
+                              <div className="staff-avatar w-8 h-8 rounded-full bg-[var(--primary-subtle)] text-[var(--primary)] font-bold flex items-center justify-center text-xs shrink-0">
                                 {(st.full_name || st.email || 'U')[0].toUpperCase()}
                               </div>
-                              <span className="staff-name">
+                              <span className="staff-name font-semibold text-sm text-[var(--text)]">
                                 {st.full_name || st.email.split('@')[0]}
                               </span>
                             </div>
                           </td>
-                          <td className="staff-email-cell">{st.email}</td>
-                          <td>
+                          <td className="staff-email-cell px-4 py-3 border-b border-[var(--border)] text-xs text-[var(--muted)] whitespace-nowrap">
+                            {st.email}
+                          </td>
+                          <td className="px-4 py-3 border-b border-[var(--border)] whitespace-nowrap">
                             <select
-                              className={`role-badge-select role-${st.role}`}
+                              className={`role-badge-select role-${st.role} min-h-[40px] px-3 py-1 rounded-lg text-xs font-bold border border-[var(--border)] bg-[var(--surface-2)]`}
                               value={st.role}
                               onChange={(e) => handleUpdateRole(st.id, e.target.value)}
                               aria-label="Change Role"
@@ -1637,17 +1781,17 @@ export default function AdminScreen() {
                               <option value="contributor">Contributor</option>
                             </select>
                           </td>
-                          <td className="staff-date-cell">
+                          <td className="staff-date-cell px-4 py-3 border-b border-[var(--border)] text-xs text-[var(--muted)] whitespace-nowrap">
                             {formatGroupDate(st.created_at)}
                           </td>
-                          <td>
+                          <td className="px-4 py-3 border-b border-[var(--border)] whitespace-nowrap">
                             <button
                               type="button"
-                              className="staff-delete-btn"
+                              className="staff-delete-btn min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[var(--muted)] hover:text-[var(--red)] hover:bg-[var(--surface-2)] transition-colors"
                               onClick={() => handleDeleteStaff(st.id)}
                               title="Revoke and delete account"
                             >
-                              <TrashIcon width="14" height="14" />
+                              <TrashIcon width="16" height="16" />
                             </button>
                           </td>
                         </tr>
@@ -1759,21 +1903,25 @@ export default function AdminScreen() {
         </div>
       )}
 
-      {/* Edit Question Modal */}
+      {/* Slide-out Drawer: Edit Question */}
       {editingQuestion && (
         <div
-          className="modal-backdrop"
+          className="drawer-backdrop"
           role="dialog"
           aria-modal="true"
           onClick={() => setEditingQuestion(null)}
         >
-          <div className="modal edit-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Edit Question</h2>
+          <div className="drawer-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="drawer-header">
+              <div>
+                <h2>Edit Question</h2>
+                <p className="drawer-subtitle">Update question details, key, and syllabus target.</p>
+              </div>
               <button
                 type="button"
-                className="icon-btn"
+                className="drawer-close-btn"
                 onClick={() => setEditingQuestion(null)}
+                aria-label="Close drawer"
               >
                 <CloseIcon width="18" height="18" />
               </button>
@@ -1784,108 +1932,110 @@ export default function AdminScreen() {
                 e.preventDefault()
                 handleSaveEditedQuestion(editingQuestion)
               }}
-              className="modal-form"
+              className="drawer-form"
             >
-              <div className="field-group">
-                <label className="field-label">Subject</label>
-                <select
-                  className="field-input"
-                  value={editingQuestion.category_id}
-                  onChange={(e) =>
-                    setEditingQuestion({ ...editingQuestion, category_id: e.target.value })
-                  }
-                >
-                  {subjects.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.title}
-                    </option>
+              <div className="drawer-body">
+                <div className="field-group">
+                  <label className="field-label">Subject</label>
+                  <select
+                    className="field-input"
+                    value={editingQuestion.category_id}
+                    onChange={(e) =>
+                      setEditingQuestion({ ...editingQuestion, category_id: e.target.value })
+                    }
+                  >
+                    {subjects.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field-group">
+                  <label className="field-label">Exam Target</label>
+                  <select
+                    className="field-input"
+                    value={
+                      editingQuestion.exam_target?.length === 2
+                        ? 'Both'
+                        : editingQuestion.exam_target?.[0] || 'Both'
+                    }
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setEditingQuestion({
+                        ...editingQuestion,
+                        exam_target: val === 'Both' ? ['CSS', 'PMS'] : [val],
+                      })
+                    }}
+                  >
+                    <option value="CSS">CSS</option>
+                    <option value="PMS">PMS</option>
+                    <option value="Both">Both (CSS & PMS)</option>
+                  </select>
+                </div>
+
+                <div className="field-group">
+                  <label className="field-label">Question Prompt</label>
+                  <textarea
+                    className="field-textarea"
+                    rows={3}
+                    value={editingQuestion.prompt}
+                    onChange={(e) =>
+                      setEditingQuestion({ ...editingQuestion, prompt: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="field-group">
+                  <label className="field-label">Choices</label>
+                  {['A', 'B', 'C', 'D'].map((letter, idx) => (
+                    <div key={letter} className="choice-input-row is-modal">
+                      <button
+                        type="button"
+                        className={`choice-key-indicator ${
+                          editingQuestion.answer === idx ? 'is-correct' : ''
+                        }`}
+                        onClick={() =>
+                          setEditingQuestion({ ...editingQuestion, answer: idx })
+                        }
+                      >
+                        {editingQuestion.answer === idx ? (
+                          <CheckIcon width="16" height="16" />
+                        ) : (
+                          <span>{letter}</span>
+                        )}
+                      </button>
+                      <input
+                        type="text"
+                        className="field-input choice-text"
+                        value={editingQuestion.choices[idx] || ''}
+                        onChange={(e) => {
+                          const next = [...editingQuestion.choices]
+                          next[idx] = e.target.value
+                          setEditingQuestion({ ...editingQuestion, choices: next })
+                        }}
+                        required
+                      />
+                    </div>
                   ))}
-                </select>
+                </div>
+
+                <div className="field-group">
+                  <label className="field-label">Explanation</label>
+                  <textarea
+                    className="field-textarea"
+                    rows={3}
+                    value={editingQuestion.explanation || ''}
+                    onChange={(e) =>
+                      setEditingQuestion({ ...editingQuestion, explanation: e.target.value })
+                    }
+                  />
+                </div>
               </div>
 
-              <div className="field-group">
-                <label className="field-label">Exam Target</label>
-                <select
-                  className="field-input"
-                  value={
-                    editingQuestion.exam_target?.length === 2
-                      ? 'Both'
-                      : editingQuestion.exam_target?.[0] || 'Both'
-                  }
-                  onChange={(e) => {
-                    const val = e.target.value
-                    setEditingQuestion({
-                      ...editingQuestion,
-                      exam_target: val === 'Both' ? ['CSS', 'PMS'] : [val],
-                    })
-                  }}
-                >
-                  <option value="CSS">CSS</option>
-                  <option value="PMS">PMS</option>
-                  <option value="Both">Both (CSS & PMS)</option>
-                </select>
-              </div>
-
-              <div className="field-group">
-                <label className="field-label">Question Prompt</label>
-                <textarea
-                  className="field-textarea"
-                  rows={3}
-                  value={editingQuestion.prompt}
-                  onChange={(e) =>
-                    setEditingQuestion({ ...editingQuestion, prompt: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div className="field-group">
-                <label className="field-label">Choices</label>
-                {['A', 'B', 'C', 'D'].map((letter, idx) => (
-                  <div key={letter} className="choice-input-row is-modal">
-                    <button
-                      type="button"
-                      className={`choice-key-indicator ${
-                        editingQuestion.answer === idx ? 'is-correct' : ''
-                      }`}
-                      onClick={() =>
-                        setEditingQuestion({ ...editingQuestion, answer: idx })
-                      }
-                    >
-                      {editingQuestion.answer === idx ? (
-                        <CheckIcon width="16" height="16" />
-                      ) : (
-                        <span>{letter}</span>
-                      )}
-                    </button>
-                    <input
-                      type="text"
-                      className="field-input choice-text"
-                      value={editingQuestion.choices[idx] || ''}
-                      onChange={(e) => {
-                        const next = [...editingQuestion.choices]
-                        next[idx] = e.target.value
-                        setEditingQuestion({ ...editingQuestion, choices: next })
-                      }}
-                      required
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <div className="field-group">
-                <label className="field-label">Explanation</label>
-                <textarea
-                  className="field-textarea"
-                  rows={2}
-                  value={editingQuestion.explanation || ''}
-                  onChange={(e) =>
-                    setEditingQuestion({ ...editingQuestion, explanation: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="modal-actions">
+              <div className="drawer-footer">
                 <button
                   type="button"
                   className="btn btn--ghost"
@@ -1895,6 +2045,180 @@ export default function AdminScreen() {
                 </button>
                 <button type="submit" className="btn btn--primary">
                   Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Slide-out Drawer: Add Question */}
+      {isAddDrawerOpen && (
+        <div
+          className="drawer-backdrop"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setIsAddDrawerOpen(false)}
+        >
+          <div className="drawer-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="drawer-header">
+              <div>
+                <h2>Add Question</h2>
+                <p className="drawer-subtitle">Stage a new question draft into the review queue.</p>
+              </div>
+              <button
+                type="button"
+                className="drawer-close-btn"
+                onClick={() => setIsAddDrawerOpen(false)}
+                aria-label="Close drawer"
+              >
+                <CloseIcon width="18" height="18" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddQuestionSubmit} className="drawer-form">
+              <div className="drawer-body">
+                {/* Step 1: Subject */}
+                <div className="form-step-card">
+                  <div className="step-card-header">
+                    <div>
+                      <div className="step-tag">Step 1</div>
+                      <label className="step-label" htmlFor="drawer-subject-select">Select Core Subject</label>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn--small btn--ghost create-subject-trigger-btn"
+                      onClick={() => setShowSubjectModal(true)}
+                    >
+                      <PlusIcon width="14" height="14" />
+                      <span>New Subject</span>
+                    </button>
+                  </div>
+                  <select
+                    id="drawer-subject-select"
+                    className="step-select"
+                    value={formSubject}
+                    onChange={(e) => setFormSubject(e.target.value)}
+                    required
+                  >
+                    {subjects.map((sub) => (
+                      <option key={sub.id} value={sub.id}>
+                        {sub.title} {sub.desc ? `— ${sub.desc}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Step 2: Exam Target */}
+                <div className="form-step-card">
+                  <div className="step-tag">Step 2</div>
+                  <label className="step-label">Select Exam Target</label>
+                  <div className="exam-toggle-group">
+                    <button
+                      type="button"
+                      className={`exam-toggle-btn ${formExamTarget === 'CSS' ? 'is-active' : ''}`}
+                      onClick={() => setFormExamTarget('CSS')}
+                    >
+                      <span className="exam-toggle-title">CSS</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`exam-toggle-btn ${formExamTarget === 'PMS' ? 'is-active' : ''}`}
+                      onClick={() => setFormExamTarget('PMS')}
+                    >
+                      <span className="exam-toggle-title">PMS</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`exam-toggle-btn ${formExamTarget === 'Both' ? 'is-active' : ''}`}
+                      onClick={() => setFormExamTarget('Both')}
+                    >
+                      <span className="exam-toggle-title">Both</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Step 3: Question details */}
+                <div className="form-step-card">
+                  <div className="step-tag">Step 3</div>
+                  <label className="step-label">Question Details</label>
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="drawer-q-prompt">Question Prompt *</label>
+                    <textarea
+                      id="drawer-q-prompt"
+                      className="field-textarea"
+                      rows={3}
+                      placeholder="Enter question text clearly..."
+                      value={formPrompt}
+                      onChange={(e) => setFormPrompt(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="field-group">
+                    <label className="field-label">Choices & Answer Key *</label>
+                    <div className="choices-stack">
+                      {['A', 'B', 'C', 'D'].map((letter, idx) => (
+                        <div
+                          key={letter}
+                          className={`choice-input-row ${formAnswer === idx ? 'is-selected' : ''}`}
+                        >
+                          <button
+                            type="button"
+                            className={`choice-key-indicator ${formAnswer === idx ? 'is-correct' : ''}`}
+                            onClick={() => setFormAnswer(idx)}
+                          >
+                            {formAnswer === idx ? (
+                              <CheckIcon width="16" height="16" />
+                            ) : (
+                              <span>{letter}</span>
+                            )}
+                          </button>
+                          <input
+                            type="text"
+                            className="field-input choice-text"
+                            placeholder={`Option ${letter}...`}
+                            value={formChoices[idx]}
+                            onChange={(e) => {
+                              const next = [...formChoices]
+                              next[idx] = e.target.value
+                              setFormChoices(next)
+                            }}
+                            required
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="drawer-q-exp">Explanation</label>
+                    <textarea
+                      id="drawer-q-exp"
+                      className="field-textarea"
+                      rows={3}
+                      placeholder="Cite constitutional article, historical context, or solution..."
+                      value={formExplanation}
+                      onChange={(e) => setFormExplanation(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="drawer-footer">
+                <button
+                  type="button"
+                  className="btn btn--ghost"
+                  onClick={() => setIsAddDrawerOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn--primary"
+                  disabled={formSubmitting}
+                >
+                  {formSubmitting ? 'Saving Draft…' : 'Submit Question Draft'}
                 </button>
               </div>
             </form>

@@ -84,7 +84,7 @@ export default function App() {
         <Outlet />
       </Suspense>
 
-      <BottomNav />
+      <BottomNav onOpenSettings={() => setShowSettings(true)} />
 
       {/* Global Dialogs & Tool Modals */}
       <GlobalSearchModal

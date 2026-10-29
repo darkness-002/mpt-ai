@@ -6,6 +6,13 @@
   background: var(--bg);
 }
 
+/* Ensure mobile content never gets concealed beneath the sticky bottom navigation dock */
+@media (max-width: 767px) {
+  .app {
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* Top of the viewport: the lesson footer is sticky at the bottom and its
    Check/Continue button must never be covered. */
 .toast {
@@ -35,4 +42,3 @@
   color: var(--text);
   line-height: 1.35;
 }
-

@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
-  BookIcon,
-  FlameIcon,
-  StarIcon,
+  HomeIcon,
+  SettingsIcon,
   TargetIcon,
   ZapIcon,
 } from './icons.jsx'
-import { mistakesStore } from '../storage/mistakesStore.js'
 import './BottomNav.css'
 
-export default function BottomNav() {
+export default function BottomNav({ onOpenSettings }) {
   const location = useLocation()
-  const [dueMistakesCount, setDueMistakesCount] = useState(0)
   const [isDrillImmersive, setIsDrillImmersive] = useState(
     () => typeof document !== 'undefined' && document.body.dataset.immersive === 'true',
   )
@@ -27,58 +24,62 @@ export default function BottomNav() {
     return () => observer.disconnect()
   }, [])
 
+  // Immersive modes: don't show navigation during focused lessons, exams, or speed runs
   const isImmersiveMode =
     location.pathname.startsWith('/lesson/') ||
     location.pathname.startsWith('/mock/') ||
     location.pathname === '/speed-run' ||
+    location.pathname.startsWith('/admin') ||
     isDrillImmersive
-
-  useEffect(() => {
-    let active = true
-    const checkMistakes = () => {
-      mistakesStore.getDue().then((due) => {
-        if (active) setDueMistakesCount(due.length)
-      })
-    }
-    checkMistakes()
-    const interval = setInterval(checkMistakes, 15000)
-    return () => {
-      active = false
-      clearInterval(interval)
-    }
-  }, [location.pathname])
 
   if (isImmersiveMode) return null
 
   return (
-    <nav className="bottom-nav is-visible" aria-label="Main Mobile Navigation">
-      <NavLink to="/" className={({ isActive }) => `bottom-nav__item ${isActive ? 'is-active' : ''}`} end>
-        <BookIcon width="20" height="20" />
-        <span>Curriculum</span>
-      </NavLink>
+    <nav className="bottom-nav" aria-label="Mobile Navigation Dock">
+      <div className="bottom-nav__dock">
+        <NavLink
+          to="/"
+          className={({ isActive }) => `bottom-nav__item ${isActive ? 'is-active' : ''}`}
+          end
+        >
+          <div className="bottom-nav__icon-box">
+            <HomeIcon width="22" height="22" />
+          </div>
+          <span className="bottom-nav__label">Home</span>
+        </NavLink>
 
-      <NavLink to="/drill" className={({ isActive }) => `bottom-nav__item ${isActive ? 'is-active' : ''}`}>
-        <TargetIcon width="20" height="20" />
-        <span>Drill</span>
-      </NavLink>
+        <NavLink
+          to="/drill"
+          className={({ isActive }) => `bottom-nav__item ${isActive ? 'is-active' : ''}`}
+        >
+          <div className="bottom-nav__icon-box">
+            <TargetIcon width="22" height="22" />
+          </div>
+          <span className="bottom-nav__label">Drill</span>
+        </NavLink>
 
-      <NavLink to="/daily" className={({ isActive }) => `bottom-nav__item ${isActive ? 'is-active' : ''}`}>
-        <ZapIcon width="20" height="20" />
-        <span>Daily</span>
-      </NavLink>
+        <NavLink
+          to="/daily"
+          className={({ isActive }) => `bottom-nav__item ${isActive ? 'is-active' : ''}`}
+        >
+          <div className="bottom-nav__icon-box">
+            <ZapIcon width="22" height="22" />
+          </div>
+          <span className="bottom-nav__label">Daily</span>
+        </NavLink>
 
-      <NavLink to="/mistakes" className={({ isActive }) => `bottom-nav__item ${isActive ? 'is-active' : ''}`}>
-        <div className="bottom-nav__icon-wrap">
-          <FlameIcon width="20" height="20" />
-          {dueMistakesCount > 0 && <span className="bottom-nav__badge">{dueMistakesCount}</span>}
-        </div>
-        <span>Mistakes</span>
-      </NavLink>
-
-      <NavLink to="/bookmarks" className={({ isActive }) => `bottom-nav__item ${isActive ? 'is-active' : ''}`}>
-        <StarIcon width="20" height="20" />
-        <span>Starred</span>
-      </NavLink>
+        <button
+          type="button"
+          className="bottom-nav__item bottom-nav__btn"
+          onClick={onOpenSettings}
+          aria-label="Open Settings"
+        >
+          <div className="bottom-nav__icon-box">
+            <SettingsIcon width="22" height="22" />
+          </div>
+          <span className="bottom-nav__label">Settings</span>
+        </button>
+      </div>
     </nav>
   )
 }

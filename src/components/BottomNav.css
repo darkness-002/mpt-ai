@@ -1,210 +1,112 @@
+/* BottomNav.css - Sticky Mobile Navigation Dock */
+
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 4.1rem;
+  z-index: 1000;
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-top: 1.5px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  z-index: 1000;
-  padding: 0 0.5rem;
-  padding-bottom: env(safe-area-inset-bottom);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 20px -2px rgba(0, 0, 0, 0.08);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   pointer-events: auto;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease;
 }
 
 body[data-immersive='true'] .bottom-nav {
   display: none !important;
 }
 
+.bottom-nav__dock {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: center;
+  max-width: 32rem;
+  margin: 0 auto;
+  height: 4.25rem;
+  padding: 0.25rem 0.5rem;
+}
+
 .bottom-nav__item {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.22rem;
-  color: var(--text-body);
+  gap: 0.2rem;
+  height: 100%;
+  min-height: 44px; /* Strictly enforces mobile touch target ergonomics */
+  color: var(--muted);
   text-decoration: none;
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 0.35rem 0.2rem;
-  border-radius: var(--radius-sm);
-  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
   background: transparent;
   border: none;
   cursor: pointer;
-  position: relative;
+  padding: 0.35rem 0.25rem;
+  border-radius: var(--radius);
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+}
+
+.bottom-nav__btn {
+  width: 100%;
+}
+
+.bottom-nav__icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 1.75rem;
+  border-radius: var(--radius-full);
+  transition: all 0.2s ease;
+}
+
+.bottom-nav__icon-box svg {
+  flex-shrink: 0;
+  stroke: currentColor;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.15s ease;
+}
+
+.bottom-nav__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  transition: color 0.15s ease, font-weight 0.15s ease;
+}
+
+.bottom-nav__item:active {
+  transform: scale(0.94);
 }
 
 .bottom-nav__item:hover {
   color: var(--text);
-  transform: translateY(-2px);
-}
-
-.bottom-nav__item svg {
-  flex-shrink: 0;
-  stroke: currentColor;
-  transition: transform 0.15s ease, color 0.15s ease;
 }
 
 .bottom-nav__item.is-active {
   color: var(--primary);
+}
+
+.bottom-nav__item.is-active .bottom-nav__icon-box {
+  background: var(--primary-subtle);
+}
+
+.bottom-nav__item.is-active .bottom-nav__icon-box svg {
+  stroke: var(--primary);
+  transform: translateY(-1px) scale(1.08);
+}
+
+.bottom-nav__item.is-active .bottom-nav__label {
+  color: var(--primary);
   font-weight: 700;
 }
 
-.bottom-nav__item.is-active::after {
-  content: '';
-  position: absolute;
-  bottom: 2px;
-  width: 1.2rem;
-  height: 3px;
-  background: var(--primary);
-  border-radius: 99px;
-  box-shadow: 0 0 8px var(--primary);
-}
-
-.bottom-nav__icon-wrap {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.bottom-nav__badge {
-  position: absolute;
-  top: -5px;
-  right: -9px;
-  background: var(--red);
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: 800;
-  min-width: 16px;
-  height: 16px;
-  line-height: 16px;
-  padding: 0 4px;
-  border-radius: 999px;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
-}
-
-/* More Tools Bottom Sheet Modal */
-.more-menu-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(11, 15, 25, 0.6);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  z-index: 1050;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  animation: modalFadeIn 0.18s ease-out;
-}
-
-.more-menu-sheet {
-  background: var(--surface);
-  border-top: 1.5px solid var(--border);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  width: min(34rem, 100vw);
-  padding: 1.25rem 1.25rem 2.5rem;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
-  animation: modalSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.more-menu-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.more-menu-title {
-  font-size: 1rem;
-  font-weight: 800;
-}
-
-.more-menu-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-}
-
-.more-menu-tile {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.8rem;
-  text-decoration: none;
-  color: var(--text);
-  transition: all 0.15s ease;
-}
-
-.more-menu-tile:hover {
-  background: var(--surface-3);
-  border-color: var(--blue);
-  transform: translateY(-2px);
-}
-
-.tile-icon-wrap {
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.tile-icon-wrap.is-gold {
-  background: var(--gold-subtle);
-  color: var(--gold);
-}
-
-.tile-icon-wrap.is-green {
-  background: var(--green-subtle);
-  color: var(--green);
-}
-
-.tile-icon-wrap.is-teal,
-.tile-icon-wrap.is-purple {
-  background: var(--teal-subtle);
-  color: var(--teal-dark);
-}
-
-.tile-icon-wrap.is-blue {
-  background: var(--blue-subtle);
-  color: var(--blue);
-}
-
-.tile-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.tile-text strong {
-  font-size: 0.85rem;
-  line-height: 1.2;
-}
-
-.tile-text span {
-  font-size: 0.72rem;
-  color: var(--muted);
-}
-
-/* On desktop screens (>= 860px), navigation is handled exclusively by the persistent top header navbar */
-@media (min-width: 860px) {
+/* Hide Bottom Nav on desktop viewports (>= 768px / md:) */
+@media (min-width: 768px) {
   .bottom-nav {
     display: none !important;
   }
