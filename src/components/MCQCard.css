@@ -1,0 +1,290 @@
+/**
+ * MCQCard.css - "The Reading Lamp" Study Hero Card
+ * Hairline border, subtle ruled-margin cue, hero stem leading, RTL mirrored
+ */
+
+.reading-mcq-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card, 18px);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: var(--space-4);
+  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+}
+
+/* Ruled margin exam paper cue: subtle vertical hairline like printed paper */
+.card-ruled-margin {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--ruled-line, var(--border));
+  left: 1.25rem;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.reading-mcq-card.is-rtl .card-ruled-margin {
+  left: auto;
+  right: 1.25rem;
+}
+
+.card-inner-content {
+  padding: 1.5rem 1.5rem 1.5rem 2.25rem;
+}
+
+.reading-mcq-card.is-rtl .card-inner-content {
+  padding: 1.5rem 2.25rem 1.5rem 1.5rem;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .card-inner-content {
+    padding: 1.15rem 1rem 1.15rem 1.5rem;
+  }
+  .reading-mcq-card.is-rtl .card-inner-content {
+    padding: 1.15rem 1.5rem 1.15rem 1rem;
+  }
+  .card-ruled-margin {
+    left: 0.75rem;
+  }
+  .reading-mcq-card.is-rtl .card-ruled-margin {
+    right: 0.75rem;
+  }
+}
+
+/* Card Header Meta Bar */
+.card-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.card-provenance-cluster {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.card-unit-chip,
+.card-provenance-chip,
+.card-penalty-chip {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+}
+
+.card-unit-chip {
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.card-provenance-chip {
+  background: var(--primary-subtle);
+  color: var(--primary-text);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+}
+
+.card-penalty-chip {
+  background: var(--red-subtle);
+  color: var(--red-text);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.card-tools-cluster {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+
+.card-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 36px;
+  min-width: 36px;
+  padding: 0.3rem 0.65rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+}
+
+.card-tool-btn:hover {
+  background: var(--surface-3);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.card-tool-btn.is-active-tool {
+  background: var(--primary-subtle);
+  color: var(--primary-text);
+  border-color: var(--primary);
+}
+
+.bookmark-tool-btn.is-bookmarked {
+  background: var(--gold-subtle);
+  color: var(--gold-text);
+  border-color: var(--gold);
+}
+
+/* Directive */
+.card-directive {
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--muted);
+  margin: 0 0 var(--space-2);
+}
+
+/* Hero Question Stem */
+.card-stem {
+  font-size: var(--text-stem);
+  font-weight: 700;
+  line-height: var(--leading-stem);
+  color: var(--text);
+  margin: 0 0 var(--space-4);
+  letter-spacing: -0.012em;
+}
+
+.card-stem.urdu {
+  font-family: var(--font-urdu);
+  font-size: calc(var(--text-stem) * 1.15);
+  line-height: var(--leading-urdu);
+  letter-spacing: normal;
+}
+
+/* Statements list I, II, III */
+.card-statements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.statement-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  color: var(--text-body);
+}
+
+.statement-numeral {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--primary-text);
+  flex-shrink: 0;
+}
+
+.statement-text.urdu {
+  font-family: var(--font-urdu);
+  line-height: var(--leading-urdu);
+}
+
+.card-closing {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 var(--space-4);
+}
+
+/* Choices group container */
+.card-choices-group {
+  margin-top: var(--space-2);
+}
+
+/* Feedback Drawer */
+.card-feedback-box {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-button, 12px);
+  border: 1px solid var(--border);
+  animation: modalSlideUp 180ms ease-out;
+}
+
+.card-feedback-box.is-correct {
+  background: var(--green-subtle);
+  border-color: rgba(22, 163, 74, 0.25);
+}
+
+.card-feedback-box.is-wrong {
+  background: var(--red-subtle);
+  border-color: rgba(220, 38, 38, 0.25);
+}
+
+.feedback-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.card-feedback-box.is-correct .feedback-banner {
+  color: var(--green-text);
+}
+
+.card-feedback-box.is-wrong .feedback-banner {
+  color: var(--red-text);
+}
+
+.feedback-headline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.feedback-deduction {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: var(--text-xs);
+}
+
+.feedback-explanation {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.explanation-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-1-5);
+}
+
+.explanation-body {
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.explanation-body.urdu {
+  font-family: var(--font-urdu);
+  line-height: var(--leading-urdu);
+}

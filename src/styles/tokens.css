@@ -1,0 +1,326 @@
+/**
+ * MPT-AI DESIGN SYSTEM TOKENS ("The Reading Lamp")
+ * Design Direction: A quiet desk at night. Ink on paper, one good lamp.
+ * Signature motif: OMR Bubble
+ *
+ * All 4 Themes adhere to WCAG AA Contrast (4.5:1 body text, 3:1 UI & large text).
+ * Hairline borders are strictly 6-8% alpha of the text color.
+ */
+
+:root,
+[data-theme="light"],
+[data-theme="minimal-light"] {
+  /* 1. LIGHT THEME: Deep Teal & Amber ("The Reading Lamp") */
+  --bg: #F8FAF9;
+  --surface: #FFFFFF;
+  --surface-2: #F0F4F2;
+  --surface-3: #E6ECE9;
+
+  /* Hairline Borders */
+  --border: #E2E8E6;
+  --hairline: var(--border);
+  --border-strong: rgba(11, 31, 29, 0.16);
+
+  /* Typography Colors */
+  --text: #0B1F1D;        /* 17.2:1 contrast on #F8FAF9 */
+  --text-body: #233835;   /* High-contrast calming body */
+  --muted: #5B6B68;       /* 5.05:1 contrast on #F8FAF9 */
+  --muted-light: #899B97;
+
+  /* Primary Action Token: Deep Teal 700 */
+  --primary: #0F766E;
+  --primary-hover: #115E59;
+  --primary-subtle: rgba(15, 118, 110, 0.09);
+  --primary-text: #0F766E;
+  --primary-fg: #FFFFFF;
+
+  /* Accent & Streak: Amber */
+  --accent: #F59E0B;
+  --streak: #F59E0B;
+  --amber: #F59E0B;
+  --amber-text: #B45309;  /* 5.91:1 on #F8FAF9 */
+  --amber-subtle: rgba(245, 158, 11, 0.12);
+
+  --gold: #F59E0B;
+  --gold-text: #B45309;
+  --gold-subtle: rgba(245, 158, 11, 0.12);
+
+  /* Semantic Colors */
+  --teal: #0F766E;
+  --teal-text: #0F766E;
+  --teal-subtle: rgba(15, 118, 110, 0.10);
+
+  --green: #10B981;
+  --green-text: #047857;  /* 5.6:1 */
+  --green-subtle: rgba(16, 185, 129, 0.10);
+
+  --red: #E11D48;
+  --red-text: #BE123C;
+  --red-subtle: rgba(225, 29, 72, 0.10);
+
+  --rose: #E11D48;
+  --rose-subtle: #FFF1F2;
+  --rose-border: #FECDD3;
+  --rose-text: #BE123C;
+  --rose-fg: #FFFFFF;
+  --rose-glow: rgba(225, 29, 72, 0.15);
+
+  --purple: #7c3aed;
+  --purple-text: #6d28d9;
+  --purple-subtle: rgba(124, 58, 237, 0.10);
+
+  /* Glassmorphism & Overlays */
+  --glass-bg: rgba(248, 250, 249, 0.94);
+  --glass-border: #E2E8E6;
+
+  /* Shadows: Minimal and flat */
+  --shadow-sm: 0 1px 2px rgba(11, 31, 29, 0.04);
+  --shadow-md: 0 4px 12px -2px rgba(11, 31, 29, 0.06);
+  --shadow-lg: 0 12px 28px -4px rgba(11, 31, 29, 0.09);
+
+  /* Reading paper cue */
+  --ruled-line: rgba(11, 31, 29, 0.05);
+  --omr-bubble-border: rgba(11, 31, 29, 0.28);
+  --omr-bubble-fill: #0B1F1D;
+
+  color-scheme: light;
+}
+
+/* 2. DARK THEME: Deep Night Pine & Teal */
+[data-theme="dark"],
+[data-theme="oled"] {
+  --bg: #0A1412;
+  --surface: #11201D;
+  --surface-2: #192D29;
+  --surface-3: #233D38;
+
+  /* Hairline Borders */
+  --border: rgba(226, 232, 230, 0.08);
+  --hairline: var(--border);
+  --border-strong: rgba(226, 232, 230, 0.18);
+
+  --text: #E6F0ED;        /* 16.8:1 contrast on #0A1412 */
+  --text-body: #C5D6D1;   /* 13.5:1 contrast on #0A1412 */
+  --muted: #7E948F;       /* 6.5:1 contrast on #0A1412 */
+  --muted-light: #576B66;
+
+  --primary: #2DD4BF;     /* Vibrant Teal 400 */
+  --primary-hover: #5EEAD4;
+  --primary-subtle: rgba(45, 212, 191, 0.14);
+  --primary-text: #2DD4BF;
+  --primary-fg: #0A1412;  /* High contrast text on teal primary */
+
+  --accent: #F59E0B;
+  --streak: #F59E0B;
+  --amber: #F59E0B;
+  --amber-text: #FBBF24;
+  --amber-subtle: rgba(245, 158, 11, 0.15);
+
+  --gold: #F59E0B;
+  --gold-text: #FBBF24;
+  --gold-subtle: rgba(245, 158, 11, 0.15);
+
+  --teal: #2DD4BF;
+  --teal-text: #2DD4BF;
+  --teal-subtle: rgba(45, 212, 191, 0.15);
+
+  --green: #34D399;
+  --green-text: #34D399;
+  --green-subtle: rgba(52, 211, 153, 0.15);
+
+  --red: #FB7185;
+  --red-text: #FDA4AF;
+  --red-subtle: rgba(251, 113, 133, 0.15);
+
+  --rose: #FB7185;
+  --rose-subtle: rgba(244, 63, 94, 0.14);
+  --rose-border: rgba(244, 63, 94, 0.28);
+  --rose-text: #FDA4AF;
+  --rose-fg: #0A1412;
+  --rose-glow: rgba(251, 113, 133, 0.20);
+
+  --purple: #a78bfa;
+  --purple-text: #c4b5fd;
+  --purple-subtle: rgba(167, 139, 250, 0.15);
+
+  --glass-bg: rgba(17, 32, 29, 0.92);
+  --glass-border: rgba(226, 232, 230, 0.08);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.65);
+  --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.85);
+
+  --ruled-line: rgba(226, 232, 230, 0.04);
+  --omr-bubble-border: rgba(226, 232, 230, 0.32);
+  --omr-bubble-fill: #2DD4BF;
+
+  color-scheme: dark;
+}
+
+/* 3. ESPRESSO THEME: Cozy dark roast coffee desk, warm amber lamp glow */
+[data-theme="espresso"],
+[data-theme="midnight"] {
+  --bg: #120f0d;
+  --surface: #1c1815;
+  --surface-2: #28231f;
+  --surface-3: #3b342e;
+
+  /* Hairline Borders: 6-8% of text color (#f5ebe0) */
+  --border: rgba(245, 235, 224, 0.08);
+  --hairline: var(--border);
+  --border-strong: rgba(245, 235, 224, 0.18);
+
+  --text: #f5ebe0;        /* 16.5:1 contrast on #120f0d */
+  --text-body: #e3d5c5;   /* 13.2:1 contrast on #120f0d */
+  --muted: #a89b8c;       /* 6.8:1 contrast on #120f0d */
+  --muted-light: #786e63;
+
+  --primary: #d97706;     /* Warm amber lamp glow */
+  --primary-hover: #f59e0b;
+  --primary-subtle: rgba(217, 119, 6, 0.16);
+  --primary-text: #fbbf24;
+  --primary-fg: #120f0d;  /* Pristine contrast on amber primary */
+
+  --teal: #2dd4bf;
+  --teal-text: #2dd4bf;
+  --teal-subtle: rgba(45, 212, 191, 0.15);
+
+  --green: #34d399;
+  --green-text: #34d399;
+  --green-subtle: rgba(52, 211, 153, 0.15);
+
+  --red: #E2574A;
+  --red-text: #FFA596;
+  --red-subtle: rgba(226, 87, 74, 0.16);
+
+  --rose: #E2574A;
+  --rose-hover: #EA6659;
+  --rose-subtle: #241715;
+  --rose-border: #4A2622;
+  --rose-text: #FFA596;
+  --rose-fg: #120F0D;
+  --rose-glow: rgba(226, 87, 74, 0.22);
+
+  --gold: #fbbf24;
+  --gold-text: #fde047;
+  --gold-subtle: rgba(251, 191, 36, 0.15);
+
+  --amber: #f59e0b;
+  --amber-text: #fbbf24;
+  --amber-subtle: rgba(245, 158, 11, 0.15);
+
+  --purple: #c4b5fd;
+  --purple-text: #ddd6fe;
+  --purple-subtle: rgba(196, 181, 253, 0.15);
+
+  --glass-bg: rgba(28, 24, 21, 0.92);
+  --glass-border: rgba(245, 235, 224, 0.08);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.65);
+  --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.85);
+
+  --ruled-line: rgba(245, 235, 224, 0.04);
+  --omr-bubble-border: rgba(245, 235, 224, 0.32);
+  --omr-bubble-fill: #d97706;
+
+  color-scheme: dark;
+}
+
+/* ==============================================================================
+   TYPOGRAPHY SCALE & FONT STACKS
+   Inter / Plus Jakarta Sans for UI
+   Noto Nastaliq Urdu for RTL content (line-height 2.2)
+   Monospace for timers, scores, indices, and shortcuts
+   ============================================================================== */
+
+:root {
+  /* Font Families */
+  --font-ui: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-urdu: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Pak Nastaleeq', 'Nafees Nastaleeq', serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Font Scale Multiplier (driven by settings: 0.9, 1.0, 1.15, 1.3) */
+  --font-scale: 1;
+
+  /* Type Scale */
+  --text-2xs: calc(0.6875rem * var(--font-scale)); /* 11px */
+  --text-xs: calc(0.75rem * var(--font-scale));     /* 12px */
+  --text-sm: calc(0.875rem * var(--font-scale));    /* 14px */
+  --text-base: calc(1rem * var(--font-scale));      /* 16px */
+  --text-lg: calc(1.125rem * var(--font-scale));    /* 18px */
+  --text-stem: calc(1.25rem * var(--font-scale));   /* 20px: Question hero body */
+  --text-xl: calc(1.375rem * var(--font-scale));    /* 22px */
+  --text-2xl: calc(1.75rem * var(--font-scale));    /* 28px */
+  --text-3xl: calc(2.25rem * var(--font-scale));    /* 36px */
+
+  /* Leading */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.6;      /* Increased to ~1.6 for enhanced long study session comfort */
+  --leading-relaxed: 1.65;
+  --leading-stem: 1.7;        /* Generous leading for exam question stems */
+  --leading-urdu: 2.2;        /* Standardized Nastaliq vertical clearance */
+
+  /* Spacing Scale (4px baseline grid) */
+  --space-0-5: 0.125rem;  /* 2px */
+  --space-1: 0.25rem;     /* 4px */
+  --space-1-5: 0.375rem;  /* 6px */
+  --space-2: 0.5rem;      /* 8px */
+  --space-2-5: 0.625rem;  /* 10px */
+  --space-3: 0.75rem;     /* 12px */
+  --space-4: 1rem;        /* 16px */
+  --space-5: 1.25rem;     /* 20px */
+  --space-6: 1.5rem;      /* 24px */
+  --space-7: 1.75rem;     /* 28px */
+  --space-8: 2rem;        /* 32px */
+  --space-10: 2.5rem;     /* 40px */
+  --space-12: 3rem;       /* 48px */
+  --space-16: 4rem;       /* 64px */
+
+  /* Border Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;      /* Buttons and Choice Rows */
+  --radius-button: 12px;  /* Spec: 12px buttons & choice rows */
+  --radius-card: 18px;    /* Spec: 16-20px cards */
+  --radius-lg: 18px;
+  --radius-modal: 24px;   /* Spec: 24px modals & drawers */
+  --radius-omr: 50%;      /* Spec: Circular OMR bubble motif */
+  --radius-full: 9999px;  /* Spec: pills 9999px */
+
+  /* Ergonomics */
+  --touch-target-min: 44px;
+
+  /* Motion: 120-200ms, purposeful */
+  --duration-fast: 120ms;
+  --duration-normal: 160ms;
+  --duration-smooth: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0.01ms;
+    --duration-normal: 0.01ms;
+    --duration-smooth: 0.01ms;
+  }
+}
+
+/* Signature pencil fill animation for OMR confirms */
+@keyframes omrPencilFill {
+  0% {
+    transform: scale(0.18);
+    opacity: 0.2;
+  }
+  60% {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

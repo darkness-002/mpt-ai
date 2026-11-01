@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import {
-  BookIcon,
   FlameIcon,
   MoonIcon,
   SearchIcon,
@@ -10,6 +9,7 @@ import {
   SunIcon,
   TimerIcon,
   UserIcon,
+  OMRLogoMark,
 } from './icons.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { settingsStore, THEMES } from '../storage/settingsStore.js'
@@ -38,9 +38,8 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
     const current = settingsStore.load()
     let next = THEMES.DARK
     if (current.theme === THEMES.LIGHT) next = THEMES.DARK
-    else if (current.theme === THEMES.DARK) next = THEMES.ZEN
-    else if (current.theme === THEMES.ZEN) next = THEMES.MIDNIGHT
-    else if (current.theme === THEMES.MIDNIGHT) next = THEMES.LIGHT
+    else if (current.theme === THEMES.DARK) next = THEMES.ESPRESSO
+    else if (current.theme === THEMES.ESPRESSO || current.theme === THEMES.MIDNIGHT) next = THEMES.LIGHT
     else next = THEMES.LIGHT
 
     const updated = { ...current, theme: next }
@@ -51,8 +50,7 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
   const themeDisplayNames = {
     [THEMES.LIGHT]: 'Light',
     [THEMES.DARK]: 'Dark',
-    [THEMES.ZEN]: 'Zen',
-    [THEMES.MIDNIGHT]: 'Midnight',
+    [THEMES.ESPRESSO]: 'Espresso',
   }
 
   const displayRole = user
@@ -72,10 +70,10 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
   return (
     <header className="site-header w-full max-w-full box-border px-4 md:px-8">
       <div className="site-header__container w-full max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 min-w-0">
-        {/* Brand */}
+        {/* Brand with OMR Signature Motif Logo */}
         <Link to="/" className="site-header__brand flex items-center gap-2.5 min-w-0" aria-label="MPT-AI Home">
           <div className="site-brand-badge shrink-0">
-            <BookIcon width="18" height="18" />
+            <OMRLogoMark width="20" height="20" />
           </div>
           <div className="site-brand-text min-w-0 flex flex-col">
             <span className="site-brand-title truncate">
@@ -85,7 +83,7 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
           </div>
         </Link>
 
-        {/* Clean, Non-Cluttered Desktop Navigation */}
+        {/* Clean Desktop Navigation (Breakpoint 860px) */}
         <nav className="header-desktop-nav hidden md:flex" aria-label="Main Navigation">
           <NavLink to="/" className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`} end>
             Curriculum
@@ -99,15 +97,9 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
           <NavLink to="/mistakes" className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`}>
             Mistakes Bank
           </NavLink>
-          {isStaffUser && (
-            <NavLink to="/admin" className="header-nav-link header-nav-link--admin" title="Admin & Staff Portal">
-              <ShieldCheckIcon width="14" height="14" />
-              <span>Admin Portal</span>
-            </NavLink>
-          )}
         </nav>
 
-        {/* Global Search Bar Button (Desktop only) */}
+        {/* Global Search Bar Button (Desktop only, Ctrl+K) */}
         <button
           type="button"
           className="header-search-trigger hidden md:flex"
@@ -122,12 +114,6 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
 
         {/* Action Controls */}
         <div className="site-header__controls flex items-center gap-1.5 sm:gap-2 shrink-0">
-          {/* Daily Streak (hidden on mobile, visible on sm: and up) */}
-          <Link to="/daily" className="header-streak-pill hidden sm:flex" title="Daily Streak">
-            <FlameIcon width="16" height="16" className="header-streak-flame" />
-            <span className="header-streak-count">{streak.currentStreak}</span>
-          </Link>
-
           {/* Pomodoro Focus Timer (Desktop only) */}
           <button
             type="button"
@@ -147,65 +133,57 @@ export default function AppHeader({ onOpenSearch, onOpenSettings, onOpenFocus, o
             title={`Theme: ${themeDisplayNames[currentTheme] || currentTheme}. Click to cycle.`}
             aria-label="Switch Theme"
           >
-            {currentTheme === 'light' || currentTheme === 'zen' || currentTheme === 'ivory' || currentTheme === 'sepia' ? (
+            {currentTheme === 'light' ? (
               <SunIcon width="18" height="18" />
             ) : (
               <MoonIcon width="18" height="18" />
             )}
           </button>
 
-          {/* Public Student Auth / Profile Button (Mobile & Desktop) */}
+          {/* User / Settings Unified Avatar Menu */}
           {!user ? (
-            <button
-              type="button"
-              className="header-auth-btn inline-flex min-h-[44px] min-w-[44px]"
-              onClick={onOpenAuth}
-              title="Sign In or Create Account"
-              aria-label="Sign In"
-            >
-              <UserIcon width="15" height="15" />
-              <span className="header-auth-btn__text hidden sm:inline">Sign In</span>
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                className="header-auth-btn inline-flex min-h-[44px] px-3.5 py-1.5 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] font-semibold text-xs sm:text-sm hover:bg-[var(--surface-3)] transition-all cursor-pointer"
+                onClick={onOpenAuth}
+                title="Sign In or Create Account"
+                aria-label="Sign In"
+              >
+                <UserIcon width="15" height="15" />
+                <span>Sign In</span>
+              </button>
+              <button
+                type="button"
+                className="icon-btn header-tool-btn inline-flex min-h-[44px] min-w-[44px]"
+                onClick={onOpenSettings}
+                title="Settings"
+                aria-label="App Settings"
+              >
+                <SettingsIcon width="18" height="18" />
+              </button>
+            </div>
           ) : (
             <button
               type="button"
-              className="header-user-btn inline-flex min-h-[44px] min-w-[44px]"
+              className="header-user-btn inline-flex min-h-[44px] items-center gap-2 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] hover:border-[var(--border-strong)] transition-all cursor-pointer"
               onClick={onOpenSettings}
-              title={`Logged in as ${user.email} (${displayRole}). Click to manage account.`}
-              aria-label="Account Settings"
+              title={`Account & Settings: ${user.email} (${displayRole})`}
+              aria-label="Account and Settings"
             >
               <div className="header-user-avatar">
                 {user.email ? user.email.charAt(0).toUpperCase() : 'S'}
               </div>
-              <span className="header-user-email hidden md:inline">
+              <span className="header-user-email hidden md:inline font-medium text-xs sm:text-sm">
                 {user.email ? user.email.split('@')[0] : 'Student'}
               </span>
+              {isStaffUser && (
+                <span className="hidden lg:inline-flex text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]">
+                  Staff
+                </span>
+              )}
             </button>
           )}
-
-          {/* Admin / Staff Shortcut (Desktop only) */}
-          {isStaffUser && (
-            <Link
-              to="/admin"
-              className="header-admin-badge-btn hidden md:inline-flex min-h-[44px]"
-              title="Open Admin & Staff Portal"
-              aria-label="Admin Portal"
-            >
-              <ShieldCheckIcon width="14" height="14" />
-              <span className="header-admin-badge-btn__text">Admin</span>
-            </Link>
-          )}
-
-          {/* Settings (Desktop only) */}
-          <button
-            type="button"
-            className="icon-btn header-tool-btn hidden md:inline-flex min-h-[44px] min-w-[44px]"
-            onClick={onOpenSettings}
-            title="Settings"
-            aria-label="App Settings"
-          >
-            <SettingsIcon width="18" height="18" />
-          </button>
         </div>
       </div>
     </header>

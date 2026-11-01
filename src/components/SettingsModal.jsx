@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CloseIcon, LogOutIcon, SettingsIcon, ShieldCheckIcon, UserIcon } from './icons.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -8,6 +8,20 @@ import './SettingsModal.css'
 export default function SettingsModal({ isOpen, onClose, onOpenAuth }) {
   const { user, profile, isStaff, signOut } = useAuth()
   const [settings, setSettings] = useState(() => settingsStore.load())
+  const [isOnline, setIsOnline] = useState(
+    typeof navigator !== 'undefined' ? navigator.onLine : true,
+  )
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
 
   if (!isOpen) return null
 
@@ -96,7 +110,7 @@ export default function SettingsModal({ isOpen, onClose, onOpenAuth }) {
                   {Boolean(user && isStaff) && (
                     <Link
                       to="/admin"
-                      className="btn btn--small btn--primary settings-admin-portal-btn"
+                      className="btn btn--small btn--ghost settings-admin-portal-btn"
                       onClick={onClose}
                     >
                       <ShieldCheckIcon width="14" height="14" />
@@ -118,7 +132,30 @@ export default function SettingsModal({ isOpen, onClose, onOpenAuth }) {
             )}
           </section>
 
-          {/* Theme Selector: 4 Distinct Themes */}
+          {/* Cloud Sync & Offline Status */}
+          <section className="settings-section">
+            <label className="settings-label">Cloud Sync & Offline Cache</label>
+            <div className="settings-sync-strip">
+              <div className="settings-sync-info">
+                <span className={`settings-sync-dot ${isOnline ? 'is-online' : 'is-offline'}`} />
+                <div className="settings-sync-text-group">
+                  <span className="settings-sync-status-title">
+                    {isOnline ? 'Online • Synced with Cloud' : 'Offline Mode • Active'}
+                  </span>
+                  <p className="settings-sync-status-desc">
+                    {isOnline
+                      ? 'Study progress, bookmarks, and SRS mistakes sync automatically to your cloud profile.'
+                      : 'All curriculum questions are cached in IndexedDB for uninterrupted offline study.'}
+                  </p>
+                </div>
+              </div>
+              <span className="settings-sync-badge">
+                IndexedDB
+              </span>
+            </div>
+          </section>
+
+          {/* Theme Selector: 3 Distinct Themes */}
           <section className="settings-section">
             <label className="settings-label">Color Theme</label>
             <div className="theme-grid">

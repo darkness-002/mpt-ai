@@ -1,18 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  BookIcon,
-  CheckCircleIcon,
   CloseIcon,
-  LightbulbIcon,
-  NotesIcon,
-  SlashIcon,
-  StarIcon,
+  BookmarkStarIcon,
   TargetIcon,
   TimerIcon,
-  XCircleIcon,
+  RotateCcwIcon,
+  CheckCircleIcon,
 } from '../components/icons.jsx'
-import QuestionTTS from '../components/QuestionTTS.jsx'
+import MCQCard from '../components/MCQCard.jsx'
 import NoteModal from '../components/NoteModal.jsx'
 import OMRSheet from '../components/OMRSheet.jsx'
 import { useContent } from '../content/contentContext.js'
@@ -25,8 +21,6 @@ import { notesStore } from '../storage/notesStore.js'
 import { streakStore } from '../storage/streakStore.js'
 import './CustomQuizScreen.css'
 
-const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
-const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
 const CHOICE_KEYS = ['1', '2', '3', '4', 'a', 'b', 'c', 'd', 'A', 'B', 'C', 'D']
 
 export default function CustomQuizScreen() {
@@ -68,7 +62,6 @@ export default function CustomQuizScreen() {
 
   // Timer state for timed drill
   const [remainingSeconds, setRemainingSeconds] = useState(0)
-  const headingRef = useRef(null)
 
   const currentQ = activeQuestions[currentIndex]
 
@@ -83,7 +76,7 @@ export default function CustomQuizScreen() {
     }
   }, [currentQ])
 
-  // Hide bottom navigation during active and finished drill states to ensure footer is never blocked
+  // Hide bottom navigation during active and finished drill states
   useEffect(() => {
     if (quizState === 'active' || quizState === 'finished') {
       document.body.dataset.immersive = 'true'
@@ -158,13 +151,6 @@ export default function CustomQuizScreen() {
     (acc, u) => acc + (u.questionCount ?? u.lessons?.reduce((n, l) => n + (l.questions?.length ?? 0), 0) ?? 0),
     0,
   )
-
-  const currentPoolSize =
-    poolType === 'mistakes'
-      ? mistakeCount
-      : poolType === 'starred'
-        ? bookmarkCount
-        : availableTrackQuestionsCount
 
   const launchSession = useCallback((candidatePool) => {
     if (!candidatePool || candidatePool.length === 0) {
@@ -356,7 +342,6 @@ export default function CustomQuizScreen() {
   }
 
   const handlersRef = useRef({ checkAnswer, advanceQuestion, isChecked, currentQ, eliminatedChoices })
-
   useEffect(() => {
     handlersRef.current = { checkAnswer, advanceQuestion, isChecked, currentQ, eliminatedChoices }
   })
@@ -373,6 +358,7 @@ export default function CustomQuizScreen() {
         currentQ: q,
         eliminatedChoices: elim,
       } = handlersRef.current
+
       if (CHOICE_KEYS.includes(event.key) && !checked) {
         let i = -1
         if (['1', '2', '3', '4'].includes(event.key)) {
@@ -394,61 +380,61 @@ export default function CustomQuizScreen() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [quizState])
 
+  // Finished Mode
   if (quizState === 'finished') {
     const finalScore = calculateScore(answers, 0)
     const missed = answers.filter((a) => !a.correct)
+    const pct = Math.round((finalScore.correct / Math.max(1, activeQuestions.length)) * 100)
 
     return (
-      <div className="custom-drill">
+      <div className="custom-drill custom-drill--finished">
         <header className="custom-drill__header">
-          <Link className="brand" to="/">
-            <BookIcon width="22" height="22" />
-            <span>MPT·AI</span>
+          <Link className="path-back-btn" to="/">
+            ← Home Desk
           </Link>
-          <h1>Custom Drill Complete!</h1>
+          <h1 className="mt-2 text-2xl font-bold">Custom Drill Complete</h1>
         </header>
 
         <main className="custom-drill__results">
           <div className="drill-score-card">
-            <h2>
+            <span className="font-mono text-2xl font-extrabold text-[var(--text)]">
               {finalScore.correct} / {activeQuestions.length} Correct
-            </h2>
-            <p>Accuracy: {Math.round((finalScore.correct / Math.max(1, activeQuestions.length)) * 100)}%</p>
+            </span>
+            <p className="font-mono text-sm text-[var(--muted)]">Accuracy: {pct}%</p>
           </div>
 
           {missed.length > 0 && (
             <section className="drill-review-section">
-              <h3>Questions to Review ({missed.length})</h3>
-              <ul className="drill-review-list">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--muted)] mb-3">
+                Review Missed Questions ({missed.length})
+              </h3>
+              <ul className="drill-review-list flex flex-col gap-3">
                 {missed.map(({ question: q, choice }) => (
-                  <li key={q.id} className="drill-review-item">
-                    {q.directive && <p className="drill-review-directive">{q.directive}</p>}
-                    <p className={`drill-review-prompt${q.rtl ? ' urdu' : ''}`} dir={q.rtl ? 'rtl' : 'ltr'}>
+                  <li key={q.id} className="drill-review-item p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-left">
+                    <p className={`font-semibold text-base text-[var(--text)] mb-2 ${q.rtl ? 'urdu' : ''}`} dir={q.rtl ? 'rtl' : 'ltr'}>
                       {q.prompt}
                     </p>
-                    {q.statements && (
-                      <ol className="drill-statements drill-statements--review">
-                        {q.statements.map((statement, i) => (
-                          <li key={i}>
-                            <span className="drill-statements__mark">{ROMAN[i] ?? i + 1}</span>
-                            <span>{statement}</span>
-                          </li>
-                        ))}
-                      </ol>
+                    <p className="text-xs font-mono text-[var(--red-text)]">
+                      Your answer: {choice !== null && choice !== undefined ? q.choices[choice] : 'None'}
+                    </p>
+                    <p className="text-xs font-mono text-[var(--green-text)] font-bold">
+                      Correct answer: {q.choices[q.answer]}
+                    </p>
+                    {explainQuestion(q) && (
+                      <p className={`text-xs text-[var(--muted)] mt-2 pt-2 border-t border-[var(--border)] ${q.rtl ? 'urdu' : ''}`}>
+                        {explainQuestion(q)}
+                      </p>
                     )}
-                    {q.closing && <p className="drill-review-closing">{q.closing}</p>}
-                    <p className="drill-review-wrong">Your answer: {choice !== null && choice !== undefined ? q.choices[choice] : 'None'}</p>
-                    <p className="drill-review-right">Correct answer: {q.choices[q.answer]}</p>
-                    {explainQuestion(q) && <p className="drill-review-why">{explainQuestion(q)}</p>}
                   </li>
                 ))}
               </ul>
             </section>
           )}
 
-          <div className="drill-actions">
-            <button className="btn" type="button" onClick={restartDrill}>
-              Retake Same Drill
+          <div className="drill-actions flex flex-wrap gap-3 justify-center mt-6">
+            <button className="btn btn--primary" type="button" onClick={restartDrill}>
+              <RotateCcwIcon width="16" height="16" />
+              <span>Retake Drill</span>
             </button>
             <button className="btn btn--ghost" type="button" onClick={() => setQuizState('config')}>
               Configure New Drill
@@ -462,21 +448,23 @@ export default function CustomQuizScreen() {
     )
   }
 
+  // Active Drill Mode
   if (quizState === 'active') {
     if (!currentQ) {
       return (
-        <div className="custom-drill">
-          <div className="drill-empty-notice" style={{ margin: '3rem auto', maxWidth: 480, textAlign: 'center' }}>
-            <p>No questions available for this drill session.</p>
-            <button type="button" className="btn btn--ghost" onClick={() => setQuizState('config')}>
-              Back to Drill Setup
-            </button>
-          </div>
+        <div className="custom-drill p-8 text-center">
+          <p className="text-sm text-[var(--muted)] mb-4">No questions available for this drill session.</p>
+          <button type="button" className="btn btn--ghost" onClick={() => setQuizState('config')}>
+            Back to Drill Setup
+          </button>
         </div>
       )
     }
 
     const isAnswerCorrect = isChecked && selectedChoice === currentQ.answer
+    const isCSS = activeTrack?.exam?.includes('CSS') ?? true
+    const penalty = isCSS ? 0 : 0.25
+
     return (
       <div className="custom-drill custom-drill--active">
         <header className="drill-topbar">
@@ -490,171 +478,48 @@ export default function CustomQuizScreen() {
           </button>
 
           <div className="drill-topbar__center">
-            <span className="badge">
-              Question {currentIndex + 1} of {activeQuestions.length}
+            <span className="badge font-mono">
+              Q{currentIndex + 1} of {activeQuestions.length}
             </span>
             {isTimed && (
-              <span className="drill-timer">
-                <TimerIcon width="16" height="16" /> {Math.floor(remainingSeconds / 60)}:
-                {String(remainingSeconds % 60).padStart(2, '0')}
+              <span className="drill-timer font-mono">
+                <TimerIcon width="14" height="14" />
+                {Math.floor(remainingSeconds / 60)}:{String(remainingSeconds % 60).padStart(2, '0')}
               </span>
             )}
           </div>
 
           <button
             type="button"
-            className={`icon-btn${bookmarked ? ' is-bookmarked' : ''}`}
-            aria-label="Star question"
+            className={`icon-btn bookmark-btn ${bookmarked ? 'is-bookmarked' : ''}`}
+            aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark question'}
             onClick={toggleBookmark}
           >
-            <StarIcon width="20" height="20" />
+            <BookmarkStarIcon width="18" height="18" />
           </button>
         </header>
 
         <main className="drill-body">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-            <p className="drill-unit-title" style={{ margin: 0 }}>{currentQ.unitTitle || activeTrack?.title}</p>
-            <div className="q-action-bar" style={{ margin: 0 }}>
-              <QuestionTTS question={currentQ} />
-              <button
-                type="button"
-                className={`note-btn ${hasNote ? 'has-note' : ''}`}
-                onClick={() => setShowNoteModal(true)}
-                title="Add or view study note"
-              >
-                <NotesIcon width="14" height="14" />
-                <span>{hasNote ? 'Note' : '+Note'}</span>
-              </button>
-            </div>
-          </div>
-          {currentQ.directive && <p className="drill-directive">{currentQ.directive}</p>}
-          <h2
-            className={`drill-prompt${currentQ.rtl ? ' urdu' : ''}`}
-            dir={currentQ.rtl ? 'rtl' : 'ltr'}
-            ref={headingRef}
-          >
-            {currentQ.prompt}
-          </h2>
-
-          {currentQ.statements && (
-            <ol className="drill-statements">
-              {currentQ.statements.map((statement, i) => (
-                <li key={i}>
-                  <span className="drill-statements__mark">{ROMAN[i] ?? i + 1}</span>
-                  <span className={currentQ.rtl ? 'urdu' : undefined}>{statement}</span>
-                </li>
-              ))}
-            </ol>
-          )}
-
-          {currentQ.closing && (
-            <p className={`drill-closing${currentQ.rtl ? ' urdu' : ''}`} dir={currentQ.rtl ? 'rtl' : 'ltr'}>
-              {currentQ.closing}
-            </p>
-          )}
-
-          <ul className="choices">
-            {currentQ.choices.map((choice, i) => {
-              const isSelected = selectedChoice === i
-              const isStruck = Boolean(eliminatedChoices[i])
-              const isCorrectAnswer = i === currentQ.answer
-              let tone = ''
-              if (isChecked && isCorrectAnswer) tone = ' choice--correct'
-              else if (isChecked && isSelected && !isCorrectAnswer) tone = ' choice--wrong'
-              else if (isSelected) tone = ' choice--selected'
-              if (isStruck) tone += ' choice--eliminated'
-
-              const letter = LETTERS[i] ?? `${i + 1}`
-
-              return (
-                <li key={i} className="choice-row">
-                  <button
-                    type="button"
-                    className={`choice${tone}${currentQ.rtl ? ' urdu' : ''}`}
-                    dir={currentQ.rtl ? 'rtl' : 'ltr'}
-                    onClick={() => !isChecked && !isStruck && setSelectedChoice(i)}
-                    disabled={isChecked || isStruck}
-                  >
-                    <span className="choice__key">{letter}</span>
-                    <span className="choice__text">{choice}</span>
-                    {isChecked && isCorrectAnswer && (
-                      <span className="choice__status-icon choice__status-icon--correct">
-                        <CheckCircleIcon width="20" height="20" />
-                      </span>
-                    )}
-                    {isChecked && isSelected && !isCorrectAnswer && (
-                      <span className="choice__status-icon choice__status-icon--wrong">
-                        <XCircleIcon width="20" height="20" />
-                      </span>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`strike-toggle${isStruck ? ' is-struck' : ''}`}
-                    aria-label={isStruck ? 'Restore option' : 'Eliminate option'}
-                    title={isStruck ? 'Restore option' : 'Eliminate option'}
-                    onClick={() => toggleEliminate(i)}
-                    disabled={isChecked}
-                  >
-                    <SlashIcon width="16" height="16" />
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
+          <MCQCard
+            question={currentQ}
+            selectedChoice={selectedChoice}
+            eliminatedChoices={eliminatedChoices}
+            checked={isChecked}
+            bookmarked={bookmarked}
+            hasNote={hasNote}
+            penalty={penalty}
+            onSelectChoice={(idx) => !isChecked && setSelectedChoice(idx)}
+            onToggleEliminate={toggleEliminate}
+            onToggleBookmark={toggleBookmark}
+            onOpenNotes={() => setShowNoteModal(true)}
+            explanation={explainQuestion(currentQ)}
+            unitLabel={currentQ.unitTitle || activeTrack?.title}
+          />
         </main>
 
-        <footer className={`drill-footer${isChecked ? (isAnswerCorrect ? ' is-correct' : ' is-wrong') : ''}`}>
-          {isChecked && (
-            <div className="feedback-drawer">
-              <div className="feedback-drawer__status">
-                {isAnswerCorrect ? (
-                  <div className="status-badge status-badge--correct">
-                    <CheckCircleIcon width="24" height="24" />
-                    <span>Correct! Great job.</span>
-                  </div>
-                ) : (
-                  <div className="status-badge status-badge--wrong">
-                    <XCircleIcon width="24" height="24" />
-                    <span>Incorrect Choice</span>
-                  </div>
-                )}
-              </div>
-
-              {!isAnswerCorrect && (
-                <div className="answer-comparison">
-                  <div className="comparison-box comparison-box--wrong">
-                    <span className="comparison-label">You Picked</span>
-                    <span className={`comparison-text${currentQ.rtl ? ' urdu' : ''}`} dir={currentQ.rtl ? 'rtl' : 'ltr'}>
-                      {selectedChoice !== null ? currentQ.choices[selectedChoice] : 'None'}
-                    </span>
-                  </div>
-                  <div className="comparison-box comparison-box--correct">
-                    <span className="comparison-label">Correct Answer</span>
-                    <span className={`comparison-text${currentQ.rtl ? ' urdu' : ''}`} dir={currentQ.rtl ? 'rtl' : 'ltr'}>
-                      {currentQ.choices[currentQ.answer]}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {explainQuestion(currentQ) && (
-                <div className="explanation-card">
-                  <div className="explanation-card__header">
-                    <LightbulbIcon width="18" height="18" />
-                    <span>Explanation & Context</span>
-                  </div>
-                  <p className={`explanation-card__text${currentQ.rtl ? ' urdu' : ''}`} dir={currentQ.rtl ? 'rtl' : 'ltr'}>
-                    {explainQuestion(currentQ)}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
+        <footer className="drill-footer">
           <button
-            className={`btn btn--wide ${isChecked && !isAnswerCorrect ? 'btn--continue-wrong' : ''}`}
+            className={`btn btn--wide ${isChecked && !isAnswerCorrect ? 'btn--continue-wrong' : 'btn--primary'}`}
             type="button"
             onClick={isChecked ? advanceQuestion : checkAnswer}
             disabled={selectedChoice === null}
@@ -663,6 +528,7 @@ export default function CustomQuizScreen() {
           </button>
         </footer>
 
+        {/* Floating OMR Response Matrix */}
         <OMRSheet
           totalQuestions={activeQuestions.length}
           currentIndex={currentIndex}
@@ -688,20 +554,17 @@ export default function CustomQuizScreen() {
     )
   }
 
+  // Config Mode
   return (
-    <div className="custom-drill">
+    <div className="custom-drill custom-drill--config">
       <header className="custom-drill__header">
         <div className="custom-drill__top">
-          <Link className="brand" to="/">
-            <BookIcon width="22" height="22" />
-            <span>MPT·AI</span>
-          </Link>
-          <Link className="path-header__back" to="/">
-            ← Back to Home
+          <Link className="path-back-btn" to="/">
+            ← Home Desk
           </Link>
         </div>
         <div className="custom-drill__title">
-          <TargetIcon width="28" height="28" style={{ color: 'var(--blue)' }} />
+          <TargetIcon width="28" height="28" style={{ color: 'var(--primary)' }} />
           <h1>Custom Practice Drill</h1>
         </div>
         <p className="custom-drill__blurb">
@@ -710,7 +573,7 @@ export default function CustomQuizScreen() {
       </header>
 
       <main className="custom-drill__form">
-        {/* Question Source Pool */}
+        {/* 1. Question Pool Source */}
         <section className="drill-section">
           <label className="drill-label">1. Question Pool Source</label>
           <div className="pool-selector">
@@ -738,7 +601,7 @@ export default function CustomQuizScreen() {
           </div>
         </section>
 
-        {/* Track Selection - only if curriculum pool is selected */}
+        {/* 2. Select Exam Track (Curriculum pool only) */}
         {poolType === 'all' && (
           <section className="drill-section">
             <label className="drill-label">2. Select Exam Track</label>
@@ -757,12 +620,12 @@ export default function CustomQuizScreen() {
           </section>
         )}
 
-        {/* Units / Subjects Selection - only if curriculum pool is selected */}
+        {/* 3. Subjects Checklist (Curriculum pool only) */}
         {poolType === 'all' && activeTrack && (
           <section className="drill-section">
             <div className="section-head">
               <label className="drill-label">
-                3. Select Subjects / Units ({enabledUnits.length} of {activeTrack.units?.length ?? 0} selected)
+                3. Select Subject Units ({enabledUnits.length} of {activeTrack.units?.length ?? 0} selected)
               </label>
               <div className="unit-bulk-actions">
                 <button type="button" className="text-btn" onClick={selectAllUnits}>
@@ -778,14 +641,19 @@ export default function CustomQuizScreen() {
             <div className="units-checkbox-grid">
               {activeTrack.units?.map((u) => {
                 const isUnitChecked = isUnitSelected(u.id)
+                const qCount = u.questionCount ?? u.lessons?.reduce((n, l) => n + (l.questions?.length ?? 0), 0) ?? 0
+
                 return (
-                  <label key={u.id} className={`unit-checkbox-label ${isUnitChecked ? 'is-checked' : ''}`}>
+                  <label key={u.id} className={`unit-checkbox-card ${isUnitChecked ? 'is-checked' : ''}`}>
                     <input
                       type="checkbox"
                       checked={isUnitChecked}
                       onChange={() => toggleUnit(u.id)}
                     />
-                    <span className={u.rtl ? 'urdu' : undefined}>{u.title}</span>
+                    <div className="unit-checkbox-meta">
+                      <span className={`unit-name ${u.rtl ? 'urdu' : ''}`}>{u.title}</span>
+                      <span className="unit-count font-mono">{qCount} MCQs</span>
+                    </div>
                   </label>
                 )
               })}
@@ -793,50 +661,51 @@ export default function CustomQuizScreen() {
           </section>
         )}
 
-        {/* Session Size & Timing */}
+        {/* 4. Question Count Chips */}
         <section className="drill-section">
           <label className="drill-label">
-            {poolType === 'all' ? '4.' : '2.'} Session Size & Timing
+            {poolType === 'all' ? '4.' : '2.'} Number of Questions
           </label>
-          <div className="size-selector">
-            {[10, 15, 20, 30, 50].map((num) => (
+          <div className="count-chips-row">
+            {[5, 10, 15, 20, 30, 50].map((num) => (
               <button
                 key={num}
                 type="button"
-                className={`scale-chip ${questionCount === num ? 'is-active' : ''}`}
+                className={`count-chip font-mono ${questionCount === num ? 'is-selected' : ''}`}
                 onClick={() => setQuestionCount(num)}
               >
-                {num} MCQs
+                {num}
               </button>
             ))}
           </div>
+        </section>
 
-          <div className="drill-toggle-row">
-            <span>Timed Mode (1 min per question)</span>
+        {/* 5. Timed Mode Toggle */}
+        <section className="drill-section">
+          <label className="drill-label">
+            {poolType === 'all' ? '5.' : '3.'} Mode Option
+          </label>
+          <label className="timed-toggle-label">
             <input
               type="checkbox"
               checked={isTimed}
               onChange={(e) => setIsTimed(e.target.checked)}
             />
-          </div>
+            <div className="timed-toggle-text">
+              <strong>Timed Practice Drill (1 min / question)</strong>
+              <span>Enforces countdown timer pressure matching actual exam speed.</span>
+            </div>
+          </label>
         </section>
 
-        {currentPoolSize === 0 && (
-          <div className="drill-empty-notice">
-            {poolType === 'mistakes' && 'You currently have no recorded mistakes. Complete lesson questions to build your mistake bank!'}
-            {poolType === 'starred' && 'You haven’t starred any questions yet. Tap the star icon on any question to bookmark it.'}
-            {poolType === 'all' && 'Please select at least one subject to generate questions.'}
-          </div>
-        )}
-
-        <div className="drill-submit-wrap">
+        {/* Launch Button */}
+        <div className="drill-start-row">
           <button
-            className="btn btn--wide"
             type="button"
+            className="btn btn--primary btn--wide"
             onClick={() => startQuiz()}
-            disabled={!ready || currentPoolSize === 0}
           >
-            Start Custom Practice Drill ({Math.min(currentPoolSize, questionCount)} MCQs) →
+            Start Practice Drill ({questionCount} MCQs) →
           </button>
         </div>
       </main>

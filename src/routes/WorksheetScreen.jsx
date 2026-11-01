@@ -10,7 +10,7 @@ export default function WorksheetScreen() {
   const { tracks } = useContent()
 
   const [selectedTrackId, setSelectedTrackId] = useState(() => paramTrack || tracks[0]?.id || '')
-  const [questionLimit, setQuestionLimit] = useState(50)
+  const [questionLimit, setQuestionLimit] = useState(100)
   const [includeKey, setIncludeKey] = useState(true)
   const [includeOMR, setIncludeOMR] = useState(true)
 
@@ -23,7 +23,7 @@ export default function WorksheetScreen() {
         l.questions.map((q) => ({
           ...q,
           unitTitle: u.title,
-          rtl: u.rtl,
+          rtl: Boolean(u.rtl || q.rtl),
         })),
       ),
     )
@@ -34,29 +34,36 @@ export default function WorksheetScreen() {
     window.print()
   }
 
+  const negativeMarkingRule = activeTrack?.blueprint?.negativeMarking
+    ? `-${activeTrack.blueprint.negativeMarking} Marks per incorrect answer`
+    : 'No negative marking (0.00)'
+
   return (
     <div className="worksheet-page">
-      {/* Configuration Controls (Hidden during print) */}
+      {/* 1. SCREEN CONFIGURATION CONTROLS (Hidden during print) */}
       <div className="worksheet-controls no-print">
         <div className="worksheet-controls__top">
           <Link to="/" className="back-link">
             <ArrowLeftIcon width="16" height="16" />
-            <span>Curriculum</span>
+            <span>Curriculum Dashboard</span>
           </Link>
-          <button type="button" className="btn btn--primary" onClick={handlePrint}>
-            <PrinterIcon width="16" height="16" /> Print / Save as PDF
+          <button type="button" className="btn btn--primary print-trigger-btn" onClick={handlePrint}>
+            <PrinterIcon width="18" height="18" />
+            <span>Print / Save A4 PDF</span>
           </button>
         </div>
 
         <div className="worksheet-config-card">
-          <h1 className="config-title">Printable Worksheet & OMR Generator</h1>
-          <p className="config-subtitle">
-            Format exam question papers and blank OMR bubble sheets for offline pen-and-paper practice.
-          </p>
+          <div className="config-header">
+            <h1 className="config-title">Printable Exam Paper & OMR Generator</h1>
+            <p className="config-subtitle">
+              Generates black-and-white, print-perfect A4 examination papers and official optical mark response (OMR) sheets with corner registration marks for physical exam room practice.
+            </p>
+          </div>
 
           <div className="config-row">
             <label className="config-field">
-              <span>Select Paper / Track:</span>
+              <span className="field-lbl">Target Syllabus / Paper:</span>
               <select
                 value={selectedTrackId}
                 onChange={(e) => setSelectedTrackId(e.target.value)}
@@ -64,23 +71,23 @@ export default function WorksheetScreen() {
               >
                 {tracks.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.title}
+                    {t.title} ({t.exam})
                   </option>
                 ))}
               </select>
             </label>
 
             <label className="config-field">
-              <span>Number of MCQs:</span>
+              <span className="field-lbl">Paper Length:</span>
               <select
                 value={questionLimit}
                 onChange={(e) => setQuestionLimit(Number(e.target.value))}
                 className="config-select"
               >
-                <option value={20}>20 MCQs (Quick Test)</option>
-                <option value={50}>50 MCQs (Sectional Paper)</option>
-                <option value={100}>100 MCQs (Standard Exam)</option>
-                <option value={200}>200 MCQs (Full MPT Mock)</option>
+                <option value={20}>20 MCQs (Quick Sectional)</option>
+                <option value={50}>50 MCQs (Half Mock)</option>
+                <option value={100}>100 MCQs (PMS Prelims Standard)</option>
+                <option value={200}>200 MCQs (Full CSS MPT Mock)</option>
               </select>
             </label>
 
@@ -100,56 +107,64 @@ export default function WorksheetScreen() {
                   checked={includeKey}
                   onChange={(e) => setIncludeKey(e.target.checked)}
                 />
-                <span>Include Answer Key at End</span>
+                <span>Include Official Key Page</span>
               </label>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Printable Paper Document (Rendered for Screen & Print) */}
+      {/* 2. PRINTABLE DOCUMENT (A4 BLACK & WHITE LAYOUT) */}
       <div className="printable-paper">
-        {/* Official Header */}
+        {/* Official Paper Header */}
         <header className="paper-top-header">
-          <div className="paper-seal">★ CIVIL SERVICES PREPARATION SCREENING TEST ★</div>
+          <div className="paper-seal">★ FEDERAL / PROVINCIAL PUBLIC SERVICE COMMISSION ★</div>
           <h1 className="paper-exam-name">{activeTrack?.title || 'SCREENING EXAMINATION'}</h1>
+          <div className="paper-exam-sub">COMPETITIVE EXAMINATION FOR RECRUITMENT TO BS-17 POSTS</div>
+
           <div className="paper-meta-row">
-            <span>Time Allowed: {Math.round(worksheetQuestions.length * 1.0)} Minutes</span>
-            <span>Maximum Marks: {worksheetQuestions.length}</span>
-            <span>Negative Marking: {activeTrack?.blueprint?.negativeMarking ?? 'None'}</span>
+            <span><strong>Time Allowed:</strong> {Math.round(worksheetQuestions.length * 1.0)} Minutes</span>
+            <span><strong>Total MCQs:</strong> {worksheetQuestions.length}</span>
+            <span><strong>Maximum Marks:</strong> {worksheetQuestions.length}</span>
+            <span><strong>Marking:</strong> {negativeMarkingRule}</span>
           </div>
+
           <div className="candidate-details-box">
             <div className="field-line">
-              <span>Candidate Roll No: ____________________</span>
-              <span>Candidate Name: ____________________________________</span>
+              <span><strong>Roll No:</strong> _______________________</span>
+              <span><strong>Candidate Name:</strong> ____________________________________</span>
             </div>
             <div className="field-line">
-              <span>Center: _______________________________</span>
-              <span>Date: ________________________</span>
+              <span><strong>Examination Center:</strong> ________________________________</span>
+              <span><strong>Date:</strong> ________________________</span>
             </div>
           </div>
+
           <div className="instructions-box">
-            <strong>INSTRUCTIONS FOR CANDIDATES:</strong>
+            <strong>IMPORTANT INSTRUCTIONS FOR CANDIDATES:</strong>
             <ol>
               <li>Attempt all questions. Each question carries 1 mark.</li>
-              <li>Fill only one circle per question on the OMR sheet using black/blue ballpoint.</li>
-              <li>Read all options carefully before marking your answer.</li>
+              <li>Fill only one bubble per question on the provided Optical Mark Recognition (OMR) response sheet using black or blue ballpoint pen.</li>
+              <li>Cutting, erasing, double bubbling, or use of correcting fluid on the OMR sheet will lead to question invalidation.</li>
+              <li>Negative marking rules apply as indicated above. Do not guess blindly if penalty is enforced.</li>
             </ol>
           </div>
         </header>
 
-        {/* Questions Grid */}
+        {/* Questions Grid: Two-Column Print Layout */}
         <div className="paper-questions-grid">
           {worksheetQuestions.map((q, idx) => (
-            <div key={idx} className="print-q" dir={q.rtl ? 'rtl' : 'ltr'}>
+            <article key={idx} className="print-q" dir={q.rtl ? 'rtl' : 'ltr'}>
               <div className="print-q-prompt">
-                <strong>Q{idx + 1}.</strong> {q.prompt}
+                <span className="print-q-num">Q{idx + 1}.</span> {q.prompt}
               </div>
 
               {q.statements && q.statements.length > 0 && (
                 <div className="print-q-statements">
                   {q.statements.map((s, sIdx) => (
-                    <div key={sIdx}>{s}</div>
+                    <div key={sIdx} className="statement-line">
+                      {s}
+                    </div>
                   ))}
                 </div>
               )}
@@ -157,26 +172,45 @@ export default function WorksheetScreen() {
               <div className="print-q-choices">
                 {q.choices.map((c, cIdx) => (
                   <div key={cIdx} className="print-choice">
-                    <strong>({String.fromCharCode(65 + cIdx)})</strong> {c}
+                    <span className="print-choice-key">({String.fromCharCode(65 + cIdx)})</span> {c}
                   </div>
                 ))}
               </div>
-            </div>
+            </article>
           ))}
         </div>
 
-        {/* Printable OMR Sheet */}
+        {/* 3. BLANK OMR RESPONSE SHEET WITH CORNER REGISTRATION MARKS */}
         {includeOMR && (
           <div className="print-page-break print-omr-section">
+            {/* OMR Corner Registration Alignment Marks */}
+            <div className="omr-reg-corner omr-reg-tl" aria-hidden="true" />
+            <div className="omr-reg-corner omr-reg-tr" aria-hidden="true" />
+            <div className="omr-reg-corner omr-reg-bl" aria-hidden="true" />
+            <div className="omr-reg-corner omr-reg-br" aria-hidden="true" />
+
+            {/* OMR Header */}
             <div className="omr-print-header">
-              <h2>OPTICAL MARK RECOGNITION (OMR) RESPONSE SHEET</h2>
-              <p>Fill circles completely: [●] Correct &nbsp;&nbsp; [X] Incorrect &nbsp;&nbsp; [/] Incorrect</p>
+              <div className="omr-header-seal">OPTICAL MARK RECOGNITION (OMR) RESPONSE SHEET</div>
+              <h2>{activeTrack?.title || 'CIVIL SERVICES SCREENING TEST'}</h2>
+              <div className="omr-candidate-strip">
+                <span>ROLL NO: [ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ]</span>
+                <span>SIGNATURE: __________________________</span>
+              </div>
+              <div className="omr-marking-guide">
+                <span>CORRECT: <span className="bubble-sample filled">●</span></span>
+                <span>WRONG: <span className="bubble-sample">✕</span></span>
+                <span>WRONG: <span className="bubble-sample">✔</span></span>
+                <span>WRONG: <span className="bubble-sample">◐</span></span>
+                <span className="guide-note">Use Black/Blue Ballpoint only. Do not fold or staple.</span>
+              </div>
             </div>
 
+            {/* OMR Matrix Grid */}
             <div className="omr-print-grid">
               {worksheetQuestions.map((_, i) => (
                 <div key={i} className="omr-print-row">
-                  <span className="omr-num">{i + 1}.</span>
+                  <span className="omr-num">{i + 1}</span>
                   <div className="omr-circles">
                     {['A', 'B', 'C', 'D'].map((letter) => (
                       <div key={letter} className="omr-print-bubble">
@@ -187,18 +221,29 @@ export default function WorksheetScreen() {
                 </div>
               ))}
             </div>
+
+            {/* Official Examiner Footer */}
+            <div className="omr-footer-strip">
+              <span>INVIGILATOR SIGNATURE: _______________________</span>
+              <span>TOTAL MARKS OBTAINED: [ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; / {worksheetQuestions.length} ]</span>
+            </div>
           </div>
         )}
 
-        {/* Separate Answer Key at End */}
+        {/* 4. CONFIDENTIAL ANSWER KEY PAGE */}
         {includeKey && (
           <div className="print-page-break print-key-section">
-            <h2 className="key-header">CONFIDENTIAL OFFICIAL ANSWER KEY</h2>
+            <div className="key-header-box">
+              <span className="key-confidential-tag">STRICTLY CONFIDENTIAL — FOR EXAMINER USE ONLY</span>
+              <h2 className="key-title">OFFICIAL ANSWER KEY & EXPLANATIONS</h2>
+              <span className="key-meta">{activeTrack?.title} • {worksheetQuestions.length} Questions</span>
+            </div>
+
             <div className="key-grid">
               {worksheetQuestions.map((q, i) => (
                 <div key={i} className="key-item">
-                  <span className="key-q">Q{i + 1}:</span>
-                  <strong className="key-ans">Option {String.fromCharCode(65 + q.answer)}</strong>
+                  <span className="key-q">Q{i + 1}</span>
+                  <strong className="key-ans">({String.fromCharCode(65 + q.answer)})</strong>
                 </div>
               ))}
             </div>

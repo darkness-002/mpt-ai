@@ -1,49 +1,76 @@
+import React from 'react'
 import { Link } from 'react-router-dom'
-import { CheckIcon, LockIcon, StarIcon } from './icons.jsx'
+import { CheckIcon, LockIcon, BookmarkStarIcon, OMRBubbleIcon } from './icons.jsx'
+import './LessonNode.css'
 
 /**
- * One stop on the path. States: locked, current (next up), done, mastered (all correct).
+ * LessonNode - "The Reading Lamp" Syllabus Path Node
+ * Signature OMR motif with 4 distinct states:
+ * 1. locked: muted, disabled, lock icon
+ * 2. current: illuminated active desk lamp pulse, OMR index
+ * 3. done: filled checkmark completion
+ * 4. mastered: double brass-gold ring + gold star badge
  */
 export default function LessonNode({ lesson, position, state, record }) {
-  const label = `${lesson.title} — ${
-    { locked: 'locked', current: 'start this lesson', done: 'completed', mastered: 'all correct' }[
-      state
-    ]
-  }`
+  const isLocked = state === 'locked'
+  const isMastered = state === 'mastered'
+  const isDone = state === 'done'
+  const isCurrent = state === 'current'
 
-  const inner = (
-    <>
-      <span className="node__disc">
-        {state === 'locked' && <LockIcon width="26" height="26" />}
-        {state === 'current' && <span className="node__index">{position}</span>}
-        {state === 'done' && <CheckIcon width="28" height="28" />}
-        {state === 'mastered' && <StarIcon width="28" height="28" />}
-      </span>
-      <span className="node__meta" dir={lesson.rtl ? 'rtl' : 'ltr'}>
-        <span className={`node__title${lesson.rtl ? ' urdu' : ''}`}>{lesson.title}</span>
-        <span className="node__sub" dir="ltr">
+  const stateAriaLabels = {
+    locked: 'Locked lesson',
+    current: 'Current lesson - start now',
+    done: 'Completed lesson',
+    mastered: 'Mastered lesson - 100% correct',
+  }
+
+  const label = `${lesson.title} — ${stateAriaLabels[state] || state}`
+
+  const nodeContent = (
+    <div className="node-omr-wrapper">
+      {/* Outer OMR Bubble Motif Ring */}
+      <div className={`node-omr-ring ${isCurrent ? 'is-active-glow' : ''}`}>
+        {isLocked && <LockIcon width="20" height="20" className="node-icon-locked" />}
+        {isCurrent && <span className="node-index-number">{position}</span>}
+        {isDone && <CheckIcon width="22" height="22" className="node-icon-done" />}
+        {isMastered && <BookmarkStarIcon width="22" height="22" className="node-icon-mastered" />}
+      </div>
+
+      {/* Meta Label */}
+      <div className="node-label-meta" dir={lesson.rtl ? 'rtl' : 'ltr'}>
+        <span className={`node-title ${lesson.rtl ? 'urdu' : ''}`}>
+          {lesson.title}
+        </span>
+        <span className="node-subtitle" dir="ltr">
           {record
             ? `Best ${record.bestScore}/${record.total}`
-            : `${lesson.questions.length} questions`}
+            : `${lesson.questions?.length ?? 0} MCQs`}
         </span>
-      </span>
-    </>
+      </div>
+    </div>
   )
 
-  if (state === 'locked') {
+  if (isLocked) {
     return (
-      <li className="node node--locked" data-side={position % 2 ? 'left' : 'right'}>
-        <span className="node__button" aria-label={label} aria-disabled="true">
-          {inner}
-        </span>
+      <li className="reading-lesson-node is-locked" data-side={position % 2 ? 'left' : 'right'}>
+        <div className="node-container is-disabled" aria-label={label} aria-disabled="true">
+          {nodeContent}
+        </div>
       </li>
     )
   }
 
   return (
-    <li className={`node node--${state}`} data-side={position % 2 ? 'left' : 'right'}>
-      <Link className="node__button" to={`/lesson/${lesson.id}`} aria-label={label}>
-        {inner}
+    <li
+      className={`reading-lesson-node is-${state}`}
+      data-side={position % 2 ? 'left' : 'right'}
+    >
+      <Link
+        to={`/lesson/${lesson.id}`}
+        className="node-container"
+        aria-label={label}
+      >
+        {nodeContent}
       </Link>
     </li>
   )

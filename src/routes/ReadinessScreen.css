@@ -1,8 +1,14 @@
+/* ==========================================================================
+   MPT-AI DESIGN SYSTEM — READINESS SCREEN
+   Theme: "The Reading Lamp" (calm, hairline borders, radial gauge, 4 pillars)
+   ========================================================================== */
+
 .readiness-page {
-  width: min(94rem, 100%);
-  max-width: 94rem;
+  width: min(84rem, 100%);
+  max-width: 84rem;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 6rem;
+  padding: 1.5rem 1.25rem 6.5rem;
+  min-height: 100dvh;
 }
 
 @media (min-width: 1024px) {
@@ -12,227 +18,621 @@
 }
 
 .readiness-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .readiness-title-wrap {
   display: flex;
-  align-items: center;
-  gap: 0.6rem;
+  align-items: flex-start;
+  gap: 1rem;
   margin-top: 0.5rem;
 }
 
-.readiness-title-wrap h1 {
-  font-size: 1.6rem;
-  margin: 0;
-  font-weight: 900;
-}
-
-.readiness-subtitle {
-  margin: 0.5rem 0 0;
-  color: var(--muted);
-  font-size: 0.92rem;
-  line-height: 1.45;
-}
-
-.readiness-hero-card {
+.readiness-icon-badge {
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: var(--radius-omr);
+  background: var(--amber-subtle);
+  border: 1px solid var(--hairline);
   display: flex;
-  align-items: center;
-  gap: 2rem;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 2rem;
-  box-shadow: var(--shadow-md);
-  margin-bottom: 2rem;
-}
-
-.readiness-dial {
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 7.5rem;
-  height: 7.5rem;
-  border-radius: 50%;
-  background: var(--surface-2);
-  border: 4px solid var(--border);
   flex-shrink: 0;
 }
 
-.readiness-dial__number {
-  font-size: 2.2rem;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -0.04em;
+.readiness-title-wrap h1 {
+  font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+  color: var(--text);
+  letter-spacing: -0.02em;
 }
 
-.readiness-dial__label {
-  font-size: 0.68rem;
-  font-weight: 800;
+.readiness-subtitle {
   color: var(--muted);
-  text-transform: uppercase;
-  margin-top: 0.25rem;
+  font-size: 0.92rem;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 46rem;
+}
+
+/* --------------------------------------------------------------------------
+   HERO READINESS CARD WITH RADIAL GAUGE
+   -------------------------------------------------------------------------- */
+.readiness-hero-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: 2.25rem 2rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.readiness-gauge-container {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .readiness-hero__body {
   flex: 1;
+  min-width: min(20rem, 100%);
 }
 
 .readiness-status-badge {
-  display: inline-block;
-  padding: 0.35rem 0.85rem;
-  border-radius: var(--radius-full);
-  font-size: 0.85rem;
-  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.3rem 0.85rem;
+  border-radius: var(--radius-pill);
   margin-bottom: 0.75rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+.status-ready {
+  background: var(--green-subtle);
+  color: var(--green-text);
+  border: 1px solid var(--green);
+}
+
+.status-moderate {
+  background: var(--teal-subtle);
+  color: var(--teal-text);
+  border: 1px solid var(--teal);
+}
+
+.status-developing {
+  background: var(--amber-subtle);
+  color: var(--amber-text);
+  border: 1px solid var(--amber);
+}
+
+.status-early {
+  background: var(--red-subtle);
+  color: var(--red-text);
+  border: 1px solid var(--red);
+}
+
+.readiness-hero-heading {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--text);
+  letter-spacing: -0.015em;
 }
 
 .readiness-advice {
-  margin: 0;
-  font-size: 0.95rem;
   color: var(--muted);
-  line-height: 1.5;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0 0 1.5rem;
+  max-width: 40rem;
 }
 
-.section-title {
-  font-size: 1.15rem;
-  font-weight: 800;
-  margin: 2rem 0 1rem;
-}
-
-.pillars-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-@media (min-width: 1024px) {
-  .pillars-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.pillar-card {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-  box-shadow: var(--shadow-sm);
-}
-
-.pillar-header {
+.readiness-quick-stats {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--hairline);
+  padding-top: 1rem;
 }
 
-.pillar-name {
-  font-size: 0.85rem;
+.quick-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-btn);
+  min-width: 7.5rem;
+}
+
+.quick-stat .lbl {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.quick-stat .val {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--text);
 }
 
-.pillar-value {
-  font-size: 1.15rem;
-  font-weight: 900;
+/* --------------------------------------------------------------------------
+   SECTION HEADERS
+   -------------------------------------------------------------------------- */
+.readiness-section {
+  margin-bottom: 2.75rem;
+}
+
+.section-title-wrap {
+  margin-bottom: 1.25rem;
+}
+
+.section-title-wrap h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  color: var(--text);
+  letter-spacing: -0.015em;
+}
+
+.section-subtitle {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------------------
+   FOUR WEIGHTED PILLARS GRID (35 / 35 / 15 / 15)
+   -------------------------------------------------------------------------- */
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1.25rem;
+}
+
+.pillar-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: 1.35rem 1.25rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.pillar-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pillar-weight-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+
+.pillar-name {
+  font-size: 0.82rem;
+  font-weight: 700;
   color: var(--text);
 }
 
-.pillar-bar {
-  height: 6px;
-  background: var(--surface-2);
-  border-radius: 99px;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
+.pillar-metric-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
 }
 
-.pillar-bar-fill {
-  height: 100%;
-  transition: width 0.3s ease;
+.pillar-val {
+  font-family: var(--font-mono);
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
 }
 
-.pillar-desc {
+.pillar-metric-sub {
   font-size: 0.75rem;
   color: var(--muted);
 }
 
-.no-weakness-card {
-  text-align: center;
-  padding: 2rem;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
+.pillar-progress-track {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+}
+
+.pillar-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 0.4s ease;
+}
+
+.fill--primary { background: var(--primary); }
+.fill--green   { background: var(--green); }
+.fill--gold    { background: var(--gold); }
+.fill--teal    { background: var(--teal); }
+
+.pillar-desc {
+  font-size: 0.78rem;
   color: var(--muted);
+  line-height: 1.45;
+  margin: 0;
 }
 
-.no-weakness-card h3 {
-  margin: 0 0 0.5rem;
-  color: var(--text);
-}
-
-.weak-spots-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+/* --------------------------------------------------------------------------
+   TOP-3 WEAK SPOTS
+   -------------------------------------------------------------------------- */
+.weak-spots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 1.25rem;
 }
 
 .weak-spot-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
   background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem 1.25rem;
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--red);
+  border-radius: var(--radius-card);
+  padding: 1.35rem 1.25rem;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
 }
 
-.weak-spot-icon {
-  width: 2.4rem;
-  height: 2.4rem;
-  border-radius: var(--radius-sm);
+.weak-spot-rank {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--red-text);
   background: var(--red-subtle);
-  color: var(--red);
+  border: 1px solid var(--red);
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: var(--radius-omr);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.weak-spot-info {
+.weak-spot-body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0.6rem;
 }
 
-.weak-spot-info strong {
-  font-size: 0.95rem;
-  color: var(--text);
-  line-height: 1.3;
+.weak-spot-tags {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
 }
 
-.weak-spot-info span {
-  font-size: 0.78rem;
+.spot-exam-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--surface-2);
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-pill);
   color: var(--muted);
 }
 
-@media (max-width: 640px) {
+.spot-track-name {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.spot-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.spot-title.urdu {
+  font-family: var(--font-urdu);
+  line-height: var(--leading-urdu);
+  font-size: 1.25rem;
+}
+
+.spot-metrics {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.metric-chip {
+  font-size: 0.74rem;
+  font-family: var(--font-mono);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.chip--accuracy {
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  color: var(--text);
+}
+
+.chip--mistakes {
+  background: var(--amber-subtle);
+  border: 1px solid var(--amber);
+  color: var(--amber-text);
+}
+
+.weak-spot-drill-btn {
+  margin-top: 0.25rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 40px;
+}
+
+.no-weakness-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+.no-weakness-card h3 {
+  margin: 0 0 0.4rem;
+  color: var(--text);
+  font-size: 1.15rem;
+}
+
+.no-weakness-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   FULL DIAGNOSTIC MATRIX TABLE
+   -------------------------------------------------------------------------- */
+.matrix-header-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.matrix-filters {
+  display: flex;
+  gap: 0.35rem;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  padding: 0.25rem;
+  border-radius: var(--radius-pill);
+}
+
+.matrix-tab {
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.matrix-tab.is-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.diagnostic-matrix-table-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.matrix-table-wrap {
+  overflow-x: auto;
+}
+
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.86rem;
+}
+
+.matrix-table th {
+  background: var(--surface-2);
+  padding: 0.85rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.matrix-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.matrix-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.matrix-table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.matrix-unit-title {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.matrix-unit-title.urdu {
+  font-family: var(--font-urdu);
+  line-height: var(--leading-urdu);
+  font-size: 1.15rem;
+}
+
+.matrix-track-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+
+.matrix-progress-num {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.matrix-accuracy-pill {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-pill);
+  display: inline-block;
+}
+
+.pill--green {
+  background: var(--green-subtle);
+  color: var(--green-text);
+  border: 1px solid var(--green);
+}
+
+.pill--amber {
+  background: var(--amber-subtle);
+  color: var(--amber-text);
+  border: 1px solid var(--amber);
+}
+
+.pill--red {
+  background: var(--red-subtle);
+  color: var(--red-text);
+  border: 1px solid var(--red);
+}
+
+.matrix-not-started {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.matrix-mistakes-flag {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--red-text);
+  background: var(--red-subtle);
+  border: 1px solid var(--red);
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-pill);
+}
+
+.matrix-zero-mistakes {
+  font-family: var(--font-mono);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.matrix-drill-action {
+  background: transparent;
+  border: 1px solid var(--hairline);
+  color: var(--primary);
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-default);
+  white-space: nowrap;
+}
+
+.matrix-drill-action:hover {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE DESIGN (375px mobile)
+   -------------------------------------------------------------------------- */
+@media (max-width: 680px) {
   .readiness-hero-card {
     flex-direction: column;
     text-align: center;
-    gap: 1.25rem;
+    gap: 1.5rem;
+    padding: 1.5rem 1rem;
   }
-  .pillars-grid {
-    grid-template-columns: 1fr;
+
+  .readiness-quick-stats {
+    justify-content: center;
   }
-  .weak-spot-card {
+
+  .matrix-header-row {
     flex-direction: column;
     align-items: flex-start;
   }
-  .weak-spot-card .btn {
+
+  .matrix-filters {
     width: 100%;
+    justify-content: space-between;
+  }
+
+  .matrix-tab {
+    flex: 1;
+    text-align: center;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.74rem;
   }
 }

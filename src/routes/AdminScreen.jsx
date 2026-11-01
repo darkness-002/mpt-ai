@@ -198,16 +198,16 @@ export default function AdminScreen() {
   // 'dashboard' | 'add-question' | 'review-queue' | 'users'
   const [activeTab, setActiveTab] = useState('dashboard')
 
-  // Theme switcher: cycles all 4 themes (Light, Dark, Zen, Midnight)
+  // Theme switcher: cycles all 3 themes (Light, Dark, Espresso)
   const [currentTheme, setCurrentTheme] = useState(() => settingsStore.load().theme)
 
   const handleCycleTheme = () => {
     const current = settingsStore.load()
     let next = THEMES.DARK
     if (current.theme === THEMES.LIGHT) next = THEMES.DARK
-    else if (current.theme === THEMES.DARK) next = THEMES.ZEN
-    else if (current.theme === THEMES.ZEN) next = THEMES.MIDNIGHT
-    else if (current.theme === THEMES.MIDNIGHT) next = THEMES.LIGHT
+    else if (current.theme === THEMES.DARK) next = THEMES.ESPRESSO
+
+    else if (current.theme === THEMES.ESPRESSO || current.theme === THEMES.MIDNIGHT) next = THEMES.LIGHT
     else next = THEMES.LIGHT
 
     const updated = { ...current, theme: next }
@@ -925,9 +925,9 @@ export default function AdminScreen() {
               type="button"
               className="admin-tool-btn"
               onClick={handleCycleTheme}
-              title={`Theme: ${currentTheme.toUpperCase()}. Click to cycle (Light / Dark / Zen / Midnight).`}
+              title={`Theme: ${currentTheme.toUpperCase()}. Click to cycle (Light / Dark / Espresso).`}
             >
-              {currentTheme === 'dark' || currentTheme === 'midnight' ? (
+              {currentTheme === 'dark' || currentTheme === 'espresso' || currentTheme === 'midnight' ? (
                 <MoonIcon width="16" height="16" />
               ) : (
                 <SunIcon width="16" height="16" />

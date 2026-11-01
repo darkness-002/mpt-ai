@@ -1,9 +1,17 @@
+/* ==========================================================================
+   MPT-AI DESIGN SYSTEM — WORKSHEET & OMR GENERATOR SCREEN
+   Theme: "The Reading Lamp" (Screen UI) & B&W A4 Print Paper Layout
+   ========================================================================== */
+
 .worksheet-page {
-  max-width: 60rem;
+  max-width: 64rem;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 6rem;
+  padding: 1.5rem 1.25rem 6.5rem;
 }
 
+/* --------------------------------------------------------------------------
+   1. SCREEN CONFIGURATION CONTROLS (Hidden on Print)
+   -------------------------------------------------------------------------- */
 .worksheet-controls {
   margin-bottom: 2rem;
 }
@@ -12,27 +20,39 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.print-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  padding: 0.65rem 1.25rem;
+  min-height: 44px;
 }
 
 .worksheet-config-card {
   background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
 }
 
 .config-title {
   font-size: 1.35rem;
-  font-weight: 800;
-  margin: 0 0 0.25rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+  color: var(--text);
+  letter-spacing: -0.015em;
 }
 
 .config-subtitle {
   color: var(--muted);
   font-size: 0.88rem;
   margin: 0 0 1.25rem;
+  line-height: 1.5;
 }
 
 .config-row {
@@ -46,50 +66,72 @@
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  font-size: 0.82rem;
+}
+
+.field-lbl {
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--text);
 }
 
 .config-select {
-  padding: 0.5rem 0.8rem;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--border);
-  background: var(--surface);
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--radius-btn);
+  border: 1px solid var(--hairline);
+  background: var(--surface-2);
   color: var(--text);
   font-family: inherit;
   font-size: 0.88rem;
+  outline: none;
+  min-height: 40px;
+}
+
+.config-select:focus {
+  border-color: var(--primary);
+  background: var(--surface);
 }
 
 .config-toggles {
   display: flex;
   gap: 1.25rem;
-  padding-bottom: 0.35rem;
+  padding-bottom: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .toggle-label {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600;
+  color: var(--text);
   cursor: pointer;
+  user-select: none;
 }
 
-/* Printable Paper Canvas */
+.toggle-label input[type="checkbox"] {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--primary);
+}
+
+/* --------------------------------------------------------------------------
+   2. PRINTABLE PAPER CANVAS (SCREEN PREVIEW)
+   -------------------------------------------------------------------------- */
 .printable-paper {
   background: #ffffff;
   color: #000000;
-  padding: 2.5rem;
-  border: 1.5px solid #cbd5e1;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  font-family: 'Times New Roman', Times, serif;
+  padding: 3rem 2.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  font-family: 'Times New Roman', Times, Georgia, serif;
 }
 
+/* Paper Header */
 .paper-top-header {
   text-align: center;
-  border-bottom: 2px solid #000;
+  border-bottom: 2px solid #000000;
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -98,186 +140,361 @@
   font-size: 0.85rem;
   font-weight: bold;
   letter-spacing: 0.05em;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.25rem;
 }
 
 .paper-exam-name {
-  font-size: 1.4rem;
+  font-size: 1.45rem;
   font-weight: bold;
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.25rem;
   text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.paper-exam-sub {
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.75rem;
 }
 
 .paper-meta-row {
   display: flex;
-  justify-content: space-around;
-  font-weight: bold;
-  font-size: 0.9rem;
+  justify-content: space-between;
+  font-size: 0.82rem;
   margin-bottom: 0.75rem;
+  padding: 0.4rem 0;
+  border-top: 1px solid #000000;
+  border-bottom: 1px solid #000000;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .candidate-details-box {
-  border: 1px solid #000;
+  border: 1.5px solid #000000;
   padding: 0.5rem 0.75rem;
   margin-bottom: 0.75rem;
   text-align: left;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
 }
 
 .field-line {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.field-line:last-child {
+  margin-bottom: 0;
 }
 
 .instructions-box {
   font-size: 0.8rem;
   text-align: left;
-  border-top: 1px dashed #666;
+  border-top: 1px dashed #444444;
   padding-top: 0.5rem;
 }
 
 .instructions-box ol {
   margin: 0.25rem 0 0;
   padding-left: 1.25rem;
+  line-height: 1.4;
 }
 
-/* Questions 2-column format */
+/* Two-Column Questions Grid */
 .paper-questions-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem 1.5rem;
+  gap: 1rem 1.75rem;
 }
 
 .print-q {
   break-inside: avoid;
-  font-size: 0.9rem;
+  page-break-inside: avoid;
+  font-size: 0.88rem;
   line-height: 1.4;
+  padding-bottom: 0.5rem;
+  border-bottom: 0.5px dotted #cccccc;
 }
 
 .print-q-prompt {
   margin-bottom: 0.35rem;
 }
 
+.print-q-num {
+  font-weight: bold;
+}
+
 .print-q-statements {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-style: italic;
-  margin-bottom: 0.35rem;
+  margin: 0.25rem 0 0.35rem;
   padding-left: 0.5rem;
+  line-height: 1.35;
 }
 
 .print-q-choices {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.25rem;
-  font-size: 0.85rem;
+  gap: 0.2rem 0.5rem;
+  font-size: 0.84rem;
 }
 
-/* Printable OMR Sheet */
+.print-choice-key {
+  font-weight: bold;
+}
+
+/* --------------------------------------------------------------------------
+   3. BLANK OMR SHEET WITH CORNER REGISTRATION MARKS
+   -------------------------------------------------------------------------- */
 .print-omr-section {
-  margin-top: 2rem;
-  border-top: 2px dashed #000;
-  padding-top: 1.5rem;
+  position: relative;
+  margin-top: 2.5rem;
+  padding: 2.5rem 2rem 2rem;
+  border: 2px solid #000000;
+  background: #ffffff;
+}
+
+/* Four Corner Registration Marks */
+.omr-reg-corner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #000000;
+}
+
+.omr-reg-tl {
+  top: 10px;
+  left: 10px;
+}
+
+.omr-reg-tr {
+  top: 10px;
+  right: 10px;
+}
+
+.omr-reg-bl {
+  bottom: 10px;
+  left: 10px;
+}
+
+.omr-reg-br {
+  bottom: 10px;
+  right: 10px;
 }
 
 .omr-print-header {
   text-align: center;
+  border-bottom: 1.5px solid #000000;
+  padding-bottom: 0.75rem;
   margin-bottom: 1rem;
 }
 
+.omr-header-seal {
+  font-size: 0.95rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.25rem;
+}
+
 .omr-print-header h2 {
-  font-size: 1.2rem;
-  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
 }
 
-.omr-print-header p {
-  font-size: 0.8rem;
-  margin: 0;
+.omr-candidate-strip {
+  display: flex;
+  justify-content: space-around;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-mono);
 }
 
+.omr-marking-guide {
+  font-size: 0.76rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.35rem 0.5rem;
+  background: #f1f5f9;
+  border: 1px solid #000000;
+}
+
+.bubble-sample {
+  display: inline-block;
+  font-weight: bold;
+}
+
+.bubble-sample.filled {
+  color: #000000;
+}
+
+.guide-note {
+  font-style: italic;
+  font-size: 0.72rem;
+}
+
+/* OMR Grid: 4-5 Columns of 20-40 rows */
 .omr-print-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.4rem 1rem;
+  gap: 0.35rem 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .omr-print-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid #ccc;
-  padding: 0.2rem 0.4rem;
-  font-size: 0.8rem;
+  border: 1px solid #999999;
+  padding: 0.15rem 0.35rem;
+  font-size: 0.78rem;
+  background: #ffffff;
+}
+
+.omr-num {
+  font-weight: bold;
+  font-family: var(--font-mono);
+  min-width: 1.6rem;
 }
 
 .omr-circles {
   display: flex;
-  gap: 0.3rem;
+  gap: 0.35rem;
 }
 
 .omr-print-bubble {
-  width: 1.2rem;
-  height: 1.2rem;
-  border: 1px solid #000;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1.5px solid #000000;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: bold;
+  font-family: var(--font-mono);
+  line-height: 1;
 }
 
-/* Printable Answer Key */
+.omr-footer-strip {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1.5px solid #000000;
+  padding-top: 0.75rem;
+  font-size: 0.82rem;
+  font-weight: bold;
+  font-family: var(--font-mono);
+}
+
+/* --------------------------------------------------------------------------
+   4. ANSWER KEY PAGE
+   -------------------------------------------------------------------------- */
 .print-key-section {
-  margin-top: 2rem;
-  border-top: 2px dashed #000;
-  padding-top: 1.5rem;
+  margin-top: 2.5rem;
+  border: 1.5px solid #000000;
+  padding: 1.5rem;
+  background: #ffffff;
 }
 
-.key-header {
+.key-header-box {
   text-align: center;
-  font-size: 1.2rem;
+  border-bottom: 2px solid #000000;
+  padding-bottom: 0.75rem;
   margin-bottom: 1rem;
+}
+
+.key-confidential-tag {
+  font-size: 0.78rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.key-title {
+  font-size: 1.25rem;
+  margin: 0 0 0.25rem;
+  text-transform: uppercase;
+}
+
+.key-meta {
+  font-size: 0.82rem;
+  font-weight: bold;
 }
 
 .key-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 0.4rem;
-  font-size: 0.85rem;
+  gap: 0.35rem 0.65rem;
+  font-size: 0.82rem;
 }
 
 .key-item {
-  border: 1px solid #ddd;
-  padding: 0.25rem 0.5rem;
+  border: 1px solid #cccccc;
+  padding: 0.2rem 0.45rem;
   display: flex;
   justify-content: space-between;
+  background: #f8fafc;
 }
 
-/* Media Print Rules */
+.key-q {
+  color: #444444;
+  font-family: var(--font-mono);
+}
+
+.key-ans {
+  font-weight: bold;
+  color: #000000;
+  font-family: var(--font-mono);
+}
+
+/* --------------------------------------------------------------------------
+   5. A4 BLACK & WHITE PRINT STYLES
+   -------------------------------------------------------------------------- */
+@page {
+  size: A4 portrait;
+  margin: 14mm 10mm;
+}
+
 @media print {
   body {
-    background: #fff !important;
-    color: #000 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 10pt;
   }
+
   .no-print,
   .site-header,
   .bottom-nav,
+  .bookmarks-toast,
   .toast {
     display: none !important;
   }
+
   .worksheet-page {
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
   }
+
   .printable-paper {
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
+    background: transparent !important;
   }
+
   .print-page-break {
     page-break-before: always;
     break-before: page;
+  }
+
+  .print-q {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }

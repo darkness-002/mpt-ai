@@ -1,8 +1,14 @@
+/* ==========================================================================
+   MPT-AI DESIGN SYSTEM — STUDY PACING PLANNER SCREEN
+   Theme: "The Reading Lamp" (calm, hairline borders, quota slider, countdown)
+   ========================================================================== */
+
 .planner-page {
-  width: min(94rem, 100%);
-  max-width: 94rem;
+  width: min(72rem, 100%);
+  max-width: 72rem;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 6rem;
+  padding: 1.5rem 1.25rem 6.5rem;
+  min-height: 100dvh;
 }
 
 @media (min-width: 1024px) {
@@ -12,148 +18,333 @@
 }
 
 .planner-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .planner-title-wrap {
   display: flex;
-  align-items: center;
-  gap: 0.6rem;
+  align-items: flex-start;
+  gap: 1rem;
   margin-top: 0.5rem;
 }
 
+.planner-icon-badge {
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: var(--radius-omr);
+  background: var(--primary-subtle);
+  border: 1px solid var(--hairline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .planner-title-wrap h1 {
-  font-size: 1.6rem;
-  margin: 0;
-  font-weight: 900;
+  font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+  color: var(--text);
+  letter-spacing: -0.02em;
 }
 
 .planner-subtitle {
-  margin: 0.5rem 0 0;
   color: var(--muted);
   font-size: 0.92rem;
-  line-height: 1.45;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 44rem;
 }
 
+/* --------------------------------------------------------------------------
+   TARGET COUNTDOWN HERO CARD
+   -------------------------------------------------------------------------- */
 .planner-hero-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: 2.25rem 2rem;
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
-  gap: 2rem;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 2rem;
-  box-shadow: var(--shadow-md);
-  margin-bottom: 1.5rem;
+  gap: 2.25rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.countdown-dial-wrap {
+  flex-shrink: 0;
 }
 
 .countdown-dial {
+  width: 8.5rem;
+  height: 8.5rem;
+  border-radius: var(--radius-omr);
+  background: var(--surface-2);
+  border: 2px solid var(--primary);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 7.5rem;
-  height: 7.5rem;
-  border-radius: 50%;
-  background: var(--surface-2);
-  border: 4px solid var(--green);
-  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
 }
 
 .countdown-days {
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: var(--primary);
   line-height: 1;
-  letter-spacing: -0.04em;
 }
 
 .countdown-label {
-  font-size: 0.68rem;
-  font-weight: 800;
+  font-size: 0.74rem;
+  font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
+  letter-spacing: 0.05em;
   margin-top: 0.25rem;
 }
 
 .planner-hero-info {
   flex: 1;
+  min-width: min(20rem, 100%);
+}
+
+.target-exam-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .target-exam-pill {
-  display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--green);
-  background: var(--green-subtle);
-  padding: 0.2rem 0.6rem;
-  border-radius: var(--radius-full);
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-subtle);
+  border: 1px solid var(--primary);
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
+}
+
+.target-date-pill {
+  font-size: 0.76rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
 }
 
 .target-pacing-headline {
-  font-size: 1.25rem;
-  font-weight: 800;
-  margin: 0 0 0.75rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+  color: var(--text);
   line-height: 1.35;
 }
 
+.target-pacing-headline strong {
+  color: var(--primary);
+  font-family: var(--font-mono);
+}
+
+/* Pacing Status Indicator */
 .pacing-status-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.8rem;
-  border-radius: var(--radius-full);
-  font-size: 0.82rem;
-  font-weight: 700;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: var(--radius-btn);
+  border: 1px solid var(--hairline);
+  background: var(--surface-2);
 }
 
 .pacing-status-indicator.is-ahead {
   background: var(--green-subtle);
-  color: var(--green-dark);
+  border-color: var(--green);
+  color: var(--green-text);
 }
 
 .pacing-status-indicator.is-on-track {
-  background: var(--blue-subtle);
-  color: var(--blue-dark);
+  background: var(--primary-subtle);
+  border-color: var(--primary);
+  color: var(--primary-text);
 }
 
 .pacing-status-indicator.is-behind {
-  background: var(--gold-subtle);
-  color: var(--gold-dark);
+  background: var(--red-subtle);
+  border-color: var(--red);
+  color: var(--red-text);
 }
 
-.planner-metrics-grid {
+.pacing-status-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pacing-status-text .status-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.pacing-status-text span {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+/* --------------------------------------------------------------------------
+   INTERACTIVE QUOTA SLIDER CARD
+   -------------------------------------------------------------------------- */
+.planner-slider-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: 1.75rem 2rem;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2rem;
+}
+
+.slider-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.slider-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.slider-card-title-group h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.current-slider-val {
+  font-size: 0.92rem;
+  color: var(--primary);
+  background: var(--primary-subtle);
+  border: 1px solid var(--primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+}
+
+.current-slider-val strong {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+}
+
+.slider-explainer {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0 0 1.5rem;
+}
+
+.slider-container {
+  margin-bottom: 1.75rem;
+}
+
+.quota-range-slider {
+  width: 100%;
+  height: 8px;
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
+  outline: none;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  margin-top: 0.5rem;
+}
+
+.slider-projection-strip {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-btn);
+  padding: 1rem 1.25rem;
+}
+
+.projection-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.projection-lbl {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.projection-val {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.text-green {
+  color: var(--green-text) !important;
+}
+
+.text-red {
+  color: var(--red-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   DAILY METRICS ROW
+   -------------------------------------------------------------------------- */
+.planner-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.25rem;
   margin-bottom: 2rem;
 }
 
 .planner-metric-card {
   background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: 1.35rem 1.25rem;
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
+  gap: 0.35rem;
 }
 
 .planner-metric-label {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
-  margin-bottom: 0.25rem;
+  letter-spacing: 0.04em;
 }
 
 .planner-metric-val {
-  font-size: 1.7rem;
-  font-weight: 900;
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: 800;
   color: var(--text);
   line-height: 1.1;
-  margin-bottom: 0.35rem;
 }
 
 .planner-metric-sub {
@@ -161,50 +352,61 @@
   color: var(--muted);
 }
 
+/* --------------------------------------------------------------------------
+   EXAM TARGET CONFIGURATION FORM
+   -------------------------------------------------------------------------- */
 .planner-form-card {
   background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: 1.75rem 2rem;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2.5rem;
 }
 
 .planner-form-card h3 {
-  margin: 0 0 1rem;
-  font-size: 1.1rem;
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.form-subtext {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0 0 1.25rem;
 }
 
 .form-fields-row {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
   margin-bottom: 1.25rem;
 }
 
 .planner-label {
-  flex: 1;
-  min-width: 14rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  font-size: 0.82rem;
+  gap: 0.4rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  color: var(--muted);
+  color: var(--text);
 }
 
 .planner-input {
-  padding: 0.6rem 0.85rem;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--border);
+  padding: 0.65rem 0.95rem;
+  border-radius: var(--radius-btn);
+  border: 1px solid var(--hairline);
   background: var(--surface-2);
   color: var(--text);
   font-family: inherit;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   outline: none;
+  min-height: 42px;
 }
 
 .planner-input:focus {
-  border-color: var(--green);
+  border-color: var(--primary);
   background: var(--surface);
 }
 
@@ -217,68 +419,97 @@
 .save-toast {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--green);
+  color: var(--green-text);
+  font-family: var(--font-mono);
+}
+
+/* --------------------------------------------------------------------------
+   SUBJECT PACING BREAKDOWN
+   -------------------------------------------------------------------------- */
+.planner-breakdown-section .section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+  color: var(--text);
 }
 
 .subject-pacing-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.85rem;
 }
 
 .subject-pacing-row {
-  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: 1rem 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
   align-items: center;
   gap: 1.25rem;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.9rem 1.25rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .subject-pacing-info {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0.2rem;
 }
 
 .subject-pacing-info strong {
-  font-size: 0.92rem;
+  font-size: 0.95rem;
+  color: var(--text);
 }
 
 .subject-pacing-info span {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: var(--muted);
+  font-family: var(--font-mono);
 }
 
 .subject-progress-bar {
-  width: 8rem;
   height: 6px;
   background: var(--surface-2);
-  border-radius: 99px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
+  border: 1px solid var(--hairline);
 }
 
 .subject-progress-fill {
   height: 100%;
-  background: var(--green);
+  background: var(--primary);
+  border-radius: var(--radius-pill);
+  transition: width 0.3s ease;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 680px) {
   .planner-hero-card {
     flex-direction: column;
     text-align: center;
-    gap: 1.25rem;
+    gap: 1.5rem;
+    padding: 1.5rem 1rem;
   }
-  .planner-metrics-grid {
+
+  .countdown-dial-wrap {
+    margin: 0 auto;
+  }
+
+  .target-exam-header-row {
+    justify-content: center;
+  }
+
+  .slider-projection-strip {
     grid-template-columns: 1fr;
-  }
-  .subject-pacing-row {
-    flex-direction: column;
-    align-items: flex-start;
     gap: 0.75rem;
   }
-  .subject-progress-bar {
-    width: 100%;
+
+  .form-fields-row {
+    grid-template-columns: 1fr;
+  }
+
+  .subject-pacing-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 }

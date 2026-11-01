@@ -1,0 +1,70 @@
+/**
+ * PaletteButton.css - "The Reading Lamp" Exam Palette Button
+ */
+
+.reading-palette-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-button, 12px);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  transition: all var(--duration-fast) ease;
+  user-select: none;
+}
+
+.reading-palette-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.reading-palette-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* State 1: Answered (Filled OMR bubble) */
+.reading-palette-btn.is-answered {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+/* State 2: Current (Active halo) */
+.reading-palette-btn.is-current {
+  border-color: var(--primary);
+  background: var(--primary-subtle);
+  color: var(--primary-text);
+  box-shadow: 0 0 0 2px var(--primary);
+  font-weight: 800;
+}
+
+/* State 3: Unanswered (clean outline) */
+.reading-palette-btn.is-unanswered {
+  background: transparent;
+  color: var(--muted);
+}
+
+/* State 4: Flagged (Amber pennant badge) */
+.reading-palette-btn.is-flagged {
+  border-color: var(--amber);
+  background: var(--amber-subtle);
+}
+
+.palette-flag-corner {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  color: var(--amber-text);
+  line-height: 1;
+}

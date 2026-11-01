@@ -1,0 +1,238 @@
+/**
+ * ChoiceRow.css - "The Reading Lamp" Ergonomic Choice Row
+ * 12px radius, >=44px touch targets, OMR bubble motif with pencil-fill animation
+ */
+
+.reading-choice-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  width: 100%;
+  margin-bottom: var(--space-2-5);
+  position: relative;
+}
+
+.choice-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--touch-target-min, 44px);
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-button, 12px);
+  color: var(--text-body);
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  transition: background-color var(--duration-fast) ease,
+              border-color var(--duration-fast) ease,
+              box-shadow var(--duration-fast) ease,
+              transform var(--duration-fast) ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* RTL Layout Mirroring */
+.reading-choice-row.is-rtl .choice-button {
+  text-align: right;
+  flex-direction: row;
+}
+
+/* Hover state */
+.choice-button:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.choice-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Focus Visible */
+.choice-button:focus-visible,
+.strike-toggle-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* OMR Bubble in Choice */
+.reading-choice-row .choice-omr-bubble {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.omr-bubble-ring {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--omr-bubble-border, var(--border-strong));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color var(--duration-fast) ease, background-color var(--duration-fast) ease;
+}
+
+.omr-bubble-letter {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1;
+  position: relative;
+  z-index: 2;
+  transition: color var(--duration-fast) ease;
+}
+
+/* Pencil Fill Animation (150-200ms) */
+.omr-pencil-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: omrPencilFill 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 1;
+}
+
+/* Selected State */
+.reading-choice-row.is-selected .choice-button,
+.choice-button.is-active {
+  background: var(--primary-subtle);
+  border-color: var(--primary);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.reading-choice-row.is-selected .omr-bubble-ring,
+.choice-button.is-active .omr-bubble-ring {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.reading-choice-row.is-selected .omr-bubble-letter,
+.choice-button.is-active .omr-bubble-letter {
+  color: var(--primary-fg, #ffffff);
+}
+
+/* Struck / Eliminated Distractor State */
+.reading-choice-row.is-struck .choice-button {
+  opacity: 0.42;
+  text-decoration: line-through;
+  filter: grayscale(0.85);
+  background: var(--surface-2);
+}
+
+.reading-choice-row.is-struck .omr-bubble-ring {
+  border-style: dashed;
+}
+
+/* Correct State */
+.reading-choice-row.is-correct .choice-button {
+  background: var(--green-subtle);
+  border-color: var(--green);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--green);
+}
+
+.reading-choice-row.is-correct .omr-bubble-ring {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.omr-badge-correct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  z-index: 3;
+}
+
+/* Wrong State */
+.reading-choice-row.is-wrong .choice-button {
+  background: var(--red-subtle);
+  border-color: var(--red);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--red);
+}
+
+.reading-choice-row.is-wrong .omr-bubble-ring {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.omr-badge-wrong {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  z-index: 3;
+}
+
+/* Dimmed non-answers in check mode */
+.reading-choice-row.is-dimmed .choice-button {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Choice text */
+.choice-content {
+  flex: 1;
+  font-size: var(--text-base);
+  color: inherit;
+  word-break: break-word;
+}
+
+.choice-content.urdu {
+  font-family: var(--font-urdu);
+  font-size: calc(var(--text-base) * 1.05);
+  line-height: var(--leading-urdu);
+}
+
+/* Strike / Elimination Toggle Button */
+.strike-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min, 44px);
+  min-height: var(--touch-target-min, 44px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-button, 12px);
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--duration-fast) ease;
+}
+
+.strike-toggle-btn:hover:not(:disabled) {
+  color: var(--red-text);
+  background: var(--red-subtle);
+  border-color: var(--red);
+}
+
+.strike-toggle-btn.is-eliminated {
+  background: var(--red);
+  border-color: var(--red);
+  color: #ffffff;
+}

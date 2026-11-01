@@ -1,25 +1,32 @@
+/**
+ * LessonScreen.css - "The Reading Lamp" Immersive Lesson Runner
+ */
+
 .lesson {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
   background: var(--bg);
+  color: var(--text);
 }
 
 .lesson--loading {
   display: grid;
   place-items: center;
   color: var(--muted);
-  font-weight: 800;
+  font-weight: 700;
   font-size: 1.1rem;
 }
 
+/* Immersive Top Bar */
 .lesson__bar {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  width: min(50rem, 100%);
+  gap: var(--space-3);
+  width: min(52rem, 100%);
   margin: 0 auto;
-  padding: 1rem 1.25rem;
+  padding: 0.75rem 1.25rem;
+  box-sizing: border-box;
 }
 
 .lesson__close {
@@ -27,22 +34,25 @@
   place-items: center;
   color: var(--muted);
   flex: none;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: var(--touch-target-min, 44px);
+  height: var(--touch-target-min, 44px);
   border-radius: 50%;
-  transition: all 0.15s ease;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: all var(--duration-fast) ease;
 }
 
 .lesson__close:hover {
   color: var(--text);
   background: var(--surface-2);
+  border-color: var(--border-strong);
 }
 
 .lesson__progress {
   flex: 1;
-  height: 0.85rem;
+  height: 8px;
   border-radius: var(--radius-full);
-  background: var(--surface-3);
+  background: var(--surface-2);
   overflow: hidden;
 }
 
@@ -50,549 +60,168 @@
   display: block;
   height: 100%;
   border-radius: var(--radius-full);
-  background: linear-gradient(90deg, var(--green), var(--blue));
-  transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: var(--primary);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .lesson__count {
   flex: none;
-  font-weight: 900;
-  font-size: 0.88rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: var(--text-xs);
   color: var(--muted);
-  font-variant-numeric: tabular-nums;
   background: var(--surface-2);
-  padding: 0.25rem 0.6rem;
+  padding: 0.25rem 0.65rem;
   border-radius: var(--radius-full);
   border: 1px solid var(--border);
 }
 
-.icon-btn {
+.bookmark-btn {
   display: grid;
   place-items: center;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: var(--touch-target-min, 44px);
+  height: var(--touch-target-min, 44px);
   border-radius: 50%;
   background: var(--surface);
-  border: 1.5px solid var(--border);
+  border: 1px solid var(--border);
   color: var(--muted);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--duration-fast) ease;
   flex: none;
 }
 
-.icon-btn:hover {
-  color: var(--gold-dark);
+.bookmark-btn:hover {
+  color: var(--gold-text);
   border-color: var(--gold);
-  transform: scale(1.08);
 }
 
-.icon-btn.is-bookmarked {
+.bookmark-btn.is-bookmarked {
   background: var(--gold-subtle);
   border-color: var(--gold);
-  color: var(--gold-dark);
+  color: var(--gold-text);
 }
 
+/* Lesson Body */
 .lesson__body {
   flex: 1;
-  width: min(50rem, 100%);
+  width: min(52rem, 100%);
   margin: 0 auto;
-  padding: 0.5rem 1.25rem 3rem;
+  padding: 0.5rem 1.25rem 6rem;
+  box-sizing: border-box;
 }
 
-.lesson__unit {
-  margin: 0 0 0.5rem;
-  font-size: 0.82rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--blue-dark);
-}
-
-.lesson__directive {
-  font-size: 0.85rem;
-  font-weight: 800;
-  color: var(--primary);
-  background: var(--primary-subtle);
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-sm);
-  display: inline-block;
-  margin-bottom: 0.75rem;
-}
-
-.lesson__prompt {
-  margin: 0 0 1.5rem;
-  font-size: clamp(1.25rem, 4vw, 1.65rem);
-  font-weight: 800;
-  line-height: 1.4;
-}
-
-.lesson__prompt:focus {
-  outline: none;
-}
-
-.statements {
-  margin: 0 0 1.25rem;
-  padding: 0.85rem 1.15rem;
-  background: var(--surface-2);
-  border-radius: var(--radius);
-  border: 1.5px solid var(--border);
-  list-style: none;
-  display: grid;
-  gap: 0.6rem;
-}
-
-.statements li {
-  display: flex;
-  gap: 0.75rem;
-  font-size: 0.95rem;
-  line-height: 1.45;
-}
-
-.statements__mark {
-  font-weight: 900;
-  color: var(--blue-dark);
-  flex-shrink: 0;
-  min-width: 1.6rem;
-}
-
-.lesson__closing {
-  font-weight: 800;
-  font-size: 1rem;
-  margin: 0 0 1.25rem;
-  color: var(--text);
-}
-
-/* MCQ Choices List */
-.choices {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.85rem;
-}
-
-.choice {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  min-height: 3.8rem;
-  padding: 0.85rem 1.2rem;
-  font: inherit;
-  font-weight: 700;
-  font-size: 1rem;
-  text-align: start;
-  color: var(--text);
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-bottom: 4px solid var(--border-strong);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
-  box-shadow: var(--shadow-sm);
-}
-
-.choice:hover:not(:disabled) {
-  border-color: var(--blue);
-  border-bottom-color: var(--blue-dark);
-  background: color-mix(in srgb, var(--blue) 5%, var(--surface));
-  transform: translateY(-2px);
-}
-
-.choice:active:not(:disabled) {
-  transform: translateY(2px);
-  border-bottom-width: 2px;
-}
-
-.choice:disabled {
-  cursor: default;
-}
-
-.choice__key {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 2.2rem;
-  height: 2.2rem;
-  font-size: 0.85rem;
-  font-weight: 900;
-  color: var(--muted);
-  background: var(--surface-2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  transition: all 0.15s ease;
-}
-
-.choice__text {
-  flex: 1;
-  line-height: 1.45;
-}
-
-.choice__status-icon {
-  display: flex;
-  align-items: center;
-  flex: none;
-  margin-left: 0.5rem;
-}
-
-.choice__status-icon--correct {
-  color: var(--green-dark);
-}
-
-.choice__status-icon--wrong {
-  color: var(--red-dark);
-}
-
-/* Choice States */
-.choice--selected {
-  border-color: var(--blue);
-  border-bottom-color: var(--blue-dark);
-  background: var(--blue-subtle);
-  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.2);
-}
-
-.choice--selected .choice__key {
-  color: #fff;
-  background: var(--blue);
-  border-color: var(--blue-dark);
-}
-
-.choice--correct {
-  border-color: var(--green) !important;
-  border-bottom-color: var(--green-dark) !important;
-  background: var(--green-subtle) !important;
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.25);
-}
-
-.choice--correct .choice__key {
-  color: #fff;
-  background: var(--green);
-  border-color: var(--green-dark);
-}
-
-.choice--wrong {
-  border-color: var(--red) !important;
-  border-bottom-color: var(--red-dark) !important;
-  background: var(--red-subtle) !important;
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);
-  animation: shake 0.35s ease;
-}
-
-.choice--wrong .choice__key {
-  color: #fff;
-  background: var(--red);
-  border-color: var(--red-dark);
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-5px); }
-  40%, 80% { transform: translateX(5px); }
-}
-
-/* Feedback Drawer / Footer */
+/* Sticky Check / Continue Thumb Dock (Lower half ergonomics on mobile) */
 .lesson__footer {
-  position: sticky;
+  position: fixed;
   bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.1rem;
-  padding: 1.25rem 1.25rem 1.75rem;
-  border-top: 2px solid var(--border);
+  justify-content: center;
+  padding: 0.85rem 1.25rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border);
   background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(var(--glass-blur, 16px));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 16px));
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
   z-index: 100;
-  transition: all 0.2s ease;
-}
-
-.lesson__footer.is-correct {
-  background: color-mix(in srgb, var(--green) 12%, var(--surface));
-  border-top-color: var(--green);
-}
-
-.lesson__footer.is-wrong {
-  background: color-mix(in srgb, var(--red) 11%, var(--surface));
-  border-top-color: var(--red);
 }
 
 .btn--continue-wrong {
-  background: var(--red);
-  box-shadow: 0 var(--shadow-press) 0 var(--red-dark), var(--shadow-sm);
+  background: var(--red) !important;
+  border-color: var(--red) !important;
+  color: #ffffff !important;
 }
 
-.feedback-drawer {
-  width: min(50rem, 100%);
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-  animation: modalSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.feedback-drawer__status {
+/* Completion Card Screen */
+.lesson--finished {
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
 }
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.25rem;
-  font-weight: 900;
-}
-
-.status-badge--correct {
-  color: var(--green-dark);
-}
-
-.status-badge--wrong {
-  color: var(--red-dark);
-}
-
-@media (prefers-color-scheme: dark) {
-  .status-badge--correct {
-    color: var(--green);
-  }
-
-  .status-badge--wrong {
-    color: var(--red);
-  }
-}
-
-.answer-comparison {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  gap: 0.75rem;
-}
-
-.comparison-box {
-  padding: 0.85rem 1.1rem;
-  border-radius: var(--radius);
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.comparison-box--wrong {
-  background: var(--red-subtle);
-  border: 1.5px solid rgba(239, 68, 68, 0.4);
-}
-
-.comparison-box--correct {
-  background: var(--green-subtle);
-  border: 1.5px solid rgba(34, 197, 94, 0.4);
-}
-
-.comparison-label {
-  font-size: 0.74rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.comparison-box--wrong .comparison-label {
-  color: var(--red-dark);
-}
-
-.comparison-box--correct .comparison-label {
-  color: var(--green-dark);
-}
-
-.comparison-text {
-  font-size: 0.95rem;
-  font-weight: 800;
-  line-height: 1.4;
-}
-
-.explanation-card {
-  padding: 1rem 1.2rem;
+.completion-card {
+  width: min(32rem, 100%);
   background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card, 18px);
+  box-shadow: var(--shadow-md);
+  padding: 2.25rem 1.75rem;
+  text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  box-shadow: var(--shadow-sm);
-}
-
-.explanation-card__header {
-  display: flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.82rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--gold-dark);
+  animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.explanation-card__text {
-  margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.5;
+.completion-icon-wrap {
+  margin-bottom: var(--space-3);
+  display: inline-flex;
+}
+
+.completion-pill {
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  margin-bottom: var(--space-2);
+}
+
+.completion-title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-2xl);
+  font-weight: 800;
   color: var(--text);
 }
 
-.explanation-card__provenance {
-  font-size: 0.76rem;
-  font-weight: 800;
+.completion-subtitle {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-sm);
   color: var(--muted);
-  background: var(--surface-2);
-  padding: 0.25rem 0.55rem;
-  border-radius: var(--radius-sm);
-  display: inline-block;
-  align-self: flex-start;
-  margin-top: 0.25rem;
 }
 
-/* Results Screen */
-.results {
-  width: min(44rem, 100%);
-  margin: 0 auto;
-  padding: 2.5rem 1.25rem 4rem;
+.completion-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  width: 100%;
+  margin-bottom: var(--space-6);
+}
+
+.c-stat-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-button, 12px);
+  padding: 0.75rem 0.5rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 1.5rem;
+  gap: 0.2rem;
 }
 
-.results h1 {
-  margin: 0;
-  font-size: clamp(1.8rem, 5vw, 2.4rem);
-  font-weight: 900;
-}
-
-.results p {
-  margin: 0;
+.c-stat-lbl {
+  font-size: var(--text-2xs);
   color: var(--muted);
-  font-size: 1rem;
-}
-
-.results__ring {
-  margin: 0.5rem 0;
-}
-
-.ring {
-  transform: rotate(-90deg);
-}
-
-.ring__track {
-  fill: none;
-  stroke: var(--border);
-  stroke-width: 12;
-}
-
-.ring__value {
-  fill: none;
-  stroke: hsl(var(--hue) 62% 45%);
-  stroke-width: 12;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.6s ease;
-}
-
-.ring__label {
-  transform: rotate(90deg);
-  transform-origin: 60px 60px;
-  fill: var(--text);
-  font-size: 1.5rem;
-  font-weight: 900;
-}
-
-.review {
-  margin: 0 0 2.5rem;
-  text-align: start;
-}
-
-.review h2 {
-  font-size: 1rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-  margin-bottom: 1rem;
-}
-
-.review ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 1rem;
-}
-
-.review li {
-  padding: 1.1rem 1.25rem;
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface-2);
-}
-
-.review__prompt {
-  margin: 0 0 0.6rem;
-  font-weight: 800;
-  font-size: 1.05rem;
-}
-
-.review__wrong,
-.review__right {
-  margin: 0.25rem 0;
-  font-size: 0.95rem;
+  letter-spacing: 0.04em;
   font-weight: 700;
 }
 
-.review__wrong {
-  color: var(--red-dark);
+.c-stat-val {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text);
 }
 
-.review__right {
-  color: var(--green-dark);
-}
-
-@media (prefers-color-scheme: dark) {
-  .review__wrong {
-    color: var(--red);
-  }
-
-  .review__right {
-    color: var(--green);
-  }
-}
-
-.review__why {
-  margin: 0.6rem 0 0;
-  font-size: 0.88rem;
-  color: var(--muted);
-}
-
-/* Statement lists */
-.statements {
-  list-style: none;
-  margin: 0 0 1.25rem;
-  padding: 0 0 0 0.25rem;
-  display: grid;
-  gap: 0.6rem;
-}
-
-.statements li {
+.completion-actions-stack {
   display: flex;
-  gap: 0.75rem;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.statements__mark {
-  flex: none;
-  min-width: 1.6rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  color: hsl(var(--hue) 62% 45%);
-}
-
-.lesson__closing {
-  margin: 0 0 1.25rem;
-  font-weight: 700;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
 }

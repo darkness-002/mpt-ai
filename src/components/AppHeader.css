@@ -328,8 +328,9 @@
   width: 1.85rem;
   height: 1.85rem;
   border-radius: var(--radius-full);
-  background: var(--primary);
-  color: #ffffff;
+  background: var(--surface-3);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
   font-size: 0.75rem;
   font-weight: 700;
   display: flex;

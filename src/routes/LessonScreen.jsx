@@ -1,43 +1,36 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import {
-  CheckCircleIcon,
   CloseIcon,
-  LightbulbIcon,
-  NotesIcon,
-  SlashIcon,
-  StarIcon,
-  XCircleIcon,
+  BookmarkStarIcon,
+  CheckCircleIcon,
+  SparklesIcon,
+  RotateCcwIcon,
+  ZapIcon,
 } from '../components/icons.jsx'
-import QuestionTTS from '../components/QuestionTTS.jsx'
+import MCQCard from '../components/MCQCard.jsx'
 import NoteModal from '../components/NoteModal.jsx'
 import { useContent } from '../content/contentContext.js'
 import { calculateScore, explainQuestion, keyNoteQuestion } from '../data/curriculum.js'
 import { feedbackService } from '../lib/feedback.js'
 import { shuffle } from '../lib/shuffle.js'
 import { bookmarksStore } from '../storage/bookmarksStore.js'
-import { mistakesStore } from '../storage/mistakesStore.js'
 import { notesStore } from '../storage/notesStore.js'
-import { streakStore } from '../storage/streakStore.js'
 import { useProgress } from '../storage/progressContext.js'
+import { streakStore } from '../storage/streakStore.js'
 import './LessonScreen.css'
 
 const CHOICE_KEYS = ['1', '2', '3', '4', 'a', 'b', 'c', 'd', 'A', 'B', 'C', 'D']
-const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI']
-const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
 
-/** Mounted with key={lessonId}, so every lesson starts from clean state. */
-export default function LessonScreen({ lessonId }) {
-  const navigate = useNavigate()
-  const progress = useProgress()
-  const { getLesson, getNextLesson, getTrack } = useContent()
+export default function LessonScreen() {
+  const { lessonId } = useParams()
+  const { getLesson, getNextLesson } = useContent()
   const lesson = getLesson(lessonId)
-  const track = lesson ? getTrack(lesson.trackId) : null
-  const negativeMarking = track?.blueprint?.negativeMarking ?? 0
+  const next = getNextLesson(lessonId)
+  const progress = useProgress()
+  const navigate = useNavigate()
 
-  // Questions are re-ordered per attempt so a repeat run is not recall of position.
   const [questions, setQuestions] = useState(() => (lesson ? shuffle(lesson.questions) : []))
-
   const [index, setIndex] = useState(0)
   const [selected, setSelected] = useState(null)
   const [eliminated, setEliminated] = useState({})
@@ -47,18 +40,16 @@ export default function LessonScreen({ lessonId }) {
   const [bookmarked, setBookmarked] = useState(false)
   const [showNoteModal, setShowNoteModal] = useState(false)
   const [hasNote, setHasNote] = useState(false)
-  const headingRef = useRef(null)
 
   const question = questions[index]
   const isLast = index === questions.length - 1
-  const scoreDetails = calculateScore(answers, negativeMarking)
-  const score = scoreDetails.netScore
 
+  // Bookmark check
   useEffect(() => {
     if (!question) return
     let active = true
-    bookmarksStore.isBookmarked(question.id).then((is) => {
-      if (active) setBookmarked(is)
+    bookmarksStore.isBookmarked(question.id).then((bm) => {
+      if (active) setBookmarked(bm)
     })
     notesStore.getNote(question.id).then((text) => {
       if (active) setHasNote(Boolean(text))
@@ -70,11 +61,18 @@ export default function LessonScreen({ lessonId }) {
 
   const toggleBookmark = async () => {
     if (!question) return
-    const newState = await bookmarksStore.toggleBookmark(question, {
-      trackId: lesson?.trackId,
-      unitId: lesson?.unitId,
-    })
-    setBookmarked(newState)
+    if (bookmarked) {
+      await bookmarksStore.remove(question.id)
+      setBookmarked(false)
+    } else {
+      await bookmarksStore.add(question, {
+        lessonId: lesson.id,
+        lessonTitle: lesson.title,
+        trackId: lesson.trackId,
+        trackTitle: lesson.trackTitle,
+      })
+      setBookmarked(true)
+    }
   }
 
   const toggleEliminate = (choiceIndex) => {
@@ -88,25 +86,25 @@ export default function LessonScreen({ lessonId }) {
     if (selected === null || checked || !question) return
     const isCorrect = selected === question.answer
     setChecked(true)
-    setAnswers((prev) => [...prev, { question, choice: selected, correct: isCorrect }])
+    setAnswers((prev) => [...prev, { choice: selected, correct: isCorrect }])
 
-    // Coordinated feedback
     if (isCorrect) {
       feedbackService.onCorrect()
-      mistakesStore.recordReviewResult(question.id, true)
     } else {
       feedbackService.onWrong()
-      mistakesStore.recordMistake(question, { trackId: lesson?.trackId, unitId: lesson?.unitId })
     }
   }
 
   const advance = () => {
     if (!checked) return
     if (isLast) {
-      // Record attempt and update daily streak
-      const finalScoreDetails = calculateScore(answers, negativeMarking)
-      progress.recordAttempt(lesson.id, {
-        score: Math.round(finalScoreDetails.netScore),
+      const finalAnswers = answers
+      const correctCount = finalAnswers.filter((a) => a.correct).length
+      const finalScoreDetails = calculateScore(finalAnswers, 0)
+
+      progress.recordScore(lesson.id, {
+        score: correctCount,
+        netScore: finalScoreDetails.netScore,
         total: questions.length,
       })
       streakStore.recordAnswers(questions.length)
@@ -135,11 +133,11 @@ export default function LessonScreen({ lessonId }) {
   }
 
   const handlersRef = useRef({ check, advance, checked, question, eliminated })
-
   useEffect(() => {
     handlersRef.current = { check, advance, checked, question, eliminated }
   })
 
+  // Keyboard shortcut listener
   useEffect(() => {
     if (finished) return undefined
     const onKeyDown = (event) => {
@@ -151,6 +149,7 @@ export default function LessonScreen({ lessonId }) {
         question: q,
         eliminated: elim,
       } = handlersRef.current
+
       if (CHOICE_KEYS.includes(event.key) && !isChecked) {
         let i = -1
         if (['1', '2', '3', '4'].includes(event.key)) {
@@ -158,7 +157,7 @@ export default function LessonScreen({ lessonId }) {
         } else {
           i = ['a', 'b', 'c', 'd'].indexOf(event.key.toLowerCase())
         }
-        if (i >= 0 && i < (q?.choices.length ?? 0) && !elim[i]) {
+        if (i >= 0 && i < (q?.choices?.length ?? 0) && !elim[i]) {
           setSelected(i)
         }
       }
@@ -173,72 +172,82 @@ export default function LessonScreen({ lessonId }) {
   }, [finished])
 
   if (!lesson) return <Navigate to="/" replace />
-  if (!progress.ready) return <div className="lesson lesson--loading">Loading…</div>
+  if (!progress.ready) {
+    return (
+      <div className="lesson lesson--loading" style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+        <p className="text-sm font-semibold text-[var(--muted)]">Loading lesson runner…</p>
+      </div>
+    )
+  }
   if (!progress.isUnlocked(lesson.id)) return <Navigate to="/" replace />
 
   const BACK = `/track/${lesson.trackId}`
 
+  // Completion Screen
   if (finished) {
-    const missed = answers.filter((a) => !a.correct)
-    const next = getNextLesson(lesson.id)
+    const finalScoreDetails = calculateScore(answers, 0)
+    const correctCount = answers.filter((a) => a.correct).length
+    const pct = Math.round((correctCount / questions.length) * 100)
+    const isMastered = correctCount === questions.length
+
     return (
-      <div className="lesson" style={{ '--hue': lesson.hue }}>
-        <div className="results">
-          <ScoreRing score={score} total={questions.length} />
-          <h1>
-            {score === questions.length
-              ? 'Flawless — lesson mastered.'
-              : score >= questions.length * 0.6
-                ? 'Lesson complete.'
-                : 'Lesson complete — worth another run.'}
-          </h1>
-          <p className="results__score">
-            {score} of {questions.length} marks
-            {negativeMarking > 0 && (
-              <small style={{ display: 'block', marginTop: '0.25rem', opacity: 0.8 }}>
-                ({scoreDetails.correct} correct, {scoreDetails.wrong} wrong · -{scoreDetails.marksDeducted} negative marking)
-              </small>
+      <div className="lesson lesson--finished" style={{ '--hue': lesson.hue }}>
+        <div className="completion-card">
+          <div className="completion-icon-wrap" aria-hidden="true">
+            {isMastered ? (
+              <SparklesIcon width="48" height="48" style={{ color: 'var(--gold-text)' }} />
+            ) : (
+              <CheckCircleIcon width="48" height="48" style={{ color: 'var(--green-text)' }} />
             )}
+          </div>
+
+          <span className="completion-pill font-mono">
+            {isMastered ? 'Lesson Mastered ★' : 'Lesson Complete'}
+          </span>
+
+          <h1 className="completion-title">
+            {isMastered ? 'Flawless Score!' : pct >= 70 ? 'Great Practice!' : 'Keep Going!'}
+          </h1>
+          <p className="completion-subtitle">
+            You scored <strong className="font-mono">{correctCount}</strong> out of <strong className="font-mono">{questions.length}</strong> questions ({pct}%).
           </p>
 
-          {missed.length > 0 && (
-            <section className="review">
-              <h2>Review what you missed</h2>
-              <ul>
-                {missed.map(({ question: q, choice }) => (
-                  <li key={q.id}>
-                    <p className={`review__prompt${lesson.rtl ? ' urdu' : ''}`} dir={lesson.rtl ? 'rtl' : 'ltr'}>
-                      {q.prompt}
-                    </p>
-                    <p className={`review__wrong${lesson.rtl ? ' urdu' : ''}`} dir={lesson.rtl ? 'rtl' : 'ltr'}>
-                      You chose: {q.choices[choice]}
-                    </p>
-                    <p className={`review__right${lesson.rtl ? ' urdu' : ''}`} dir={lesson.rtl ? 'rtl' : 'ltr'}>
-                      Correct: {q.choices[q.answer]}
-                    </p>
-                    {explainQuestion(q) && <p className="review__why">{explainQuestion(q)}</p>}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
+          <div className="completion-stats-grid">
+            <div className="c-stat-box">
+              <span className="c-stat-lbl">Correct</span>
+              <strong className="c-stat-val font-mono text-[var(--green-text)]">+{correctCount}</strong>
+            </div>
+            <div className="c-stat-box">
+              <span className="c-stat-lbl">Accuracy</span>
+              <strong className="c-stat-val font-mono">{pct}%</strong>
+            </div>
+            <div className="c-stat-box">
+              <span className="c-stat-lbl">Mistakes</span>
+              <strong className="c-stat-val font-mono text-[var(--red-text)]">
+                {questions.length - correctCount}
+              </strong>
+            </div>
+          </div>
 
-          <div className="results__actions">
-            <button className="btn" type="button" onClick={() => navigate(BACK)}>
-              Back to the path
-            </button>
-            <button className="btn btn--ghost" type="button" onClick={restart}>
-              Practise again
-            </button>
-            {next && progress.isUnlocked(next.id) && (
+          <div className="completion-actions-stack">
+            {next && progress.isUnlocked(next.id) ? (
               <button
-                className="btn btn--ghost"
+                className="btn btn--primary btn--wide"
                 type="button"
                 onClick={() => navigate(`/lesson/${next.id}`)}
               >
-                Next lesson: {next.title}
+                Next Lesson: {next.title} →
               </button>
+            ) : (
+              <Link className="btn btn--primary btn--wide" to={BACK}>
+                Back to Syllabus Path →
+              </Link>
             )}
+
+            <button className="btn btn--ghost btn--wide" type="button" onClick={restart}>
+              <RotateCcwIcon width="16" height="16" />
+              <span>Practise Again</span>
+            </button>
           </div>
         </div>
       </div>
@@ -251,184 +260,64 @@ export default function LessonScreen({ lessonId }) {
 
   return (
     <div className="lesson" style={{ '--hue': lesson.hue }}>
+      {/* Immersive Top Bar: Exit, Progress, Bookmark, Monospace Counter */}
       <header className="lesson__bar">
-        <Link className="lesson__close" to={`/track/${lesson.trackId}`} aria-label="Leave lesson">
-          <CloseIcon width="22" height="22" />
+        <Link className="lesson__close" to={BACK} aria-label="Leave lesson and return to syllabus">
+          <CloseIcon width="20" height="20" />
         </Link>
-        <div className="lesson__progress" role="img" aria-label={`Question ${index + 1} of ${questions.length}`}>
-          <span style={{ width: `${(index / questions.length) * 100}%` }} />
+        <div
+          className="lesson__progress"
+          role="progressbar"
+          aria-valuenow={index + 1}
+          aria-valuemin={1}
+          aria-valuemax={questions.length}
+          aria-label={`Question ${index + 1} of ${questions.length}`}
+        >
+          <span style={{ width: `${((index + 1) / questions.length) * 100}%` }} />
         </div>
         <button
           type="button"
-          className={`icon-btn${bookmarked ? ' is-bookmarked' : ''}`}
+          className={`icon-btn bookmark-btn ${bookmarked ? 'is-bookmarked' : ''}`}
           aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this question'}
           onClick={toggleBookmark}
           title={bookmarked ? 'Remove bookmark' : 'Bookmark this question'}
         >
-          <StarIcon width="20" height="20" />
+          <BookmarkStarIcon width="20" height="20" />
         </button>
-        <span className="lesson__count">
+        <span className="lesson__count font-mono">
           {index + 1}/{questions.length}
         </span>
       </header>
 
+      {/* Main MCQ Card Surface */}
       <main className="lesson__body">
-        <div className="lesson__unit-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-          <p className="lesson__unit" style={{ margin: 0 }}>
-            {lesson.trackTitle} · {lesson.unitTitle}
-          </p>
-          <div className="q-action-bar" style={{ margin: 0 }}>
-            <QuestionTTS question={question} />
-            <button
-              type="button"
-              className={`note-btn ${hasNote ? 'has-note' : ''}`}
-              onClick={() => setShowNoteModal(true)}
-              title="Add or view question study note"
-            >
-              <NotesIcon width="14" height="14" />
-              <span>{hasNote ? 'Note' : '+Note'}</span>
-            </button>
-          </div>
-        </div>
-        {question.directive && <p className="lesson__directive">{question.directive}</p>}
-        <h1
-          className={`lesson__prompt${lesson.rtl ? ' urdu' : ''}`}
-          dir={lesson.rtl ? 'rtl' : 'ltr'}
-          tabIndex={-1}
-          ref={headingRef}
-        >
-          {question.prompt}
-        </h1>
-
-        {/* Multi-statement items: stem, statement list, closing ask */}
-        {question.statements && question.statements.length > 0 && (
-          <ol className="statements">
-            {question.statements.map((statement, i) => (
-              <li key={statement}>
-                <span className="statements__mark">{ROMAN[i] ?? i + 1}</span>
-                <span>{statement}</span>
-              </li>
-            ))}
-          </ol>
-        )}
-        {question.closing && <p className="lesson__closing">{question.closing}</p>}
-
-        <ul className="choices">
-          {question.choices.map((choice, i) => {
-            const isSelected = selected === i
-            const isAnswer = i === question.answer
-            const isStruck = Boolean(eliminated[i])
-            let tone = ''
-            if (checked && isAnswer) tone = ' choice--correct'
-            else if (checked && isSelected && !isAnswer) tone = ' choice--wrong'
-            else if (isSelected) tone = ' choice--selected'
-            if (isStruck) tone += ' choice--eliminated'
-
-            const letter = LETTERS[i] ?? `${i + 1}`
-
-            return (
-              <li key={choice} className="choice-row">
-                <button
-                  type="button"
-                  className={`choice${tone}${lesson.rtl ? ' urdu' : ''}`}
-                  dir={lesson.rtl ? 'rtl' : 'ltr'}
-                  onClick={() => !checked && !isStruck && setSelected(i)}
-                  aria-pressed={isSelected}
-                  disabled={checked || isStruck}
-                >
-                  <span className="choice__key">{letter}</span>
-                  <span className="choice__text">{choice}</span>
-                  {checked && isAnswer && (
-                    <span className="choice__status-icon choice__status-icon--correct">
-                      <CheckCircleIcon width="20" height="20" />
-                    </span>
-                  )}
-                  {checked && isSelected && !isAnswer && (
-                    <span className="choice__status-icon choice__status-icon--wrong">
-                      <XCircleIcon width="20" height="20" />
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  className={`strike-toggle${isStruck ? ' is-struck' : ''}`}
-                  aria-label={isStruck ? 'Restore option' : 'Eliminate option'}
-                  title={isStruck ? 'Restore option' : 'Eliminate option'}
-                  onClick={() => toggleEliminate(i)}
-                  disabled={checked}
-                >
-                  <SlashIcon width="16" height="16" />
-                </button>
-              </li>
-            )
-          })}
-        </ul>
+        <MCQCard
+          question={question}
+          selectedChoice={selected}
+          eliminatedChoices={eliminated}
+          checked={checked}
+          bookmarked={bookmarked}
+          hasNote={hasNote}
+          penalty={0} // CSS MPT has no negative marking
+          onSelectChoice={(idx) => !checked && setSelected(idx)}
+          onToggleEliminate={toggleEliminate}
+          onToggleBookmark={toggleBookmark}
+          onOpenNotes={() => setShowNoteModal(true)}
+          explanation={explanation}
+          provenance={provenance}
+          unitLabel={`${lesson.trackTitle} · ${lesson.unitTitle}`}
+        />
       </main>
 
-      <footer className={`lesson__footer${checked ? (answeredCorrectly ? ' is-correct' : ' is-wrong') : ''}`}>
-        {checked && (
-          <div className="feedback-drawer">
-            <div className="feedback-drawer__status">
-              {answeredCorrectly ? (
-                <div className="status-badge status-badge--correct">
-                  <CheckCircleIcon width="24" height="24" />
-                  <span>Correct! Excellent.</span>
-                </div>
-              ) : (
-                <div className="status-badge status-badge--wrong">
-                  <XCircleIcon width="24" height="24" />
-                  <span>Incorrect Answer</span>
-                </div>
-              )}
-            </div>
-
-            {!answeredCorrectly && (
-              <div className="answer-comparison">
-                <div className="comparison-box comparison-box--wrong">
-                  <span className="comparison-label">You Picked</span>
-                  <span className={`comparison-text${lesson.rtl ? ' urdu' : ''}`} dir={lesson.rtl ? 'rtl' : 'ltr'}>
-                    {question.choices[selected]}
-                  </span>
-                </div>
-                <div className="comparison-box comparison-box--correct">
-                  <span className="comparison-label">Correct Answer</span>
-                  <span className={`comparison-text${lesson.rtl ? ' urdu' : ''}`} dir={lesson.rtl ? 'rtl' : 'ltr'}>
-                    {question.choices[question.answer]}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {explanation && (
-              <div className="explanation-card">
-                <div className="explanation-card__header">
-                  <LightbulbIcon width="18" height="18" />
-                  <span>Explanation & Context</span>
-                </div>
-                <p
-                  className={`explanation-card__text${lesson.rtl ? ' urdu' : ''}`}
-                  dir={lesson.rtl ? 'rtl' : 'ltr'}
-                >
-                  {explanation}
-                </p>
-                {provenance && (
-                  <span className="explanation-card__provenance">
-                    {provenance}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
+      {/* Sticky Check / Continue Thumb Dock (Lower half ergonomics on mobile) */}
+      <footer className="lesson__footer">
         <button
-          className={`btn btn--wide ${checked && !answeredCorrectly ? 'btn--continue-wrong' : ''}`}
+          className={`btn btn--wide ${checked && !answeredCorrectly ? 'btn--continue-wrong' : 'btn--primary'}`}
           type="button"
           onClick={checked ? advance : check}
           disabled={selected === null}
         >
-          {checked ? (isLast ? 'Finish Lesson' : 'Continue') : 'Check Answer'}
+          {checked ? (isLast ? 'Finish Lesson' : 'Continue (Enter)') : 'Check Answer (Enter)'}
         </button>
       </footer>
 
@@ -445,27 +334,5 @@ export default function LessonScreen({ lessonId }) {
         />
       )}
     </div>
-  )
-}
-
-function ScoreRing({ score, total }) {
-  const radius = 52
-  const circumference = 2 * Math.PI * radius
-  const pct = total === 0 ? 0 : Math.max(0, Math.min(1, score / total))
-  return (
-    <svg className="ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
-      <circle className="ring__track" cx="60" cy="60" r={radius} />
-      <circle
-        className="ring__value"
-        cx="60"
-        cy="60"
-        r={radius}
-        strokeDasharray={circumference}
-        strokeDashoffset={circumference * (1 - pct)}
-      />
-      <text x="60" y="68" textAnchor="middle" className="ring__label">
-        {Math.round(pct * 100)}%
-      </text>
-    </svg>
   )
 }

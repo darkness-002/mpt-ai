@@ -6,7 +6,7 @@ import {
   CheckCircleIcon,
   NotesIcon,
   RotateCcwIcon,
-  StarIcon,
+  BookmarkStarIcon,
   FlameIcon,
 } from '../components/icons.jsx'
 import QuestionTTS from '../components/QuestionTTS.jsx'
@@ -46,7 +46,12 @@ export default function FlashcardsScreen() {
         pool = tracks.flatMap((t) =>
           t.units.flatMap((u) =>
             u.lessons.flatMap((l) =>
-              l.questions.map((q) => ({ ...q, trackTitle: t.title, unitTitle: u.title })),
+              l.questions.map((q) => ({
+                ...q,
+                trackTitle: t.title,
+                unitTitle: u.title,
+                rtl: Boolean(u.rtl || q.rtl),
+              })),
             ),
           ),
         )
@@ -56,7 +61,12 @@ export default function FlashcardsScreen() {
         if (track) {
           pool = track.units.flatMap((u) =>
             u.lessons.flatMap((l) =>
-              l.questions.map((q) => ({ ...q, trackTitle: track.title, unitTitle: u.title })),
+              l.questions.map((q) => ({
+                ...q,
+                trackTitle: track.title,
+                unitTitle: u.title,
+                rtl: Boolean(u.rtl || q.rtl),
+              })),
             ),
           )
         }
@@ -79,7 +89,7 @@ export default function FlashcardsScreen() {
 
   const currentQ = questions[currentIndex]
 
-  // Fetch candidate note for the active question
+  // Fetch candidate note for active question
   useEffect(() => {
     if (!currentQ) {
       setActiveNote('')
@@ -108,16 +118,19 @@ export default function FlashcardsScreen() {
     }
   }, [currentIndex])
 
-  const handleRate = useCallback((quality) => {
-    if (quality === 'easy') {
-      setCardStats((s) => ({ ...s, mastered: s.mastered + 1 }))
-    } else if (quality === 'hard') {
-      setCardStats((s) => ({ ...s, review: s.review + 1 }))
-    }
-    handleNext()
-  }, [handleNext])
+  const handleRate = useCallback(
+    (quality) => {
+      if (quality === 'easy') {
+        setCardStats((s) => ({ ...s, mastered: s.mastered + 1 }))
+      } else if (quality === 'hard') {
+        setCardStats((s) => ({ ...s, review: s.review + 1 }))
+      }
+      handleNext()
+    },
+    [handleNext],
+  )
 
-  // Keyboard navigation
+  // Keyboard navigation & Leitner shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
@@ -155,13 +168,16 @@ export default function FlashcardsScreen() {
           <span>Curriculum</span>
         </Link>
         <div className="flashcards-title-wrap">
-          <CardsIcon width="22" height="22" style={{ color: 'var(--blue)' }} />
+          <CardsIcon width="24" height="24" style={{ color: 'var(--primary)' }} />
           <h1>Active Recall Flashcards</h1>
         </div>
+        <p className="flashcards-subtitle">
+          Spaced memory reinforcement. Read the stem, formulate your response, and flip to verify.
+        </p>
       </div>
 
       {/* Deck Selector Tabs */}
-      <div className="deck-selector-bar">
+      <div className="deck-selector-bar" role="tablist" aria-label="Select flashcards deck">
         <button
           type="button"
           className={`deck-tab ${deckType === 'all' ? 'is-active' : ''}`}
@@ -174,14 +190,16 @@ export default function FlashcardsScreen() {
           className={`deck-tab ${deckType === 'starred' ? 'is-active' : ''}`}
           onClick={() => setDeckType('starred')}
         >
-          <StarIcon width="13" height="13" /> Starred Deck
+          <BookmarkStarIcon width="13" height="13" style={{ color: 'var(--gold-text)' }} />
+          <span>Starred Deck</span>
         </button>
         <button
           type="button"
           className={`deck-tab ${deckType === 'mistakes' ? 'is-active' : ''}`}
           onClick={() => setDeckType('mistakes')}
         >
-          <FlameIcon width="13" height="13" /> Mistakes SRS
+          <FlameIcon width="13" height="13" style={{ color: 'var(--amber-text)' }} />
+          <span>Mistakes SRS</span>
         </button>
         {tracks.map((t) => (
           <button
@@ -200,12 +218,12 @@ export default function FlashcardsScreen() {
       ) : questions.length === 0 ? (
         <div className="flashcards-empty">
           <CardsIcon width="36" height="36" style={{ color: 'var(--muted)', marginBottom: '0.75rem' }} />
-          <h3>No flashcards found in this deck</h3>
+          <h3>No Flashcards in this Deck</h3>
           <p>
             {deckType === 'starred'
               ? 'Star questions during lessons or drills to review them here.'
               : deckType === 'mistakes'
-              ? 'Missed questions will automatically appear in your review deck.'
+              ? 'Missed questions automatically appear in your review deck.'
               : 'Try selecting another deck.'}
           </p>
         </div>
@@ -216,7 +234,7 @@ export default function FlashcardsScreen() {
             <span className="flashcards-count">
               Card <strong>{currentIndex + 1}</strong> of {questions.length}
             </span>
-            <div className="flashcards-meter">
+            <div className="flashcards-meter" aria-hidden="true">
               <div
                 className="flashcards-meter__fill"
                 style={{ width: `${Math.round(((currentIndex + 1) / questions.length) * 100)}%` }}
@@ -233,6 +251,9 @@ export default function FlashcardsScreen() {
             className={`flashcard ${isFlipped ? 'is-flipped' : ''}`}
             onClick={() => setIsFlipped(!isFlipped)}
             dir={currentQ?.rtl ? 'rtl' : 'ltr'}
+            tabIndex={0}
+            role="button"
+            aria-label={`Flashcard: ${isFlipped ? 'Showing Answer' : 'Showing Question'}. Press Space to flip.`}
           >
             <div className="flashcard__inner">
               {/* Front Side: Question */}
@@ -309,7 +330,7 @@ export default function FlashcardsScreen() {
 
                 {activeNote && (
                   <div className="card-user-note">
-                    <NotesIcon width="14" height="14" style={{ color: 'var(--gold)', flexShrink: 0 }} />
+                    <NotesIcon width="14" height="14" style={{ color: 'var(--gold-text)', flexShrink: 0 }} />
                     <div className="user-note-text">
                       <strong>My Study Note:</strong> {activeNote}
                     </div>
@@ -327,7 +348,7 @@ export default function FlashcardsScreen() {
           <div className="flashcards-controls">
             <button
               type="button"
-              className="btn btn--small btn--ghost rating-btn is-hard"
+              className="btn btn--secondary rating-btn is-hard"
               onClick={() => handleRate('hard')}
               title="Press 1"
             >
@@ -335,7 +356,7 @@ export default function FlashcardsScreen() {
             </button>
             <button
               type="button"
-              className="btn btn--small btn--ghost rating-btn is-good"
+              className="btn btn--secondary rating-btn is-good"
               onClick={() => handleRate('good')}
               title="Press 2"
             >
@@ -343,7 +364,7 @@ export default function FlashcardsScreen() {
             </button>
             <button
               type="button"
-              className="btn btn--small rating-btn is-easy"
+              className="btn btn--primary rating-btn is-easy"
               onClick={() => handleRate('easy')}
               title="Press 3"
             >
@@ -354,9 +375,15 @@ export default function FlashcardsScreen() {
               className="icon-btn restart-btn"
               onClick={handleRestart}
               title="Reshuffle & Restart Deck"
+              aria-label="Restart deck"
             >
               <RotateCcwIcon width="18" height="18" />
             </button>
+          </div>
+
+          {/* Shortcut HUD */}
+          <div className="flashcards-shortcut-hud" aria-hidden="true">
+            <span>Shortcuts: <kbd>Space</kbd> Flip &nbsp;•&nbsp; <kbd>1</kbd> Hard &nbsp;•&nbsp; <kbd>2</kbd> Good &nbsp;•&nbsp; <kbd>3</kbd> Easy &nbsp;•&nbsp; <kbd>←</kbd> <kbd>→</kbd> Navigate</span>
           </div>
         </div>
       )}

@@ -1,0 +1,107 @@
+/**
+ * OMRRow.css - "The Reading Lamp" Matrix Row
+ */
+
+.reading-omr-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: var(--surface);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+  user-select: none;
+}
+
+.reading-omr-row:hover {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+
+.reading-omr-row.is-current-row {
+  background: var(--primary-subtle);
+  border-color: var(--primary);
+}
+
+.reading-omr-row.is-flagged-row {
+  background: var(--amber-subtle);
+}
+
+.omr-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 2.2rem;
+}
+
+.omr-index-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.omr-flag-indicator {
+  color: var(--amber-text);
+  display: inline-flex;
+}
+
+.omr-bubbles-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.omr-cell-bubble {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0;
+  transition: all var(--duration-fast) ease;
+}
+
+.omr-cell-bubble:hover {
+  border-color: var(--primary);
+  color: var(--primary-text);
+}
+
+.omr-cell-bubble.is-filled {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.bubble-fill-disc {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: omrPencilFill 160ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 1;
+}
+
+.omr-cell-bubble.is-filled .bubble-letter {
+  position: relative;
+  z-index: 2;
+  color: #ffffff;
+}
+
+.omr-cell-bubble.is-struck {
+  opacity: 0.35;
+  text-decoration: line-through;
+  border-style: dashed;
+}

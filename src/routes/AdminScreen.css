@@ -83,7 +83,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: var(--primary);
-  color: #ffffff;
+  color: var(--primary-fg);
   padding: 0.15rem 0.45rem;
   border-radius: 4px;
 }
@@ -478,7 +478,7 @@
 
 .stepper-bubble.is-live {
   background: #10b981;
-  color: #ffffff;
+  color: var(--primary-fg);
   border-color: #059669;
 }
 
@@ -739,7 +739,7 @@
 .choice-key-indicator.is-correct {
   background: #10b981;
   border-color: #059669;
-  color: #ffffff;
+  color: var(--primary-fg);
 }
 
 .choice-text {
@@ -800,7 +800,7 @@
 
 .filter-chip.is-active {
   background: var(--primary);
-  color: #ffffff;
+  color: var(--primary-fg);
   border-color: transparent;
 }
 
@@ -1031,7 +1031,7 @@
 .action-btn.is-approve {
   background: #10b981;
   border-color: #059669;
-  color: #ffffff;
+  color: var(--primary-fg);
 }
 
 .action-btn.is-approve:hover {

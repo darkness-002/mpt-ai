@@ -134,23 +134,19 @@ describe('Draft-to-Live Approval Pipeline', () => {
     expect(question.status).toBe('pending')
   })
 
-  it('supports exactly 4 refreshed themes including fixed Dark and deep Midnight', () => {
-    expect(THEME_LIST).toHaveLength(4)
+  it('supports exactly 3 refreshed themes including Espresso', () => {
+    expect(THEME_LIST).toHaveLength(3)
     expect(THEME_LIST.map((t) => t.id)).toEqual([
       THEMES.LIGHT,
       THEMES.DARK,
-      THEMES.ZEN,
-      THEMES.MIDNIGHT,
+      THEMES.ESPRESSO,
     ])
 
-    settingsStore.save({ theme: THEMES.MIDNIGHT })
-    expect(settingsStore.load().theme).toBe('midnight')
+    settingsStore.save({ theme: THEMES.ESPRESSO })
+    expect(settingsStore.load().theme).toBe('espresso')
 
     settingsStore.save({ theme: THEMES.DARK })
     expect(settingsStore.load().theme).toBe('dark')
-
-    settingsStore.save({ theme: THEMES.ZEN })
-    expect(settingsStore.load().theme).toBe('zen')
 
     settingsStore.save({ theme: THEMES.LIGHT })
     expect(settingsStore.load().theme).toBe('light')

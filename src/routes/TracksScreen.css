@@ -1,4 +1,6 @@
-/* TracksScreen.css - Responsive Student Dashboard */
+/**
+ * TracksScreen.css - "The Reading Lamp" Home Study Desk
+ */
 
 .simple-dashboard {
   background: var(--bg);
@@ -10,6 +12,23 @@
   box-sizing: border-box;
 }
 
+.reading-status-strip {
+  backdrop-filter: blur(8px);
+}
+
+.status-dot {
+  display: inline-block;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.resume-hero-card {
+  border-radius: var(--radius-card, 18px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+}
+
 .resume-hero-card::before {
   content: '';
   position: absolute;
@@ -17,7 +36,105 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--primary), var(--teal));
+  background: linear-gradient(90deg, var(--primary), var(--primary-light, var(--primary)));
+}
+
+.simple-prompt-card {
+  border-radius: var(--radius-card, 18px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.simple-prompt-card--review {
+  background: var(--rose-subtle);
+  border: 1px solid var(--rose-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.simple-prompt-card--review:hover {
+  border-color: var(--rose);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -2px var(--rose-glow, rgba(225, 29, 72, 0.18));
+}
+
+.review-banner__icon {
+  background: var(--rose);
+  color: var(--rose-fg, #ffffff);
+  box-shadow: 0 2px 8px -1px var(--rose-glow, rgba(225, 29, 72, 0.25));
+}
+
+.review-banner__badge {
+  background: var(--rose);
+  color: var(--rose-fg, #ffffff);
+}
+
+.review-banner__btn {
+  background: var(--rose);
+  color: var(--rose-fg, #ffffff);
+  box-shadow: 0 2px 8px -1px var(--rose-glow, rgba(225, 29, 72, 0.25));
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.simple-prompt-card--review:hover .review-banner__btn {
+  filter: brightness(1.06);
+  box-shadow: 0 4px 14px -1px var(--rose-glow, rgba(225, 29, 72, 0.35));
+}
+
+/* Specific Optimization for Espresso Theme (Warm Roasted Ember Desk) */
+[data-theme="espresso"] .simple-prompt-card--review,
+[data-theme="midnight"] .simple-prompt-card--review {
+  background: var(--rose-subtle, #241715);
+  border-color: var(--rose-border, #4A2622);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(245, 235, 224, 0.04);
+}
+
+[data-theme="espresso"] .simple-prompt-card--review:hover,
+[data-theme="midnight"] .simple-prompt-card--review:hover {
+  border-color: var(--rose, #E2574A);
+  box-shadow: 0 8px 28px -4px rgba(226, 87, 74, 0.28), inset 0 1px 0 rgba(245, 235, 224, 0.08);
+}
+
+[data-theme="espresso"] .review-banner__icon,
+[data-theme="midnight"] .review-banner__icon {
+  background: var(--rose, #E2574A);
+  color: var(--rose-fg, #120F0D);
+  box-shadow: 0 2px 10px rgba(226, 87, 74, 0.35);
+}
+
+[data-theme="espresso"] .review-banner__badge,
+[data-theme="midnight"] .review-banner__badge {
+  background: var(--rose, #E2574A);
+  color: var(--rose-fg, #120F0D);
+}
+
+[data-theme="espresso"] .review-banner__btn,
+[data-theme="midnight"] .review-banner__btn {
+  background: var(--rose, #E2574A);
+  color: var(--rose-fg, #120F0D);
+  box-shadow: 0 3px 12px rgba(226, 87, 74, 0.35);
+}
+
+[data-theme="espresso"] .review-banner__btn:hover,
+[data-theme="midnight"] .review-banner__btn:hover {
+  background: var(--rose-hover, #EA6659);
+  filter: brightness(1.05);
+}
+
+.student-track-card {
+  border-radius: var(--radius-card, 18px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.student-track-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .student-track-tabs {

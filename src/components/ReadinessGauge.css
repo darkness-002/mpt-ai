@@ -1,0 +1,64 @@
+/**
+ * ReadinessGauge.css - "The Reading Lamp" Readiness Dial
+ */
+
+.reading-readiness-gauge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-track-ring {
+  fill: none;
+  stroke: var(--surface-2);
+}
+
+.gauge-fill-ring {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1), stroke var(--duration-fast) ease;
+}
+
+.gauge-center-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.gauge-score-value {
+  font-family: var(--font-mono);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.gauge-percent-symbol {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-left: 2px;
+}
+
+.gauge-tier-badge {
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  margin-top: 0.4rem;
+}
+
+.gauge-subtitle {
+  font-size: var(--text-2xs);
+  color: var(--muted);
+  margin-top: 0.2rem;
+}

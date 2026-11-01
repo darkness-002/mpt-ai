@@ -130,6 +130,20 @@
   color: var(--text-body);
 }
 
+.public-auth-forgot-link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.public-auth-forgot-link:hover {
+  text-decoration: underline;
+}
+
 .public-auth-input {
   width: 100%;
   padding: 0.65rem 0.85rem;

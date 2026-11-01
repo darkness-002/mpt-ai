@@ -46,7 +46,7 @@
 
 .focus-mode-btn.is-active {
   background: var(--surface);
-  color: var(--blue);
+  color: var(--primary);
   box-shadow: var(--shadow-sm);
 }
 
@@ -73,7 +73,7 @@
 
 .focus-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--blue), var(--green));
+  background: var(--primary);
   transition: width 0.3s ease;
 }
 
@@ -135,9 +135,9 @@
 }
 
 .focus-sound-pill.is-active {
-  background: var(--blue);
-  color: #fff;
-  border-color: var(--blue-dark);
+  background: var(--primary);
+  color: var(--primary-fg);
+  border-color: var(--primary);
 }
 
 .focus-stats {

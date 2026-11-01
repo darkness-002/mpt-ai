@@ -1,22 +1,22 @@
 const SETTINGS_KEY = 'mpt_ai_settings'
 
 export const THEMES = {
-  LIGHT: 'light',          // 1. Light: Pure white & slate-50
-  DARK: 'dark',            // 2. Dark (Fixed): Truly dark zinc-950 & charcoal
-  ZEN: 'zen',              // 3. Zen: Calming gray-blue & soft indigo
-  MIDNIGHT: 'midnight',    // 4. Midnight: Deep navy blue & sky cyan
+  LIGHT: 'light',          // 1. Light: Clean paper & focused accent
+  DARK: 'dark',            // 2. Dark: Zinc-950 deep charcoal
+  ESPRESSO: 'espresso',    // 3. Espresso: Cozy dark roast coffee desk
   // Backward compatibility aliases
+  SEPIA: 'light',
+  ZEN: 'light',
+  MIDNIGHT: 'espresso',
   OLED: 'dark',
-  SEPIA: 'zen',
-  IVORY: 'zen',
+  IVORY: 'light',
   SYSTEM: 'system',
 }
 
 export const THEME_LIST = [
-  { id: THEMES.LIGHT, label: 'Light', desc: 'Pure white & slate-50' },
+  { id: THEMES.LIGHT, label: 'Light', desc: 'Clean paper & scholar emerald' },
   { id: THEMES.DARK, label: 'Dark', desc: 'Zinc-950 deep charcoal' },
-  { id: THEMES.ZEN, label: 'Zen', desc: 'Calming gray-blue' },
-  { id: THEMES.MIDNIGHT, label: 'Midnight', desc: 'Deep navy & sky blue' },
+  { id: THEMES.ESPRESSO, label: 'Espresso', desc: 'Cozy dark roast desk' },
 ]
 
 export const FONT_SCALES = {
@@ -76,6 +76,7 @@ export const settingsStore = {
 
     const isDark =
       theme === THEMES.DARK ||
+      theme === THEMES.ESPRESSO ||
       theme === THEMES.MIDNIGHT ||
       (theme === THEMES.SYSTEM && isSystemDark)
 

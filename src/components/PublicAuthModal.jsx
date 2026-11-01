@@ -9,8 +9,8 @@ import { useAuth } from '../context/AuthContext.jsx'
 import './PublicAuthModal.css'
 
 export default function PublicAuthModal({ isOpen, onClose, initialMode = 'signin' }) {
-  const { signIn, signUp, user } = useAuth()
-  const [mode, setMode] = useState(initialMode) // 'signin' | 'signup'
+  const { signIn, signUp, resetPassword, user } = useAuth()
+  const [mode, setMode] = useState(initialMode) // 'signin' | 'signup' | 'reset'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
@@ -54,6 +54,23 @@ export default function PublicAuthModal({ isOpen, onClose, initialMode = 'signin
       return
     }
 
+    if (mode === 'reset') {
+      setSubmitting(true)
+      try {
+        const res = await resetPassword(cleanEmail)
+        if (res?.error) {
+          setError(res.error.message || 'Unable to send password reset email.')
+        } else {
+          setMessage('Password reset instructions have been sent to your email address.')
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to request password reset.')
+      } finally {
+        setSubmitting(false)
+      }
+      return
+    }
+
     if (!password || password.length < 6) {
       setError('Password must be at least 6 characters.')
       return
@@ -64,7 +81,6 @@ export default function PublicAuthModal({ isOpen, onClose, initialMode = 'signin
       if (mode === 'signin') {
         const res = await signIn(cleanEmail, password)
         if (res.error) {
-          // Provide friendly user feedback
           const raw = res.error.message || ''
           let friendly = raw
           if (raw.toLowerCase().includes('invalid login credentials')) {
@@ -77,7 +93,6 @@ export default function PublicAuthModal({ isOpen, onClose, initialMode = 'signin
           return
         }
 
-        // Successfully authenticated! Modal closes and user stays on public view
         setSubmitting(false)
         onClose()
       } else {
@@ -96,12 +111,10 @@ export default function PublicAuthModal({ isOpen, onClose, initialMode = 'signin
           return
         }
 
-        // Check if session was granted right away
         if (res.data?.session) {
           setSubmitting(false)
           onClose()
         } else {
-          // Email confirmation is required
           setSubmitting(false)
           setMessage('Account created! Please check your email inbox to confirm your account, then sign in.')
           setMode('signin')
@@ -123,12 +136,18 @@ export default function PublicAuthModal({ isOpen, onClose, initialMode = 'signin
             </div>
             <div>
               <h2 className="public-auth-modal__title">
-                {mode === 'signin' ? 'Sign In to MPT·AI' : 'Create Student Account'}
+                {mode === 'signin'
+                  ? 'Sign In to MPT·AI'
+                  : mode === 'signup'
+                  ? 'Create Student Account'
+                  : 'Reset Password'}
               </h2>
               <p className="public-auth-modal__subtitle">
                 {mode === 'signin'
                   ? 'Access your saved progress, streaks, and bookmarks.'
-                  : 'Sync your curriculum mastery and study streak across devices.'}
+                  : mode === 'signup'
+                  ? 'Sync your curriculum mastery and study streak across devices.'
+                  : 'Enter your email to receive password recovery instructions.'}
               </p>
             </div>
           </div>
@@ -157,6 +176,13 @@ export default function PublicAuthModal({ isOpen, onClose, initialMode = 'signin
             onClick={() => handleSwitchMode('signup')}
           >
             Create Account
+          </button>
+          <button
+            type="button"
+            className={`public-auth-tab ${mode === 'reset' ? 'is-active' : ''}`}
+            onClick={() => handleSwitchMode('reset')}
+          >
+            Reset
           </button>
         </div>
 
@@ -194,24 +220,35 @@ export default function PublicAuthModal({ isOpen, onClose, initialMode = 'signin
             />
           </div>
 
-          <div className="public-auth-field">
-            <div className="public-auth-field-header">
-              <label htmlFor="public-auth-password" className="public-auth-label">
-                Password
-              </label>
+          {mode !== 'reset' && (
+            <div className="public-auth-field">
+              <div className="public-auth-field-header">
+                <label htmlFor="public-auth-password" className="public-auth-label">
+                  Password
+                </label>
+                {mode === 'signin' && (
+                  <button
+                    type="button"
+                    className="public-auth-forgot-link"
+                    onClick={() => handleSwitchMode('reset')}
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
+              <input
+                id="public-auth-password"
+                type="password"
+                className="public-auth-input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={mode === 'signup' ? 'Minimum 6 characters' : 'Enter your password'}
+                required
+                minLength={6}
+                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+              />
             </div>
-            <input
-              id="public-auth-password"
-              type="password"
-              className="public-auth-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={mode === 'signup' ? 'Minimum 6 characters' : 'Enter your password'}
-              required
-              minLength={6}
-              autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-            />
-          </div>
+          )}
 
           <button
             type="submit"
@@ -222,8 +259,10 @@ export default function PublicAuthModal({ isOpen, onClose, initialMode = 'signin
               <span>Please wait…</span>
             ) : mode === 'signin' ? (
               'Sign In'
-            ) : (
+            ) : mode === 'signup' ? (
               'Create Account'
+            ) : (
+              'Send Reset Email'
             )}
           </button>
         </form>
@@ -240,7 +279,7 @@ export default function PublicAuthModal({ isOpen, onClose, initialMode = 'signin
                 Create an account
               </button>
             </p>
-          ) : (
+          ) : mode === 'signup' ? (
             <p>
               Already registered?{' '}
               <button
@@ -249,6 +288,17 @@ export default function PublicAuthModal({ isOpen, onClose, initialMode = 'signin
                 onClick={() => handleSwitchMode('signin')}
               >
                 Sign in here
+              </button>
+            </p>
+          ) : (
+            <p>
+              Remembered your credentials?{' '}
+              <button
+                type="button"
+                className="public-auth-link"
+                onClick={() => handleSwitchMode('signin')}
+              >
+                Return to sign in
               </button>
             </p>
           )}

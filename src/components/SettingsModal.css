@@ -246,9 +246,9 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   border-radius: 9999px;
-  background: var(--primary-subtle);
-  color: var(--primary);
-  border: 1px solid rgba(37, 99, 235, 0.25);
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--border-strong);
 }
 
 .settings-account-hint {
@@ -280,6 +280,15 @@
   align-items: center;
   gap: 0.4rem;
   text-decoration: none;
+  border: 1px solid var(--border-strong) !important;
+  color: var(--muted) !important;
+  background: var(--surface-2) !important;
+}
+
+.settings-admin-portal-btn:hover {
+  background: var(--surface-3) !important;
+  color: var(--text) !important;
+  border-color: var(--text) !important;
 }
 
 .settings-signout-btn {
@@ -296,6 +305,72 @@
   background: rgba(239, 68, 68, 0.1);
   border-color: #ef4444;
   color: #ef4444;
+}
+
+/* Connectivity & Offline Sync Status */
+.settings-sync-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md, 12px);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.settings-sync-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.settings-sync-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.settings-sync-dot.is-online {
+  background: var(--green);
+  box-shadow: 0 0 6px rgba(22, 163, 74, 0.4);
+}
+
+.settings-sync-dot.is-offline {
+  background: var(--gold);
+  box-shadow: 0 0 6px rgba(217, 119, 6, 0.4);
+}
+
+.settings-sync-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.settings-sync-status-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.settings-sync-status-desc {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.settings-sync-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted-light);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  white-space: nowrap;
 }
 
 

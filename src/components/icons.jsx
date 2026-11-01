@@ -194,7 +194,7 @@ export function ArrowLeftIcon(props) {
   return (
     <svg {...base} {...props}>
       <line x1="19" y1="12" x2="5" y2="12" />
-      <polyline points="12 19 5 12 12 19 12 5" />
+      <polyline points="12 19 5 12 12 5" />
     </svg>
   )
 }
@@ -226,6 +226,19 @@ export function VolumeXIcon(props) {
       <line x1="17" y1="9" x2="23" y2="15" />
     </svg>
   )
+}
+
+export function CopyIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  )
+}
+
+export function Volume2Icon(props) {
+  return <SpeakerIcon {...props} />
 }
 
 export function NotesIcon(props) {
@@ -481,6 +494,57 @@ export function LogOutIcon(props) {
     </svg>
   )
 }
+
+/**
+ * Signature Motif: The OMR Bubble ("The Reading Lamp")
+ * Used for logo mark, lesson-path nodes, progress indicators, question palette, and pencil-fill confirms.
+ */
+export function OMRBubbleIcon({ filled = false, letter, ...props }) {
+  return (
+    <svg {...base} viewBox="0 0 24 24" {...props}>
+      <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth={filled ? 2.5 : 1.8} fill={filled ? "currentColor" : "none"} />
+      {filled && (
+        <circle cx="12" cy="12" r="5" fill="var(--bg, #ffffff)" />
+      )}
+      {letter && !filled && (
+        <text
+          x="12"
+          y="15.5"
+          textAnchor="middle"
+          fontSize="10"
+          fontWeight="700"
+          fontFamily="monospace"
+          fill="currentColor"
+          stroke="none"
+        >
+          {letter}
+        </text>
+      )}
+    </svg>
+  )
+}
+
+export function OMRLogoMark(props) {
+  return (
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...props}>
+      {/* Outer OMR Sheet Target Rings */}
+      <rect x="2" y="2" width="28" height="28" rx="8" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.3" />
+      <circle cx="16" cy="16" r="10" stroke="currentColor" strokeWidth="2" strokeDasharray="3 2" />
+      <circle cx="16" cy="16" r="6.5" fill="currentColor" />
+      {/* Reading Lamp subtle beam apex */}
+      <path d="M16 6v3M10 8l2 2M22 8l-2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/**
+ * Icon Disambiguation:
+ * - BookmarkStarIcon (Gold) = Bookmark in lessons/drills ONLY
+ * - ExamFlagIcon (Amber Pennant) = Mark for Review in mock exams ONLY
+ */
+export const BookmarkStarIcon = StarIcon
+export const ExamFlagIcon = FlagIcon
+
 
 
 

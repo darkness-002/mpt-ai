@@ -5,9 +5,10 @@ import {
   ArrowLeftIcon,
   BookIcon,
   CheckCircleIcon,
-  StarIcon,
+  BookmarkStarIcon,
   TimerIcon,
 } from '../components/icons.jsx'
+import { Chip, Modal, Button } from '../components/UIPrimitives.jsx'
 import { useContent } from '../content/contentContext.js'
 import { useInstallPrompt } from '../lib/useInstallPrompt.js'
 import { useProgress } from '../storage/progressContext.js'
@@ -36,7 +37,7 @@ export default function PathScreen() {
     const record = progress.records[lesson.id]
     return record && record.bestScore === record.total
   }).length
-  const percent = Math.round((completed / trackLessons.length) * 100)
+  const percent = trackLessons.length > 0 ? Math.round((completed / trackLessons.length) * 100) : 0
   const nextLesson = trackLessons.find((lesson) => !progress.records[lesson.id])
   const { blueprint } = track
 
@@ -49,43 +50,43 @@ export default function PathScreen() {
     <div className="path-page">
       <header className="path-header">
         <div className="path-header__top">
-          <Link className="path-back-btn" to="/">
+          <Link className="path-back-btn" to="/" aria-label="Return to all curriculum tracks">
             <ArrowLeftIcon width="16" height="16" />
             <span>All Exams</span>
           </Link>
 
           <div className="path-header__top-actions">
             {canInstall && (
-              <button className="btn btn--small btn--primary" type="button" onClick={install}>
+              <Button size="small" variant="primary" pill onClick={install}>
                 Install App
-              </button>
+              </Button>
             )}
           </div>
         </div>
 
         <div className="path-title-group">
-          <span className="path-exam-badge">{track.exam}</span>
+          <span className="path-exam-badge font-mono">{track.exam}</span>
           <h1>{track.title}</h1>
           <p className="path-header__blurb">{track.tagline}</p>
         </div>
 
-        {/* Exam Blueprint Info Card */}
+        {/* Exam Blueprint Chips Bar */}
         {blueprint && (
-          <div className="blueprint-pill-bar">
-            <span className="bp-chip">
+          <div className="blueprint-pill-bar" role="group" aria-label="Exam Blueprint Specifications">
+            <Chip variant="default">
               <BookIcon width="14" height="14" /> {blueprint.totalMcqs} MCQs
-            </span>
-            <span className="bp-chip">
+            </Chip>
+            <Chip variant="default">
               <TimerIcon width="14" height="14" /> {blueprint.minutes} Mins
-            </span>
-            <span className="bp-chip">
+            </Chip>
+            <Chip variant="success">
               <CheckCircleIcon width="14" height="14" /> Pass: {blueprint.passingMarks}/{blueprint.totalMcqs}
-            </span>
-            <span className="bp-chip bp-chip--penalty">
+            </Chip>
+            <Chip variant={blueprint.negativeMarking > 0 ? 'danger' : 'default'}>
               {blueprint.negativeMarking > 0
                 ? `-${blueprint.negativeMarking} Negative Marking`
                 : 'No Negative Marking'}
-            </span>
+            </Chip>
           </div>
         )}
 
@@ -96,12 +97,12 @@ export default function PathScreen() {
           <div className="path-summary__top">
             <div className="path-summary__meta">
               <span className="path-summary__title">Syllabus Progress</span>
-              <span className="path-summary__stats">
+              <span className="path-summary__stats font-mono">
                 <strong>{completed}</strong> of {trackLessons.length} lessons ({percent}%)
               </span>
             </div>
-            <span className="mastery-count-pill">
-              <StarIcon width="14" height="14" style={{ color: 'var(--gold)' }} /> {mastered} Mastered
+            <span className="mastery-count-pill font-mono">
+              <BookmarkStarIcon width="14" height="14" style={{ color: 'var(--gold-text)' }} /> {mastered} Mastered
             </span>
           </div>
 
@@ -116,7 +117,7 @@ export default function PathScreen() {
               </span>
             ) : (
               <span className="all-cleared-text">
-                🎉 All lessons in this track completed! Take a full-length mock to test your score.
+                🎉 All lessons in this syllabus track completed! Take a timed mock exam to test your score.
               </span>
             )}
           </div>
@@ -151,12 +152,12 @@ export default function PathScreen() {
 
               {unit.marks ? (
                 <span className="unit__marks" dir="ltr">
-                  <span className="marks-val">{unit.marks}</span>
+                  <span className="marks-val font-mono">{unit.marks}</span>
                   <small>/{blueprint?.totalMcqs ?? 100} Marks</small>
                 </span>
               ) : (
                 <span className="unit__marks" dir="ltr">
-                  <span className="marks-val">{unit.questionCount}</span>
+                  <span className="marks-val font-mono">{unit.questionCount}</span>
                   <small>Questions</small>
                 </span>
               )}
@@ -181,7 +182,7 @@ export default function PathScreen() {
 
       <footer className="path-footer">
         <p>
-          {track.units.length} subjects · {track.lessonCount} lessons · Stored offline on this device.
+          {track.units.length} subjects · {track.lessonCount} lessons · Stored offline in IndexedDB.
         </p>
         <button
           className="btn btn--ghost btn--small"
@@ -192,34 +193,23 @@ export default function PathScreen() {
         </button>
       </footer>
 
-      {showResetConfirm && (
-        <div className="modal-backdrop" onClick={() => setShowResetConfirm(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Reset Track Progress?</h2>
-            <p>
-              This will clear your completed lessons and scores for this track on this device. Your mistakes bank and bookmarks will remain saved.
-            </p>
-            <div className="modal__actions">
-              <button
-                className="btn btn--small btn--ghost"
-                type="button"
-                onClick={() => setShowResetConfirm(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn btn--small"
-                style={{ background: 'var(--red)', boxShadow: '0 3px 0 var(--red-dark)' }}
-                type="button"
-                onClick={handleReset}
-              >
-                Yes, Reset
-              </button>
-            </div>
-          </div>
+      <Modal
+        isOpen={showResetConfirm}
+        onClose={() => setShowResetConfirm(false)}
+        title="Reset Track Progress?"
+      >
+        <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', lineHeight: 1.5, margin: '0 0 1.5rem' }}>
+          This will reset your completed lessons and scores for this track on this device. Your mistakes bank and study bookmarks will remain saved.
+        </p>
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+          <Button variant="ghost" size="small" onClick={() => setShowResetConfirm(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" size="small" onClick={handleReset}>
+            Yes, Reset
+          </Button>
         </div>
-      )}
+      </Modal>
     </div>
   )
 }
-

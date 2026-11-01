@@ -1,17 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import {
-  BookIcon,
   CloseIcon,
-  FlagIcon,
+  ExamFlagIcon,
   MaximizeIcon,
   NotesIcon,
   SlashIcon,
   TimerIcon,
+  CheckCircleIcon,
+  RotateCcwIcon,
+  SparklesIcon,
 } from '../components/icons.jsx'
 import QuestionTTS from '../components/QuestionTTS.jsx'
 import NoteModal from '../components/NoteModal.jsx'
 import OMRSheet from '../components/OMRSheet.jsx'
+import PaletteButton from '../components/PaletteButton.jsx'
+import { Modal, Button, Chip } from '../components/UIPrimitives.jsx'
 import { useContent } from '../content/contentContext.js'
 import { calculateScore, explainQuestion } from '../data/curriculum.js'
 import { feedbackService } from '../lib/feedback.js'
@@ -127,7 +131,7 @@ export default function MockExamScreen() {
         if (diff > 0) return diff
       }
     } catch {
-      // Fallback to default
+      // Fallback
     }
     return totalDurationMs
   })
@@ -175,6 +179,7 @@ export default function MockExamScreen() {
     sessionStorage.removeItem(sessionKey)
   }, [sessionKey])
 
+  // Timer countdown: auto-submit when reaches 0
   useEffect(() => {
     if (submitted) return undefined
     const timer = setInterval(() => {
@@ -201,7 +206,6 @@ export default function MockExamScreen() {
 
     streakStore.recordAnswers(answeredList.filter((a) => a.choice !== undefined).length)
 
-    // Save incorrect or skipped items to mistakes store, or update SRS for correct answers
     for (const item of answeredList) {
       if (item.correct) {
         mistakesStore.recordReviewResult(item.question.id, true)
@@ -225,7 +229,6 @@ export default function MockExamScreen() {
     const attemptedOnly = answers.filter((a) => !a.unanswered)
     const scoreData = calculateScore(attemptedOnly, blueprint.negativeMarking)
 
-    // Unit-wise breakdown
     const unitBreakdown = (track.units ?? []).map((unit) => {
       const unitQs = allTrackQuestions.filter((q) => q.unitId === unit.id)
       const unitAnswers = unitQs.map((q) => {
@@ -283,109 +286,116 @@ export default function MockExamScreen() {
   const answeredCount = Object.keys(selectedAnswers).length
   const flaggedCount = Object.values(flagged).filter(Boolean).length
 
+  // Timer HUD status class: amber under 15 min (900,000ms), pulsing red under 5 min (300,000ms)
+  let timerClass = ''
+  if (remainingMs < 300000) {
+    timerClass = 'timer--pulsing-red'
+  } else if (remainingMs < 900000) {
+    timerClass = 'timer--warning-amber'
+  }
+
+  // Post-Exam Results Screen
   if (submitted && results) {
     return (
-      <div className="mock">
+      <div className="mock mock--results-view">
         <header className="mock__header">
-          <Link className="brand" to={`/track/${track.id}`}>
-            <BookIcon width="22" height="22" />
-            <span>MPT·AI</span>
+          <Link className="path-back-btn" to={`/track/${track.id}`}>
+            ← Syllabus Path
           </Link>
-          <h1>Mock Exam Results</h1>
-          <p className="mock__sub">
-            {track.exam} · {track.title} · Diagnostic Performance Report
+          <h1 className="mt-2 text-2xl font-bold">Exam Performance Diagnostic</h1>
+          <p className="mock__sub font-mono text-sm text-[var(--muted)]">
+            {track.exam} · {track.title}
           </p>
         </header>
 
         <main className="mock__results">
+          {/* Main Scorecard Banner */}
           <div className={`result-card ${results.isPassed ? 'result-card--pass' : 'result-card--fail'}`}>
-            <span className="result-card__badge">{results.isPassed ? 'QUALIFIED' : 'DID NOT QUALIFY'}</span>
-            <h2>
-              {results.netScore} / {allTrackQuestions.length} marks
+            <span className="result-card__badge font-mono">
+              {results.isPassed ? 'QUALIFIED FOR SCREENING' : 'NEEDS IMPROVEMENT'}
+            </span>
+            <h2 className="font-mono text-3xl font-extrabold my-2">
+              {results.netScore} / {allTrackQuestions.length} Marks
             </h2>
-            <p className="result-card__passing">
-              Qualifying benchmark: {blueprint.passingMarks} marks
+            <p className="result-card__passing text-xs text-[var(--muted)]">
+              Passing Benchmark: {blueprint.passingMarks} Marks
             </p>
+
             <div className="result-stats">
               <div className="stat">
-                <span className="stat__val stat--green">{results.correct}</span>
-                <span className="stat__lbl">Correct</span>
+                <span className="stat__val stat--green font-mono">+{results.correct}</span>
+                <span className="stat__lbl">Correct (+1.00)</span>
               </div>
               <div className="stat">
-                <span className="stat__val stat--red">{results.wrong}</span>
+                <span className="stat__val stat--red font-mono">{results.wrong}</span>
                 <span className="stat__lbl">Incorrect</span>
               </div>
               <div className="stat">
-                <span className="stat__val">{results.unansweredCount}</span>
+                <span className="stat__val font-mono">{results.unansweredCount}</span>
                 <span className="stat__lbl">Skipped</span>
               </div>
               {blueprint.negativeMarking > 0 && (
                 <div className="stat">
-                  <span className="stat__val stat--red">-{results.marksDeducted}</span>
-                  <span className="stat__lbl">Penalty</span>
+                  <span className="stat__val stat--red font-mono">-{results.marksDeducted}</span>
+                  <span className="stat__lbl">Deductions (-{blueprint.negativeMarking})</span>
                 </div>
               )}
             </div>
           </div>
 
+          {/* Subject Breakdown */}
           <section className="section-card">
-            <h3>Subject-wise Breakdown</h3>
-            <ul className="unit-list">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--muted)] mb-3">
+              Per-Subject Diagnostic Breakdown
+            </h3>
+            <ul className="unit-list flex flex-col gap-2">
               {results.unitBreakdown.map((item) => (
-                <li key={item.unitTitle} className="unit-row">
+                <li key={item.unitTitle} className="unit-row p-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] flex items-center justify-between">
                   <div>
-                    <strong>{item.unitTitle}</strong>
-                    <span className="unit-row__meta">
+                    <strong className="text-sm text-[var(--text)]">{item.unitTitle}</strong>
+                    <span className="unit-row__meta block text-xs text-[var(--muted)] font-mono">
                       {item.correct} correct · {item.wrong} wrong · {item.total} total
                     </span>
                   </div>
-                  <span className="unit-row__score">{item.netScore} marks</span>
+                  <span className="unit-row__score font-mono font-bold text-sm text-[var(--primary-text)]">
+                    {item.netScore} Marks
+                  </span>
                 </li>
               ))}
             </ul>
           </section>
 
+          {/* Question Review Section */}
           <section className="section-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0 }}>Review Exam Questions</h3>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  className={`btn btn--small ${reviewFilter === 'all' ? 'btn--primary' : 'btn--ghost'}`}
-                  onClick={() => setReviewFilter('all')}
-                >
-                  All ({allTrackQuestions.length})
-                </button>
-                <button
-                  type="button"
-                  className={`btn btn--small ${reviewFilter === 'wrong' ? 'btn--primary' : 'btn--ghost'}`}
-                  onClick={() => setReviewFilter('wrong')}
-                >
-                  Wrong ({results.wrong})
-                </button>
-                <button
-                  type="button"
-                  className={`btn btn--small ${reviewFilter === 'skipped' ? 'btn--primary' : 'btn--ghost'}`}
-                  onClick={() => setReviewFilter('skipped')}
-                >
-                  Skipped ({results.unansweredCount})
-                </button>
-                <button
-                  type="button"
-                  className={`btn btn--small ${reviewFilter === 'flagged' ? 'btn--primary' : 'btn--ghost'}`}
-                  onClick={() => setReviewFilter('flagged')}
-                >
-                  Flagged ({Object.values(flagged).filter(Boolean).length})
-                </button>
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--muted)] m-0">
+                Detailed Question Review
+              </h3>
+              <div className="flex gap-1.5 flex-wrap">
+                {[
+                  { id: 'all', label: `All (${allTrackQuestions.length})` },
+                  { id: 'wrong', label: `Wrong (${results.wrong})` },
+                  { id: 'skipped', label: `Skipped (${results.unansweredCount})` },
+                  { id: 'flagged', label: `Flagged (${flaggedCount})` },
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    className={`btn btn--small ${reviewFilter === f.id ? 'btn--primary' : 'btn--ghost'}`}
+                    onClick={() => setReviewFilter(f.id)}
+                  >
+                    {f.label}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Quick Bulk Actions for missed questions */}
+            {/* Quick Bulk Action */}
             {results.wrong > 0 && (
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', background: 'var(--surface-2)', padding: '0.75rem 1rem', borderRadius: 'var(--radius)' }}>
-                <button
-                  type="button"
-                  className="btn btn--small btn--ghost"
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] mb-4">
+                <Button
+                  size="small"
+                  variant="ghost"
                   onClick={async () => {
                     let count = 0
                     for (let idx = 0; idx < allTrackQuestions.length; idx++) {
@@ -396,23 +406,27 @@ export default function MockExamScreen() {
                         count++
                       }
                     }
-                    setSavedToMistakesMsg(`Saved ${count} incorrect questions to SRS Mistakes bank!`)
-                    setTimeout(() => setSavedToMistakesMsg(null), 3000)
+                    setSavedToMistakesMsg(`Saved ${count} missed questions to SRS Mistakes Bank!`)
+                    setTimeout(() => setSavedToMistakesMsg(null), 3500)
                   }}
                 >
                   Save All Missed to Mistakes Bank (SRS)
-                </button>
-                {savedToMistakesMsg && <span style={{ color: 'var(--green)', fontSize: '0.85rem', fontWeight: 700 }}>{savedToMistakesMsg}</span>}
+                </Button>
+                {savedToMistakesMsg && (
+                  <span className="text-xs font-bold text-[var(--green-text)] font-mono">
+                    {savedToMistakesMsg}
+                  </span>
+                )}
               </div>
             )}
 
-            <ul className="review-list">
+            <ul className="review-list flex flex-col gap-3">
               {allTrackQuestions.map((q, idx) => {
                 const choice = selectedAnswers[idx]
                 const isCorrect = choice === q.answer
                 const isSkipped = choice === undefined
                 const isWrong = choice !== undefined && !isCorrect
-                const isFlag = !!flagged[idx]
+                const isFlag = Boolean(flagged[idx])
 
                 if (reviewFilter === 'wrong' && !isWrong) return null
                 if (reviewFilter === 'skipped' && !isSkipped) return null
@@ -421,44 +435,65 @@ export default function MockExamScreen() {
                 return (
                   <li
                     key={q.id}
-                    className={`review-item ${isCorrect ? 'is-correct' : isSkipped ? 'is-skipped' : 'is-wrong'}`}
+                    className={`review-item p-4 rounded-xl border ${
+                      isCorrect
+                        ? 'border-[rgba(22,163,74,0.3)] bg-[var(--green-subtle)]'
+                        : isSkipped
+                        ? 'border-[var(--border)] bg-[var(--surface)]'
+                        : 'border-[rgba(220,38,38,0.3)] bg-[var(--red-subtle)]'
+                    }`}
                   >
-                    <div className="review-item__header">
-                      <span className="review-item__num">Q{idx + 1}</span>
-                      <span className="review-item__unit">{q.unitTitle}</span>
-                      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div className="review-item__header flex items-center justify-between text-xs mb-2">
+                      <div className="flex items-center gap-2 font-mono">
+                        <span className="font-bold">Q{idx + 1}</span>
+                        <span className="text-[var(--muted)]">{q.unitTitle}</span>
+                        {isFlag && (
+                          <span className="text-[var(--amber-text)] flex items-center gap-1 font-bold">
+                            <ExamFlagIcon width="12" height="12" /> Flagged
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
                         <QuestionTTS question={q} />
                         <button
                           type="button"
-                          className="note-btn"
+                          className="note-btn text-xs font-mono"
                           onClick={() => setNoteModalQuestion(q)}
                         >
-                          <NotesIcon width="13" height="13" /> +Note
+                          <NotesIcon width="12" height="12" /> +Note
                         </button>
-                        <span className="review-item__status">
-                          {isCorrect ? 'Correct (+1)' : isSkipped ? 'Skipped (0)' : `Wrong (-${blueprint.negativeMarking})`}
+                        <span className={`font-mono font-bold ${isCorrect ? 'text-[var(--green-text)]' : isSkipped ? 'text-[var(--muted)]' : 'text-[var(--red-text)]'}`}>
+                          {isCorrect ? 'Correct (+1.00)' : isSkipped ? 'Skipped (0.00)' : `Wrong (-${blueprint.negativeMarking})`}
                         </span>
                       </div>
                     </div>
-                    <p className={`review-item__prompt${q.rtl ? ' urdu' : ''}`} dir={q.rtl ? 'rtl' : 'ltr'}>
+
+                    <p className={`font-semibold text-base text-[var(--text)] mb-2 ${q.rtl ? 'urdu' : ''}`} dir={q.rtl ? 'rtl' : 'ltr'}>
                       {q.prompt}
                     </p>
+
                     {!isSkipped && !isCorrect && (
-                      <p className="review-item__wrong">Your choice: {q.choices[choice]}</p>
+                      <p className="text-xs font-mono text-[var(--red-text)]">
+                        Your choice: {q.choices[choice]}
+                      </p>
                     )}
-                    <p className="review-item__right" style={{ color: 'var(--green)', fontWeight: 700, margin: '0.35rem 0' }}>
+                    <p className="text-xs font-mono text-[var(--green-text)] font-bold">
                       Correct answer: {q.choices[q.answer]}
                     </p>
-                    {explainQuestion(q) && <p className="review-item__why">{explainQuestion(q)}</p>}
+                    {explainQuestion(q) && (
+                      <p className={`text-xs text-[var(--muted)] mt-2 pt-2 border-t border-[var(--border)] ${q.rtl ? 'urdu' : ''}`}>
+                        {explainQuestion(q)}
+                      </p>
+                    )}
                   </li>
                 )
               })}
             </ul>
           </section>
 
-          <div className="mock__actions">
-            <button className="btn" type="button" onClick={() => navigate(`/track/${track.id}`)}>
-              Back to Track
+          <div className="mock__actions flex gap-3 justify-center mt-6">
+            <button className="btn btn--primary" type="button" onClick={() => navigate(`/track/${track.id}`)}>
+              Back to Syllabus Path
             </button>
             <button
               className="btn btn--ghost"
@@ -468,14 +503,15 @@ export default function MockExamScreen() {
                 window.location.reload()
               }}
             >
-              Retake Mock Exam
+              <RotateCcwIcon width="16" height="16" />
+              <span>Retake Mock Exam</span>
             </button>
           </div>
         </main>
 
         {noteModalQuestion && (
           <NoteModal
-            isOpen={!!noteModalQuestion}
+            isOpen={Boolean(noteModalQuestion)}
             onClose={() => setNoteModalQuestion(null)}
             question={noteModalQuestion}
           />
@@ -483,6 +519,7 @@ export default function MockExamScreen() {
       </div>
     )
   }
+
   const jumpToNextUnanswered = () => {
     if (unansweredIndices.length === 0) return
     const next = unansweredIndices.find((idx) => idx > currentIndex)
@@ -495,40 +532,38 @@ export default function MockExamScreen() {
   }
 
   const renderPaletteContent = () => (
-    <>
-      <div className="palette-header-info">
-        <div className="palette-header-title">
-          <span className="palette-main-title">Question Palette</span>
-          <span className="palette-progress-pct">
-            <strong>{answeredCount}</strong>/{allTrackQuestions.length} ({Math.round((answeredCount / allTrackQuestions.length) * 100)}%)
-          </span>
-        </div>
-
-        {unansweredIndices.length > 0 && (
-          <button
-            type="button"
-            className="btn btn--small btn--ghost palette-jump-btn"
-            onClick={jumpToNextUnanswered}
-          >
-            Next Unanswered →
-          </button>
-        )}
+    <div className="palette-inner-container">
+      <div className="palette-header-info flex items-center justify-between mb-3">
+        <span className="font-bold text-sm text-[var(--text)]">Question Map</span>
+        <span className="font-mono text-xs text-[var(--muted)]">
+          <strong>{answeredCount}</strong>/{allTrackQuestions.length} answered
+        </span>
       </div>
 
-      <div className="palette-filters" role="tablist" aria-label="Question palette filters">
+      {unansweredIndices.length > 0 && (
+        <button
+          type="button"
+          className="btn btn--small btn--ghost w-full mb-3"
+          onClick={jumpToNextUnanswered}
+        >
+          Next Unanswered →
+        </button>
+      )}
+
+      <div className="palette-filters flex gap-1 mb-3" role="tablist">
         <button
           type="button"
           className={`filter-tab ${paletteFilter === 'all' ? 'is-active' : ''}`}
           onClick={() => setPaletteFilter('all')}
         >
-          All ({allTrackQuestions.length})
+          All
         </button>
         <button
           type="button"
           className={`filter-tab ${paletteFilter === 'unanswered' ? 'is-active' : ''}`}
           onClick={() => setPaletteFilter('unanswered')}
         >
-          Left ({allTrackQuestions.length - answeredCount})
+          Unanswered ({allTrackQuestions.length - answeredCount})
         </button>
         <button
           type="button"
@@ -539,62 +574,38 @@ export default function MockExamScreen() {
         </button>
       </div>
 
-      {/* Status Legend */}
-      <div className="palette-legend">
-        <span className="legend-item">
-          <span className="legend-dot legend-dot--current" /> Current
-        </span>
-        <span className="legend-item">
-          <span className="legend-dot legend-dot--answered" /> Answered
-        </span>
-        <span className="legend-item">
-          <span className="legend-dot legend-dot--flagged" /> Flagged
-        </span>
-        <span className="legend-item">
-          <span className="legend-dot legend-dot--unanswered" /> Left
-        </span>
-      </div>
-
       <div className="palette-grid">
         {allTrackQuestions.map((_, idx) => {
           const isAnswered = selectedAnswers[idx] !== undefined
           const isFlagged = Boolean(flagged[idx])
           const isCurrent = currentIndex === idx
 
-          // Apply palette filter
           if (paletteFilter === 'unanswered' && isAnswered) return null
           if (paletteFilter === 'flagged' && !isFlagged) return null
 
-          let tone = ''
-          if (isCurrent) tone += ' is-current'
-          if (isFlagged) tone += ' is-flagged'
-          if (isAnswered) tone += ' is-answered'
-
           return (
-            <button
+            <PaletteButton
               key={idx}
-              type="button"
-              className={`palette-btn${tone}`}
+              index={idx}
+              isCurrent={isCurrent}
+              isAnswered={isAnswered}
+              isFlagged={isFlagged}
               onClick={() => {
                 setCurrentIndex(idx)
                 setShowMobilePalette(false)
               }}
-              aria-label={`Go to question ${idx + 1}`}
-              title={`Question ${idx + 1}${isFlagged ? ' (Flagged)' : ''}${isAnswered ? ' (Answered)' : ''}`}
-            >
-              <span className="palette-btn__num">{idx + 1}</span>
-              {isFlagged && <span className="palette-flag-dot" />}
-            </button>
+            />
           )
         })}
       </div>
-    </>
+    </div>
   )
 
   return (
-    <div className="mock">
+    <div className="mock mock--active-runner">
+      {/* HUD Top Bar */}
       <header className="mock__topbar">
-        <div className="mock__topbar-left">
+        <div className="mock__topbar-left flex items-center gap-2">
           <Link
             className="icon-btn"
             to={`/track/${track.id}`}
@@ -608,17 +619,22 @@ export default function MockExamScreen() {
             <CloseIcon width="20" height="20" />
           </Link>
           <div className="mock__topbar-title-wrap">
-            <span className="mock__exam-name">{track.title}</span>
-            <span className="mock__topbar-sub">Mock Exam</span>
+            <span className="mock__exam-name text-xs font-bold text-[var(--muted)] uppercase font-mono">
+              {track.title}
+            </span>
+            <span className="mock__topbar-sub text-sm font-extrabold text-[var(--text)]">
+              Timed Mock
+            </span>
           </div>
         </div>
 
-        <div className={`timer ${remainingMs < 300000 ? 'timer--urgent' : ''}`}>
-          <TimerIcon width="18" height="18" />
+        {/* HUD Timer with 3 Tiers (Normal, Amber under 15m, Pulsing Red under 5m) */}
+        <div className={`mock-timer-hud font-mono ${timerClass}`} role="timer" aria-live="polite">
+          <TimerIcon width="16" height="16" />
           <span>{formatTime(remainingMs)}</span>
         </div>
 
-        <div className="mock__topbar-right">
+        <div className="mock__topbar-right flex items-center gap-2">
           <button
             type="button"
             className="btn btn--small btn--ghost mobile-palette-trigger"
@@ -636,12 +652,17 @@ export default function MockExamScreen() {
           >
             <MaximizeIcon width="18" height="18" />
           </button>
-          <button className="btn btn--small btn--primary" type="button" onClick={() => setShowConfirm(true)}>
+          <button
+            className="btn btn--small btn--primary"
+            type="button"
+            onClick={() => setShowConfirm(true)}
+          >
             Submit Exam
           </button>
         </div>
       </header>
 
+      {/* Progress Track */}
       <div className="mock__progress-bar">
         <div
           className="mock__progress-fill"
@@ -649,89 +670,104 @@ export default function MockExamScreen() {
         />
       </div>
 
+      {/* Two-Column Desktop (65/35) Layout */}
       <main className="mock__layout">
         <section className="mock__question-panel">
-          <div className="mock__qheader">
+          <div className="mock__qheader flex items-center justify-between mb-3 pb-2 border-b border-[var(--border)]">
             <button
               type="button"
-              className="qheader-jump-pill"
+              className="qheader-jump-pill font-mono text-xs font-bold"
               onClick={() => setShowMobilePalette(true)}
               title="Click to view all questions"
             >
               Question {currentIndex + 1} of {allTrackQuestions.length} ▾
             </button>
-            <span className="mock__unit-tag">{currentQuestion.unitTitle}</span>
+            <span className="mock__unit-tag text-xs text-[var(--muted)] font-semibold">
+              {currentQuestion.unitTitle}
+            </span>
             <button
               type="button"
               className={`flag-btn ${flagged[currentIndex] ? 'is-flagged' : ''}`}
               onClick={() =>
                 setFlagged((prev) => ({ ...prev, [currentIndex]: !prev[currentIndex] }))
               }
+              title={flagged[currentIndex] ? 'Unflag question' : 'Mark for review'}
             >
-              <FlagIcon width="16" height="16" />
-              {flagged[currentIndex] ? 'Flagged' : 'Flag for review'}
+              <ExamFlagIcon width="16" height="16" />
+              <span>{flagged[currentIndex] ? 'Flagged' : 'Flag for review'}</span>
             </button>
           </div>
 
           <h2
-            className={`mock__prompt${currentQuestion.rtl ? ' urdu' : ''}`}
+            className={`mock__prompt text-xl font-bold text-[var(--text)] mb-4 ${currentQuestion.rtl ? 'urdu' : ''}`}
             dir={currentQuestion.rtl ? 'rtl' : 'ltr'}
           >
             {currentQuestion.prompt}
           </h2>
 
           {currentQuestion.statements && (
-            <ol className="statements">
+            <ol className="mock-statements-list mb-4 flex flex-col gap-2">
               {currentQuestion.statements.map((s, i) => (
-                <li key={i}>
-                  <span className="statements__mark">{i + 1}.</span>
-                  <span>{s}</span>
+                <li key={i} className="flex gap-2 text-sm text-[var(--text-body)]">
+                  <span className="font-mono font-bold text-[var(--primary-text)]">{i + 1}.</span>
+                  <span className={currentQuestion.rtl ? 'urdu' : undefined}>{s}</span>
                 </li>
               ))}
             </ol>
           )}
 
-          {currentQuestion.closing && <p className="mock__closing">{currentQuestion.closing}</p>}
+          {currentQuestion.closing && (
+            <p className={`mock__closing font-semibold text-sm mb-4 ${currentQuestion.rtl ? 'urdu' : ''}`} dir={currentQuestion.rtl ? 'rtl' : 'ltr'}>
+              {currentQuestion.closing}
+            </p>
+          )}
 
-          <ul className="choices">
+          {/* Answer Options */}
+          <div className="mock-choices-list flex flex-col gap-2.5 mb-6">
             {currentQuestion.choices.map((choice, i) => {
               const isSelected = selectedAnswers[currentIndex] === i
               const isStruck = Boolean(eliminatedChoices[`${currentIndex}-${i}`])
-              let tone = isSelected ? ' choice--selected' : ''
-              if (isStruck) tone += ' choice--eliminated'
               const letter = ['A', 'B', 'C', 'D', 'E', 'F'][i] ?? `${i + 1}`
 
               return (
-                <li key={i} className="choice-row">
+                <div key={i} className={`reading-choice-row ${isSelected ? 'is-selected' : ''} ${isStruck ? 'is-struck' : ''}`}>
                   <button
                     type="button"
-                    className={`choice${tone}${currentQuestion.rtl ? ' urdu' : ''}`}
-                    dir={currentQuestion.rtl ? 'rtl' : 'ltr'}
+                    className={`choice-button ${isSelected ? 'is-active' : ''} ${isStruck ? 'is-eliminated' : ''}`}
                     onClick={() => {
                       if (isStruck) return
                       setSelectedAnswers((prev) => ({ ...prev, [currentIndex]: i }))
                       feedbackService.tap(30)
                     }}
+                    aria-pressed={isSelected}
                   >
-                    <span className="choice__key">{letter}</span>
-                    <span className="choice__text">{choice}</span>
+                    <span className="choice-omr-bubble" aria-hidden="true">
+                      <span className="omr-bubble-ring">
+                        <span className="omr-bubble-letter font-mono">{letter}</span>
+                        {isSelected && <span className="omr-pencil-fill" />}
+                      </span>
+                    </span>
+                    <span className={`choice-content ${currentQuestion.rtl ? 'urdu' : ''}`}>
+                      {choice}
+                    </span>
                   </button>
 
                   <button
                     type="button"
-                    className={`strike-toggle${isStruck ? ' is-struck' : ''}`}
-                    aria-label={isStruck ? 'Restore option' : 'Eliminate option'}
-                    title={isStruck ? 'Restore option' : 'Eliminate option'}
+                    className={`strike-toggle-btn ${isStruck ? 'is-eliminated' : ''}`}
                     onClick={() => toggleEliminate(i)}
+                    title={isStruck ? 'Restore option' : 'Eliminate option'}
+                    aria-label={isStruck ? 'Restore option' : 'Eliminate option'}
                   >
                     <SlashIcon width="16" height="16" />
                   </button>
-                </li>
+                </div>
               )
             })}
-          </ul>
+          </div>
 
-          <div className="mock__nav">
+          {/* Stepper Navigation Buttons */}
+          <div className="mock__nav flex items-center justify-between pt-3 border-t border-[var(--border)]">
             <button
               className="btn btn--ghost btn--small"
               type="button"
@@ -751,61 +787,13 @@ export default function MockExamScreen() {
           </div>
         </section>
 
-        {/* Question Palette Sidebar (Desktop) */}
-        <aside className="mock__sidebar">
+        {/* Desktop Sidebar (65/35 ratio) */}
+        <aside className="mock__sidebar hidden md:block">
           {renderPaletteContent()}
         </aside>
       </main>
 
-      {/* Mobile Bottom Sheet Drawer for Question Palette */}
-      {showMobilePalette && (
-        <div className="modal-backdrop" onClick={() => setShowMobilePalette(false)}>
-          <div className="mobile-palette-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="mobile-palette-sheet__top">
-              <h3>Question Map</h3>
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={() => setShowMobilePalette(false)}
-                aria-label="Close question palette"
-              >
-                <CloseIcon width="18" height="18" />
-              </button>
-            </div>
-            {renderPaletteContent()}
-          </div>
-        </div>
-      )}
-
-
-      {/* Confirmation Modal */}
-      {showConfirm && (
-        <div className="modal-backdrop" role="dialog" aria-modal="true">
-          <div className="modal">
-            <h2>Ready to submit?</h2>
-            <p>
-              You have answered <strong>{answeredCount}</strong> of{' '}
-              <strong>{allTrackQuestions.length}</strong> questions.
-              {allTrackQuestions.length - answeredCount > 0 && (
-                <> (There are {allTrackQuestions.length - answeredCount} unanswered questions).</>
-              )}
-            </p>
-            <div className="modal__actions">
-              <button className="btn" type="button" onClick={submitExam}>
-                Yes, Submit Now
-              </button>
-              <button
-                className="btn btn--ghost"
-                type="button"
-                onClick={() => setShowConfirm(false)}
-              >
-                Keep Practicing
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Authentic OMR Bubble Sheet simulation drawer */}
+      {/* Floating OMR Response Matrix */}
       <OMRSheet
         totalQuestions={allTrackQuestions.length}
         currentIndex={currentIndex}
@@ -813,10 +801,66 @@ export default function MockExamScreen() {
         flagged={flagged}
         onSelectAnswer={(qIdx, optIdx) => {
           setSelectedAnswers((prev) => ({ ...prev, [qIdx]: optIdx }))
-          feedbackService.tap(30)
         }}
         onJumpToQuestion={(qIdx) => setCurrentIndex(qIdx)}
       />
+
+      {/* Mobile Drawer Map */}
+      {showMobilePalette && (
+        <div className="modal-backdrop" onClick={() => setShowMobilePalette(false)}>
+          <div className="mobile-palette-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--border)]">
+              <span className="font-bold text-sm">Question Map</span>
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => setShowMobilePalette(false)}
+                aria-label="Close Map"
+              >
+                <CloseIcon width="16" height="16" />
+              </button>
+            </div>
+            {renderPaletteContent()}
+          </div>
+        </div>
+      )}
+
+      {/* Submit Confirmation Modal */}
+      <Modal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        title="Submit Timed Exam?"
+      >
+        <p className="text-sm text-[var(--muted)] mb-4">
+          Are you sure you want to finish and submit your exam?
+        </p>
+
+        <div className="grid grid-cols-3 gap-2 p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] mb-4 text-center font-mono">
+          <div>
+            <span className="block text-xs text-[var(--muted)]">Answered</span>
+            <strong className="text-base text-[var(--text)]">{answeredCount}</strong>
+          </div>
+          <div>
+            <span className="block text-xs text-[var(--muted)]">Flagged</span>
+            <strong className="text-base text-[var(--amber-text)]">{flaggedCount}</strong>
+          </div>
+          <div>
+            <span className="block text-xs text-[var(--muted)]">Left</span>
+            <strong className="text-base text-[var(--red-text)]">
+              {allTrackQuestions.length - answeredCount}
+            </strong>
+          </div>
+        </div>
+
+        <div className="flex gap-2 justify-end">
+          <Button variant="ghost" size="small" onClick={() => setShowConfirm(false)}>
+            Keep Working
+          </Button>
+          <Button variant="primary" size="small" onClick={submitExam}>
+            Confirm Submission
+          </Button>
+        </div>
+      </Modal>
     </div>
   )
 }

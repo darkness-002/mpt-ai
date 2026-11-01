@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { GridIcon } from './icons.jsx'
+import { GridIcon, CloseIcon } from './icons.jsx'
+import OMRRow from './OMRRow.jsx'
 import './OMRSheet.css'
-
-const BUBBLE_LABELS = ['A', 'B', 'C', 'D']
 
 export default function OMRSheet({
   totalQuestions,
@@ -24,17 +23,19 @@ export default function OMRSheet({
         type="button"
         className="omr-toggle-btn"
         onClick={() => setIsOpen(!isOpen)}
-        title="Toggle OMR Bubble Sheet"
+        title="Toggle OMR Response Matrix Sheet"
+        aria-label="Toggle OMR Sheet"
+        aria-expanded={isOpen}
       >
         <GridIcon width="16" height="16" />
         <span>OMR Sheet</span>
-        <span className="omr-toggle-count">
+        <span className="omr-toggle-count font-mono">
           {answeredCount}/{totalQuestions}
         </span>
       </button>
 
       {isOpen && (
-        <div className="omr-panel">
+        <div className="omr-panel" role="region" aria-label="OMR Response Matrix">
           <div className="omr-panel__header">
             <span className="omr-panel__title">OMR Response Matrix</span>
             <div className="omr-panel__legend">
@@ -42,6 +43,14 @@ export default function OMRSheet({
               <span className="legend-dot is-flagged" /> Flagged
               <span className="legend-dot is-current" /> Active
             </div>
+            <button
+              type="button"
+              className="omr-panel-close"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close OMR Sheet"
+            >
+              <CloseIcon width="14" height="14" />
+            </button>
           </div>
 
           <div className="omr-grid">
@@ -49,37 +58,18 @@ export default function OMRSheet({
               const qIndex = i
               const selectedChoice = selectedAnswers[qIndex]
               const isCurrent = currentIndex === qIndex
-              const isFlag = !!flagged[qIndex]
+              const isFlag = Boolean(flagged[qIndex])
 
               return (
-                <div
+                <OMRRow
                   key={i}
-                  className={`omr-row ${isCurrent ? 'is-active-row' : ''} ${isFlag ? 'is-flagged-row' : ''}`}
-                  onClick={() => onJumpToQuestion && onJumpToQuestion(qIndex)}
-                >
-                  <span className="omr-q-num">{i + 1}</span>
-                  <div className="omr-bubbles">
-                    {BUBBLE_LABELS.map((letter, optIdx) => {
-                      const isFilled = selectedChoice === optIdx
-                      return (
-                        <button
-                          key={letter}
-                          type="button"
-                          className={`omr-bubble ${isFilled ? 'is-filled' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            if (onSelectAnswer) {
-                              onSelectAnswer(qIndex, optIdx)
-                            }
-                          }}
-                          aria-label={`Question ${i + 1} Option ${letter}`}
-                        >
-                          {letter}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
+                  questionIndex={qIndex}
+                  selectedChoice={selectedChoice}
+                  isCurrent={isCurrent}
+                  isFlagged={isFlag}
+                  onSelectChoice={onSelectAnswer}
+                  onJumpToQuestion={onJumpToQuestion}
+                />
               )
             })}
           </div>

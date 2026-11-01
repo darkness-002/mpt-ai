@@ -1,3 +1,8 @@
+/* ==========================================================================
+   MPT-AI DESIGN SYSTEM — PAST PAPERS VAULT SCREEN
+   Theme: "The Reading Lamp" (calm, hairline borders, official archive styling)
+   ========================================================================== */
+
 .papers-page {
   width: min(94rem, 100%);
   margin: 0 auto;
@@ -23,7 +28,7 @@
   color: var(--primary);
   text-decoration: none;
   margin-bottom: 1rem;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition: transform var(--duration-fast) var(--ease-default), opacity var(--duration-fast) var(--ease-default);
 }
 
 .back-link:hover {
@@ -53,9 +58,10 @@
 .papers-icon-badge {
   width: 3.2rem;
   height: 3.2rem;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-omr);
   background: var(--primary-subtle);
   color: var(--primary);
+  border: 1px solid var(--hairline);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,7 +70,7 @@
 
 .papers-title-wrap h1 {
   font-family: inherit;
-  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.25;
@@ -99,18 +105,18 @@
 
 .papers-stat-card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
   padding: 0.85rem 1.25rem;
   display: flex;
   flex-direction: column;
   min-width: 6.8rem;
-  box-shadow: var(--shadow-diffused);
+  box-shadow: var(--shadow-sm);
 }
 
 .papers-stat-num {
-  font-family: inherit;
-  font-size: 1.4rem;
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text);
@@ -118,8 +124,8 @@
 }
 
 .papers-stat-lbl {
-  font-size: 0.74rem;
-  font-weight: 600;
+  font-size: 0.72rem;
+  font-weight: 700;
   color: var(--muted);
   margin-top: 0.2rem;
   text-transform: uppercase;
@@ -129,10 +135,10 @@
 /* Controls Card Dock */
 .papers-controls-card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
   padding: 1.25rem;
-  box-shadow: var(--shadow-diffused);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 1.75rem;
   display: flex;
   flex-direction: column;
@@ -164,13 +170,13 @@
 .papers-search-input {
   width: 100%;
   padding: 0.75rem 2.6rem 0.75rem 2.75rem;
-  border-radius: var(--radius-full);
-  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--hairline);
   background: var(--surface-2);
   color: var(--text);
   font-size: 0.9rem;
   font-family: inherit;
-  transition: all 0.15s ease;
+  transition: all var(--duration-fast) var(--ease-default);
   outline: none;
 }
 
@@ -191,12 +197,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-pill);
 }
 
 .papers-clear-btn:hover {
   color: var(--text);
-  background: var(--border);
+  background: var(--surface-2);
 }
 
 .papers-sort-group {
@@ -213,8 +219,8 @@
 
 .papers-sort-select {
   padding: 0.65rem 1.15rem;
-  border-radius: var(--radius-full);
-  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--hairline);
   background: var(--surface-2);
   color: var(--text);
   font-size: 0.84rem;
@@ -222,7 +228,7 @@
   font-family: inherit;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--duration-fast) var(--ease-default);
 }
 
 .papers-sort-select:focus {
@@ -236,7 +242,7 @@
   gap: 1rem;
   flex-wrap: wrap;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--hairline);
 }
 
 .papers-tabs-group {
@@ -256,7 +262,7 @@
   align-items: center;
   gap: 0.45rem;
   padding: 0.45rem 1rem;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-pill);
   border: 1px solid transparent;
   background: transparent;
   color: var(--muted);
@@ -264,7 +270,7 @@
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: all var(--duration-fast) var(--ease-default);
 }
 
 .paper-filter-tab:hover {
@@ -275,15 +281,15 @@
 .paper-filter-tab.is-active {
   background: var(--surface-2);
   color: var(--primary);
-  border-color: var(--border);
+  border-color: var(--hairline);
   box-shadow: var(--shadow-sm);
 }
 
 .tab-count {
   font-size: 0.72rem;
   padding: 0.1rem 0.45rem;
-  border-radius: var(--radius-full);
-  background: var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
   color: var(--text);
 }
 
@@ -301,15 +307,15 @@
 
 .penalty-chip {
   padding: 0.35rem 0.85rem;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--hairline);
   background: transparent;
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: all var(--duration-fast) var(--ease-default);
 }
 
 .penalty-chip:hover {
@@ -351,11 +357,11 @@
   text-decoration: underline;
 }
 
-/* Spacious Card Grid */
+/* Card Grid */
 .papers-grid {
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(26rem, 1fr));
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
 }
 
 @media (max-width: 640px) {
@@ -364,22 +370,22 @@
   }
 }
 
-/* Redesigned Paper Card */
+/* Paper Card */
 .paper-card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.65rem 1.75rem;
-  box-shadow: var(--shadow-diffused);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform var(--duration-fast) var(--ease-default), box-shadow var(--duration-fast) var(--ease-default), border-color var(--duration-fast) var(--ease-default);
 }
 
 .paper-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-diffused-lg);
+  box-shadow: var(--shadow-md);
   border-color: var(--border-strong);
 }
 
@@ -387,7 +393,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
 }
 
 .paper-card__badges {
@@ -398,44 +404,44 @@
 }
 
 .paper-year-pill {
+  font-family: var(--font-mono);
   font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-weight: 700;
   background: var(--surface-2);
   color: var(--text);
-  border: 1px solid var(--border);
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-full);
+  border: 1px solid var(--hairline);
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
 }
 
 .paper-exam-badge {
   font-size: 0.74rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   background: var(--primary-subtle);
   color: var(--primary);
   border: 1px solid var(--primary);
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-full);
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
 }
 
 .paper-penalty-badge {
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 0.25rem 0.7rem;
-  border-radius: var(--radius-full);
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
 }
 
 .paper-penalty-badge--warning {
   background: var(--red-subtle);
-  color: var(--red);
+  color: var(--red-text);
   border: 1px solid var(--red);
 }
 
 .paper-penalty-badge--neutral {
   background: var(--green-subtle);
-  color: var(--green-dark);
+  color: var(--green-text);
   border: 1px solid var(--green);
 }
 
@@ -445,12 +451,12 @@
 
 .paper-title {
   font-family: inherit;
-  font-size: 1.22rem;
+  font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -0.018em;
   color: var(--text);
-  margin: 0 0 0.4rem;
-  line-height: 1.3;
+  margin: 0 0 0.35rem;
+  line-height: 1.35;
 }
 
 .paper-commission {
@@ -471,28 +477,29 @@
 .paper-specs-grid {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  margin-bottom: 1.4rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
+  margin-bottom: 1.25rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--hairline);
 }
 
 .paper-spec-item {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 500;
   color: var(--muted);
   background: var(--surface-2);
-  border: 1px solid var(--border);
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-full);
+  border: 1px solid var(--hairline);
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-pill);
 }
 
 .paper-spec-item strong {
   color: var(--text);
+  font-family: var(--font-mono);
 }
 
 .paper-spec-item svg {
@@ -501,13 +508,13 @@
 }
 
 .paper-spec-item--provenance {
-  color: var(--green-dark);
+  color: var(--green-text);
   background: var(--green-subtle);
   border-color: var(--green);
 }
 
 .paper-spec-item--provenance svg {
-  color: var(--green);
+  color: var(--green-text);
 }
 
 /* Action Hub */
@@ -529,30 +536,33 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.7rem 1.25rem;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-btn);
   font-size: 0.84rem;
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--duration-fast) var(--ease-default);
   white-space: nowrap;
+  min-height: 44px;
 }
 
 .paper-btn--primary {
   background: var(--primary);
-  color: #ffffff !important;
-  box-shadow: 0 4px 14px -2px rgba(37, 99, 235, 0.4);
+  color: var(--primary-fg) !important;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid transparent;
 }
 
 .paper-btn--primary:hover {
   filter: brightness(1.08);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .paper-btn--secondary {
   background: var(--surface-2);
   color: var(--text) !important;
-  border: 1.5px solid var(--border);
+  border: 1px solid var(--hairline);
 }
 
 .paper-btn--secondary:hover {
@@ -565,8 +575,8 @@
 /* Empty Card State */
 .papers-empty-card {
   background: var(--surface);
-  border: 1.5px dashed var(--border-strong);
-  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-card);
   padding: 3.5rem 2rem;
   text-align: center;
   display: flex;
@@ -584,7 +594,7 @@
 .papers-empty-card h3 {
   margin: 0;
   font-family: inherit;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   letter-spacing: -0.018em;
   color: var(--text);
 }

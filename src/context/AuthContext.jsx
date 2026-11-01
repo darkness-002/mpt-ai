@@ -144,6 +144,13 @@ export function AuthProvider({ children }) {
     setProfile(null)
   }
 
+  const resetPassword = async (email) => {
+    if (!isSupabaseConfigured()) {
+      return { error: { message: 'Supabase credentials not configured in environment.' } }
+    }
+    return await supabase.auth.resetPasswordForEmail(email)
+  }
+
   const value = {
     user,
     session,
@@ -157,6 +164,7 @@ export function AuthProvider({ children }) {
     signIn,
     signUp,
     signOut,
+    resetPassword,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
