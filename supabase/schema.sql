@@ -116,6 +116,29 @@ AS $$
   );
 $$;
 
+-- Secure deletion function for admins to revoke/delete a staff member (auth & profile)
+CREATE OR REPLACE FUNCTION public.delete_staff_member(target_user_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+BEGIN
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'Unauthorized: Only administrators can remove staff accounts.';
+  END IF;
+
+  IF target_user_id = auth.uid() THEN
+    RAISE EXCEPTION 'Forbidden: You cannot delete your own admin account.';
+  END IF;
+
+  DELETE FROM auth.users WHERE id = target_user_id;
+  DELETE FROM public.profiles WHERE id = target_user_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.delete_staff_member(UUID) TO authenticated;
+
 -- Trigger to auto-create profile on auth.users insert
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
@@ -319,6 +342,11 @@ DROP POLICY IF EXISTS "Users can update own name/email; admins can update role" 
 CREATE POLICY "Users can update own name/email; admins can update role"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id OR public.is_admin());
+
+DROP POLICY IF EXISTS "Admins can delete profiles" ON public.profiles;
+CREATE POLICY "Admins can delete profiles"
+  ON public.profiles FOR DELETE
+  USING (public.is_admin());
 
 -- ------------------------------------------------------------------------------
 -- TRACKS POLICIES (Read-only for public, Admin manages)

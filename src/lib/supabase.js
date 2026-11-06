@@ -473,15 +473,52 @@ export async function updateProfileRole(userId, newRole, assignedCategories = nu
 
 /**
  * Deletes or revokes a staff profile.
+ * First attempts the secure delete_staff_member RPC (which cleans up auth.users and cascades),
+ * then falls back to direct table deletion on public.profiles.
  */
 export async function deleteStaffProfile(userId) {
   if (!isSupabaseConfigured()) return { error: null }
   try {
-    const { error } = await supabase
+    // 1. Attempt secure RPC call (removes auth user & profile)
+    const { error: rpcError } = await supabase.rpc('delete_staff_member', {
+      target_user_id: userId,
+    })
+
+    if (!rpcError) {
+      return { error: null }
+    }
+
+    // If RPC returned an error other than function not existing, return that error
+    const isMissingRpc =
+      rpcError.code === 'PGRST202' ||
+      rpcError.message?.includes('function') ||
+      rpcError.message?.includes('not found')
+
+    if (!isMissingRpc) {
+      return { error: rpcError }
+    }
+
+    // 2. Fallback: direct table delete on public.profiles with .select()
+    const { data, error: tableError } = await supabase
       .from('profiles')
       .delete()
       .eq('id', userId)
-    return { error }
+      .select()
+
+    if (tableError) {
+      return { error: tableError }
+    }
+
+    // If 0 rows were affected and no error was thrown, RLS blocked it
+    if (!data || data.length === 0) {
+      return {
+        error: new Error(
+          'Staff account could not be deleted: Row Level Security (RLS) blocked the delete. Please run the SQL migration (supabase/migration_staff_deletion.sql) in your Supabase SQL Editor.'
+        ),
+      }
+    }
+
+    return { error: null }
   } catch (err) {
     return { error: err }
   }

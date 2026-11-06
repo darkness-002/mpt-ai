@@ -749,16 +749,25 @@ export default function AdminScreen() {
   }
 
   const handleDeleteStaff = async (userId) => {
-    if (!window.confirm('Revoke access and delete this staff account?')) return
+    const targetUser = usersList.find((u) => u.id === userId)
+    if (user && (user.id === userId || user.email === targetUser?.email)) {
+      alert('You cannot delete your own active logged-in account.')
+      return
+    }
+
+    if (!window.confirm(`Revoke access and delete staff account for ${targetUser?.email || 'this user'}?`)) return
     try {
-      await deleteStaffProfile(userId)
+      const res = await deleteStaffProfile(userId)
+      if (res?.error) {
+        throw res.error
+      }
       setUsersList((prev) => prev.filter((u) => u.id !== userId))
       setNotice({
         type: 'info',
         text: 'Staff account removed.',
       })
     } catch (err) {
-      alert('Failed to remove account: ' + err.message)
+      alert('Failed to remove account: ' + (err.message || 'Unknown error'))
     }
   }
 
@@ -1901,14 +1910,25 @@ export default function AdminScreen() {
                             {formatGroupDate(st.created_at)}
                           </td>
                           <td className="px-4 py-3 border-b border-[var(--border)] whitespace-nowrap">
-                            <button
-                              type="button"
-                              className="staff-delete-btn min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[var(--muted)] hover:text-[var(--red)] hover:bg-[var(--surface-2)] transition-colors"
-                              onClick={() => handleDeleteStaff(st.id)}
-                              title="Revoke and delete account"
-                            >
-                              <TrashIcon width="16" height="16" />
-                            </button>
+                            {user && (user.id === st.id || user.email === st.email) ? (
+                              <button
+                                type="button"
+                                className="staff-delete-btn min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[var(--muted)] opacity-35 cursor-not-allowed"
+                                disabled
+                                title="Active logged-in account cannot be deleted"
+                              >
+                                <TrashIcon width="16" height="16" />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className="staff-delete-btn min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[var(--muted)] hover:text-[var(--red)] hover:bg-[var(--surface-2)] transition-colors"
+                                onClick={() => handleDeleteStaff(st.id)}
+                                title="Revoke and delete account"
+                              >
+                                <TrashIcon width="16" height="16" />
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}
