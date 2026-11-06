@@ -90,30 +90,35 @@ export async function fetchFullCurriculumFromSupabase() {
 
     if (tracksData.length === 0) return null
 
-    // Group questions by category_id and lesson_id
+    // Group questions by category_id and lesson_id (supports multi-subject questions)
     const questionsByCategory = new Map()
     for (const q of questionsData) {
-      const catId = q.category_id
-      if (!questionsByCategory.has(catId)) {
-        questionsByCategory.set(catId, [])
+      const catIds = Array.isArray(q.category_ids) && q.category_ids.length > 0
+        ? q.category_ids
+        : [q.category_id].filter(Boolean)
+
+      for (const catId of catIds) {
+        if (!questionsByCategory.has(catId)) {
+          questionsByCategory.set(catId, [])
+        }
+        questionsByCategory.get(catId).push({
+          id: q.id,
+          prompt: q.prompt,
+          choices: Array.isArray(q.choices) ? q.choices : [],
+          answer: q.answer,
+          directive: q.directive || undefined,
+          statements: Array.isArray(q.statements) && q.statements.length > 0 ? q.statements : undefined,
+          closing: q.closing || undefined,
+          explanation: q.explanation || undefined,
+          source: q.source || undefined,
+          status: q.status || 'approved',
+          examTarget: q.exam_target || ['CSS', 'PMS'],
+          lessonId: q.lesson_id || `${catId}-lesson-1`,
+          lessonTitle: q.lesson_title || 'Core Practice',
+          lessonSubtitle: q.lesson_subtitle || undefined,
+          displayOrder: q.display_order,
+        })
       }
-      questionsByCategory.get(catId).push({
-        id: q.id,
-        prompt: q.prompt,
-        choices: Array.isArray(q.choices) ? q.choices : [],
-        answer: q.answer,
-        directive: q.directive || undefined,
-        statements: Array.isArray(q.statements) && q.statements.length > 0 ? q.statements : undefined,
-        closing: q.closing || undefined,
-        explanation: q.explanation || undefined,
-        source: q.source || undefined,
-        status: q.status || 'approved',
-        examTarget: q.exam_target || ['CSS', 'PMS'],
-        lessonId: q.lesson_id || `${catId}-lesson-1`,
-        lessonTitle: q.lesson_title || 'Core Practice',
-        lessonSubtitle: q.lesson_subtitle || undefined,
-        displayOrder: q.display_order,
-      })
     }
 
     // Group categories by track_id

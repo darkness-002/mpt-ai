@@ -209,6 +209,7 @@ CREATE INDEX IF NOT EXISTS idx_categories_track_id ON public.categories(track_id
 CREATE TABLE IF NOT EXISTS public.questions (
   id TEXT PRIMARY KEY,
   category_id TEXT NOT NULL REFERENCES public.categories(id) ON DELETE CASCADE,
+  category_ids TEXT[] NOT NULL DEFAULT '{}',
   prompt TEXT NOT NULL,
   choices JSONB NOT NULL,
   answer INT NOT NULL CHECK (answer >= 0),
@@ -231,6 +232,7 @@ CREATE TABLE IF NOT EXISTS public.questions (
 );
 
 CREATE INDEX IF NOT EXISTS idx_questions_category_id ON public.questions(category_id);
+CREATE INDEX IF NOT EXISTS idx_questions_category_ids ON public.questions USING gin(category_ids);
 CREATE INDEX IF NOT EXISTS idx_questions_lesson_id ON public.questions(lesson_id);
 CREATE INDEX IF NOT EXISTS idx_questions_created_at ON public.questions(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_questions_status ON public.questions(status);

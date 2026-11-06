@@ -32,7 +32,15 @@ export function buildCustomTracks(categories, questions) {
     const trackId = `custom-${slugify(exam)}`
     const units = group.map((category) => {
       const mine = questions
-        .filter((question) => question.categoryId === category.id)
+        .filter((question) => {
+          if (Array.isArray(question.categoryIds) && question.categoryIds.length > 0) {
+            return question.categoryIds.includes(category.id)
+          }
+          if (Array.isArray(question.category_ids) && question.category_ids.length > 0) {
+            return question.category_ids.includes(category.id)
+          }
+          return question.categoryId === category.id || question.category_id === category.id
+        })
         .sort((a, b) => a.order - b.order)
 
       // Only approved & answerable questions reach live practice

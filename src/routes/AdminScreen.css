@@ -1049,6 +1049,72 @@
   border-color: var(--primary);
 }
 
+/* Multi-Subject Chips Selector */
+.subjects-chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.subject-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  min-height: 44px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.subject-chip-btn:hover {
+  background: var(--surface-3);
+  border-color: var(--primary);
+}
+
+.subject-chip-btn.is-selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-fg);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.subject-chip-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.subject-chip-btn:not(.is-selected) .subject-chip-indicator {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.selected-subjects-summary {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+.selected-subjects-summary .selected-list {
+  color: var(--text);
+  font-weight: 600;
+}
+
 /* Exam Target Toggle Pills */
 .exam-toggle-group {
   display: grid;

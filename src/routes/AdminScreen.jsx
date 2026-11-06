@@ -92,6 +92,7 @@ const INITIAL_SAMPLE_QUESTIONS = [
     answer: 1,
     explanation: 'Article 19 provides freedom of speech, expression, and freedom of the press subject to reasonable restrictions.',
     category_id: 'pakistan-affairs',
+    category_ids: ['pakistan-affairs'],
     status: 'pending',
     exam_target: ['CSS', 'PMS'],
     created_at: new Date().toISOString(),
@@ -104,6 +105,7 @@ const INITIAL_SAMPLE_QUESTIONS = [
     answer: 1,
     explanation: 'Speed = 72 * (5/18) = 20 m/s. Total distance in 15s = 20 * 15 = 300m. Train length = 300 - 180 = 120m.',
     category_id: 'general-abilities',
+    category_ids: ['general-abilities'],
     status: 'pending',
     exam_target: ['CSS', 'PMS'],
     created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
@@ -116,6 +118,7 @@ const INITIAL_SAMPLE_QUESTIONS = [
     answer: 1,
     explanation: 'Ephemeral denotes lasting for a very short time; transitory, fleeting.',
     category_id: 'english',
+    category_ids: ['english'],
     status: 'pending',
     exam_target: ['CSS'],
     created_at: new Date(Date.now() - 86400000).toISOString(),
@@ -128,6 +131,7 @@ const INITIAL_SAMPLE_QUESTIONS = [
     answer: 1,
     explanation: 'The Indus Waters Treaty was signed on September 19, 1960 with the World Bank as mediator and signatory.',
     category_id: 'pakistan-affairs',
+    category_ids: ['pakistan-affairs', 'general-knowledge'],
     status: 'approved',
     exam_target: ['CSS', 'PMS'],
     created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
@@ -260,17 +264,48 @@ export default function AdminScreen() {
 
   // ==========================================
   // Form State: The 3-Step Question Flow
-  // Step 1: Subject
+  // Step 1: Subject (Supports multiple subjects)
   // Step 2: Exam Target (CSS, PMS, Both)
   // Step 3: Question Details
   // ==========================================
-  const [formSubject, setFormSubject] = useState(CORE_SUBJECTS[0].id)
+  const [formSubjects, setFormSubjects] = useState([CORE_SUBJECTS[0].id])
   const [formExamTarget, setFormExamTarget] = useState('Both') // 'CSS' | 'PMS' | 'Both'
   const [formPrompt, setFormPrompt] = useState('')
   const [formChoices, setFormChoices] = useState(['', '', '', ''])
   const [formAnswer, setFormAnswer] = useState(0)
   const [formExplanation, setFormExplanation] = useState('')
   const [formSubmitting, setFormSubmitting] = useState(false)
+
+  const toggleSubject = (subId) => {
+    setFormSubjects((prev) => {
+      if (prev.includes(subId)) {
+        if (prev.length <= 1) return prev // Maintain at least 1 subject selected
+        return prev.filter((id) => id !== subId)
+      }
+      return [...prev, subId]
+    })
+  }
+
+  const toggleEditingSubject = (subId) => {
+    setEditingQuestion((prev) => {
+      if (!prev) return prev
+      const current = Array.isArray(prev.category_ids) && prev.category_ids.length > 0
+        ? prev.category_ids
+        : [prev.category_id].filter(Boolean)
+      let next
+      if (current.includes(subId)) {
+        if (current.length <= 1) return prev
+        next = current.filter((id) => id !== subId)
+      } else {
+        next = [...current, subId]
+      }
+      return {
+        ...prev,
+        category_id: next[0],
+        category_ids: next,
+      }
+    })
+  }
 
   // Load dynamic subjects from Supabase categories table & local content store
   const loadDynamicSubjects = useCallback(async () => {
@@ -328,6 +363,9 @@ export default function AdminScreen() {
               answer: q.answer,
               explanation: q.explanation || '',
               category_id: q.category_id,
+              category_ids: Array.isArray(q.category_ids) && q.category_ids.length > 0
+                ? q.category_ids
+                : [q.category_id].filter(Boolean),
               status: q.status || (q.is_reviewed ? 'approved' : 'pending'),
               exam_target: Array.isArray(q.exam_target) ? q.exam_target : ['CSS', 'PMS'],
               created_at: q.created_at || new Date().toISOString(),
@@ -350,6 +388,9 @@ export default function AdminScreen() {
             answer: q.answer,
             explanation: q.explanation || '',
             category_id: q.categoryId || 'general-abilities',
+            category_ids: Array.isArray(q.categoryIds) && q.categoryIds.length > 0
+              ? q.categoryIds
+              : [q.categoryId || 'general-abilities'],
             status: q.status || 'pending',
             exam_target: q.exam_target || ['CSS', 'PMS'],
             created_at: q.createdAt ? new Date(q.createdAt).toISOString() : new Date().toISOString(),
@@ -461,7 +502,7 @@ export default function AdminScreen() {
       })
 
       // Immediately select newly created subject
-      setFormSubject(slug)
+      setFormSubjects((prev) => (prev.includes(slug) ? prev : [...prev, slug]))
       setShowSubjectModal(false)
       setNewSubjectName('')
       setNewSubjectTagline('')
@@ -497,13 +538,16 @@ export default function AdminScreen() {
     const examTargetArray =
       formExamTarget === 'Both' ? ['CSS', 'PMS'] : [formExamTarget]
 
+    const primarySubject = formSubjects[0] || CORE_SUBJECTS[0].id
+
     const newQuestion = {
       id: qId,
       prompt: formPrompt.trim(),
       choices: cleanChoices,
       answer: Number(formAnswer),
       explanation: formExplanation.trim(),
-      category_id: formSubject,
+      category_id: primarySubject,
+      category_ids: formSubjects,
       status: 'pending', // Draft-to-Live default
       exam_target: examTargetArray,
       created_at: new Date().toISOString(),
@@ -513,9 +557,10 @@ export default function AdminScreen() {
     try {
       // 1. Supabase sync if configured
       if (isSupabaseConfigured()) {
-        const { error: sbErr } = await supabase.from('questions').insert({
+        const insertPayload = {
           id: qId,
-          category_id: formSubject,
+          category_id: primarySubject,
+          category_ids: formSubjects,
           prompt: newQuestion.prompt,
           choices: newQuestion.choices,
           answer: newQuestion.answer,
@@ -524,14 +569,21 @@ export default function AdminScreen() {
           exam_target: examTargetArray,
           is_reviewed: false,
           created_at: newQuestion.created_at,
-        })
+        }
+        let { error: sbErr } = await supabase.from('questions').insert(insertPayload)
+        if (sbErr && (sbErr.message?.includes('category_ids') || sbErr.code === 'PGRST204')) {
+          delete insertPayload.category_ids
+          const retry = await supabase.from('questions').insert(insertPayload)
+          sbErr = retry.error
+        }
         if (sbErr) console.warn('Supabase insert warning:', sbErr.message)
       }
 
       // 2. Local ContentStore sync
       await contentStore.saveQuestion({
         id: qId,
-        categoryId: formSubject,
+        categoryId: primarySubject,
+        categoryIds: formSubjects,
         prompt: newQuestion.prompt,
         choices: newQuestion.choices,
         answer: newQuestion.answer,
@@ -623,25 +675,40 @@ export default function AdminScreen() {
 
   // Save changes from Edit Modal
   const handleSaveEditedQuestion = async (updated) => {
+    const primaryCat = updated.category_id || updated.category_ids?.[0] || CORE_SUBJECTS[0].id
+    const allCats = Array.isArray(updated.category_ids) && updated.category_ids.length > 0
+      ? updated.category_ids
+      : [primaryCat].filter(Boolean)
+
+    const normalizedUpdated = {
+      ...updated,
+      category_id: primaryCat,
+      category_ids: allCats,
+    }
+
     try {
       if (isSupabaseConfigured()) {
-        await supabase
-          .from('questions')
-          .update({
-            prompt: updated.prompt,
-            choices: updated.choices,
-            answer: updated.answer,
-            explanation: updated.explanation,
-            category_id: updated.category_id,
-            exam_target: updated.exam_target,
-            status: updated.status,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', updated.id)
+        const updatePayload = {
+          prompt: updated.prompt,
+          choices: updated.choices,
+          answer: updated.answer,
+          explanation: updated.explanation,
+          category_id: primaryCat,
+          category_ids: allCats,
+          exam_target: updated.exam_target,
+          status: updated.status,
+          updated_at: new Date().toISOString(),
+        }
+        let { error: sbErr } = await supabase.from('questions').update(updatePayload).eq('id', updated.id)
+        if (sbErr && (sbErr.message?.includes('category_ids') || sbErr.code === 'PGRST204')) {
+          delete updatePayload.category_ids
+          await supabase.from('questions').update(updatePayload).eq('id', updated.id)
+        }
       }
       await contentStore.saveQuestion({
         id: updated.id,
-        categoryId: updated.category_id,
+        categoryId: primaryCat,
+        categoryIds: allCats,
         prompt: updated.prompt,
         choices: updated.choices,
         answer: updated.answer,
@@ -652,7 +719,7 @@ export default function AdminScreen() {
       invalidateCurriculumCache()
       await refresh()
 
-      setQuestions((prev) => prev.map((q) => (q.id === updated.id ? updated : q)))
+      setQuestions((prev) => prev.map((q) => (q.id === updated.id ? normalizedUpdated : q)))
       setEditingQuestion(null)
       setNotice({
         type: 'success',
@@ -1275,11 +1342,11 @@ export default function AdminScreen() {
                 <div className="step-card-header">
                   <div>
                     <div className="step-tag">Step 1</div>
-                    <label className="step-label" htmlFor="subject-select">
-                      Select Core Subject
+                    <label className="step-label">
+                      Select Subject(s) <span className="field-req">*</span>
                     </label>
                     <p className="step-hint">
-                      Pick the syllabus area this question belongs to, or create a new subject dynamically.
+                      Choose one or more subjects this question belongs to, or create a new subject dynamically.
                     </p>
                   </div>
 
@@ -1294,20 +1361,30 @@ export default function AdminScreen() {
                   </button>
                 </div>
 
-                <div className="subject-select-row">
-                  <select
-                    id="subject-select"
-                    className="step-select"
-                    value={formSubject}
-                    onChange={(e) => setFormSubject(e.target.value)}
-                    required
-                  >
-                    {subjects.map((sub) => (
-                      <option key={sub.id} value={sub.id}>
-                        {sub.title} {sub.desc ? `— ${sub.desc}` : ''}
-                      </option>
-                    ))}
-                  </select>
+                <div className="subjects-chips-grid" role="group" aria-label="Select subjects">
+                  {subjects.map((sub) => {
+                    const isSelected = formSubjects.includes(sub.id)
+                    return (
+                      <button
+                        key={sub.id}
+                        type="button"
+                        className={`subject-chip-btn ${isSelected ? 'is-selected' : ''}`}
+                        onClick={() => toggleSubject(sub.id)}
+                        aria-pressed={isSelected}
+                      >
+                        <span className="subject-chip-indicator">
+                          {isSelected ? <CheckIcon width="13" height="13" /> : <PlusIcon width="13" height="13" />}
+                        </span>
+                        <span className="subject-chip-title">{sub.title}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+                <div className="selected-subjects-summary">
+                  Selected ({formSubjects.length}):{' '}
+                  <span className="selected-list">
+                    {formSubjects.map((id) => subjects.find((s) => s.id === id)?.title || id).join(', ')}
+                  </span>
                 </div>
               </div>
 
@@ -1565,8 +1642,17 @@ export default function AdminScreen() {
                         <tbody>
                           {items.map((q) => (
                             <tr key={q.id}>
-                              <td className="px-4 py-3 border-b border-[var(--border)] text-xs font-semibold text-[var(--text)] whitespace-nowrap">
-                                {subjects.find((s) => s.id === q.category_id)?.title || q.category_id}
+                              <td className="px-4 py-3 border-b border-[var(--border)] text-xs font-semibold text-[var(--text)]">
+                                <div className="flex flex-wrap gap-1 max-w-[200px]">
+                                  {(Array.isArray(q.category_ids) && q.category_ids.length > 0
+                                    ? q.category_ids
+                                    : [q.category_id]
+                                  ).map((catId) => (
+                                    <span key={catId} className="subject-pill">
+                                      {subjects.find((s) => s.id === catId)?.title || catId}
+                                    </span>
+                                  ))}
+                                </div>
                               </td>
                               <td className="px-4 py-3 border-b border-[var(--border)] text-sm text-[var(--text)] max-w-xs truncate" title={q.prompt}>
                                 {q.prompt}
@@ -1651,10 +1737,14 @@ export default function AdminScreen() {
                           {/* Card Header */}
                           <div className="queue-card__header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div className="queue-card__badges flex flex-wrap items-center gap-1.5">
-                              <span className="subject-pill">
-                                {subjects.find((s) => s.id === q.category_id)?.title ||
-                                  q.category_id}
-                              </span>
+                              {(Array.isArray(q.category_ids) && q.category_ids.length > 0
+                                ? q.category_ids
+                                : [q.category_id]
+                              ).map((catId) => (
+                                <span key={catId} className="subject-pill">
+                                  {subjects.find((s) => s.id === catId)?.title || catId}
+                                </span>
+                              ))}
                               <span className="exam-target-pill">
                                 {Array.isArray(q.exam_target)
                                   ? q.exam_target.join(' & ')
@@ -2072,20 +2162,41 @@ export default function AdminScreen() {
             >
               <div className="drawer-body">
                 <div className="field-group">
-                  <label className="field-label">Subject</label>
-                  <select
-                    className="field-input"
-                    value={editingQuestion.category_id}
-                    onChange={(e) =>
-                      setEditingQuestion({ ...editingQuestion, category_id: e.target.value })
-                    }
-                  >
-                    {subjects.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.title}
-                      </option>
-                    ))}
-                  </select>
+                  <label className="field-label">Subject(s)</label>
+                  <p className="step-hint text-xs mb-1.5">
+                    Select one or more subjects this question belongs to:
+                  </p>
+                  <div className="subjects-chips-grid" role="group" aria-label="Edit subjects">
+                    {subjects.map((s) => {
+                      const currentCats = Array.isArray(editingQuestion.category_ids) && editingQuestion.category_ids.length > 0
+                        ? editingQuestion.category_ids
+                        : [editingQuestion.category_id].filter(Boolean)
+                      const isSelected = currentCats.includes(s.id)
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          className={`subject-chip-btn ${isSelected ? 'is-selected' : ''}`}
+                          onClick={() => toggleEditingSubject(s.id)}
+                          aria-pressed={isSelected}
+                        >
+                          <span className="subject-chip-indicator">
+                            {isSelected ? <CheckIcon width="13" height="13" /> : <PlusIcon width="13" height="13" />}
+                          </span>
+                          <span className="subject-chip-title">{s.title}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <div className="selected-subjects-summary">
+                    Selected:{' '}
+                    <span className="selected-list">
+                      {(Array.isArray(editingQuestion.category_ids) && editingQuestion.category_ids.length > 0
+                        ? editingQuestion.category_ids
+                        : [editingQuestion.category_id]
+                      ).map((id) => subjects.find((s) => s.id === id)?.title || id).join(', ')}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="field-group">
@@ -2219,7 +2330,12 @@ export default function AdminScreen() {
                   <div className="step-card-header">
                     <div>
                       <div className="step-tag">Step 1</div>
-                      <label className="step-label" htmlFor="drawer-subject-select">Select Core Subject</label>
+                      <label className="step-label">
+                        Select Subject(s) <span className="field-req">*</span>
+                      </label>
+                      <p className="step-hint text-xs mt-0.5">
+                        Choose one or more subjects this question belongs to.
+                      </p>
                     </div>
                     <button
                       type="button"
@@ -2230,19 +2346,32 @@ export default function AdminScreen() {
                       <span>New Subject</span>
                     </button>
                   </div>
-                  <select
-                    id="drawer-subject-select"
-                    className="step-select"
-                    value={formSubject}
-                    onChange={(e) => setFormSubject(e.target.value)}
-                    required
-                  >
-                    {subjects.map((sub) => (
-                      <option key={sub.id} value={sub.id}>
-                        {sub.title} {sub.desc ? `— ${sub.desc}` : ''}
-                      </option>
-                    ))}
-                  </select>
+
+                  <div className="subjects-chips-grid" role="group" aria-label="Select subjects">
+                    {subjects.map((sub) => {
+                      const isSelected = formSubjects.includes(sub.id)
+                      return (
+                        <button
+                          key={sub.id}
+                          type="button"
+                          className={`subject-chip-btn ${isSelected ? 'is-selected' : ''}`}
+                          onClick={() => toggleSubject(sub.id)}
+                          aria-pressed={isSelected}
+                        >
+                          <span className="subject-chip-indicator">
+                            {isSelected ? <CheckIcon width="13" height="13" /> : <PlusIcon width="13" height="13" />}
+                          </span>
+                          <span className="subject-chip-title">{sub.title}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <div className="selected-subjects-summary">
+                    Selected ({formSubjects.length}):{' '}
+                    <span className="selected-list">
+                      {formSubjects.map((id) => subjects.find((s) => s.id === id)?.title || id).join(', ')}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Step 2: Exam Target */}
