@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AlertCircleIcon,
@@ -15,6 +15,7 @@ import {
   ShieldCheckIcon,
   SunIcon,
   TrashIcon,
+  UserIcon,
   UserPlusIcon,
   UsersIcon,
   XCircleIcon,
@@ -197,6 +198,21 @@ export default function AdminScreen() {
   // Navigation: exactly 4 tabs
   // 'dashboard' | 'add-question' | 'review-queue' | 'users'
   const [activeTab, setActiveTab] = useState('dashboard')
+  const activeTabRef = useRef(null)
+
+  // Mobile account dropdown / bottom sheet state
+  const [isAccountOpen, setIsAccountOpen] = useState(false)
+
+  // Auto-scroll active tab into view on mobile
+  useEffect(() => {
+    if (activeTabRef.current) {
+      activeTabRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      })
+    }
+  }, [activeTab])
 
   // Theme switcher: cycles all 3 themes (Light, Dark, Espresso)
   const [currentTheme, setCurrentTheme] = useState(() => settingsStore.load().theme)
@@ -874,51 +890,57 @@ export default function AdminScreen() {
       <header className="admin-header">
         <div className="admin-header__inner">
           <div className="admin-header__left">
-            <Link to="/" className="admin-back-btn" title="Back to Student Dashboard">
+            <Link to="/" className="admin-back-btn" title="Back to Student Dashboard" aria-label="Back to Student Dashboard">
               <ArrowLeftIcon width="16" height="16" />
-              <span>Student App</span>
+              <span className="admin-back-text">Student App</span>
             </Link>
             <div className="admin-header__divider" />
             <div className="admin-brand">
               <span className="admin-brand__badge">Admin</span>
-              <span className="admin-brand__title">MPT·AI Portal</span>
+              <span className="admin-brand__title">
+                <span className="brand-short">MPT·AI</span>
+                <span className="brand-suffix"> Portal</span>
+              </span>
             </div>
           </div>
 
           <div className="admin-header__right">
-            {/* Quick Dev Role Switcher */}
-            <div className="admin-role-switch" title="Active preview permissions">
-              <LockIcon width="13" height="13" />
-              <span className="role-switch-label">Role:</span>
-              <select
-                className="role-switch-select"
-                value={role}
-                onChange={(e) => setDevRole(e.target.value)}
-                aria-label="Simulate Role"
-              >
-                <option value="admin">Admin (Full Control)</option>
-                <option value="editor">Editor (Can Add & Edit)</option>
-                <option value="reviewer">Reviewer (Review Queue)</option>
-                <option value="contributor">Contributor (Draft Submissions)</option>
-              </select>
-            </div>
-
-            {/* Authenticated Staff User Pill */}
-            {user && (
-              <div className="admin-user-pill">
-                <span className="admin-user-email" title={user.email}>{user.email}</span>
-                <button
-                  type="button"
-                  className="admin-signout-btn"
-                  onClick={async () => {
-                    await signOut()
-                  }}
-                  title="Sign Out of Staff Portal"
+            {/* Desktop inline controls (Role Switcher + User Pill) - hidden on mobile < 768px */}
+            <div className="admin-header__desktop-controls">
+              {/* Quick Dev Role Switcher */}
+              <div className="admin-role-switch" title="Active preview permissions">
+                <LockIcon width="13" height="13" />
+                <span className="role-switch-label">Role:</span>
+                <select
+                  className="role-switch-select"
+                  value={role}
+                  onChange={(e) => setDevRole(e.target.value)}
+                  aria-label="Simulate Role"
                 >
-                  Sign Out
-                </button>
+                  <option value="admin">Admin (Full Control)</option>
+                  <option value="editor">Editor (Can Add & Edit)</option>
+                  <option value="reviewer">Reviewer (Review Queue)</option>
+                  <option value="contributor">Contributor (Draft Submissions)</option>
+                </select>
               </div>
-            )}
+
+              {/* Authenticated Staff User Pill */}
+              {user && (
+                <div className="admin-user-pill">
+                  <span className="admin-user-email" title={user.email}>{user.email}</span>
+                  <button
+                    type="button"
+                    className="admin-signout-btn"
+                    onClick={async () => {
+                      await signOut()
+                    }}
+                    title="Sign Out of Staff Portal"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Quick 4-Theme Switcher */}
             <button
@@ -926,6 +948,7 @@ export default function AdminScreen() {
               className="admin-tool-btn"
               onClick={handleCycleTheme}
               title={`Theme: ${currentTheme.toUpperCase()}. Click to cycle (Light / Dark / Espresso).`}
+              aria-label={`Theme: ${currentTheme.toUpperCase()}`}
             >
               {currentTheme === 'dark' || currentTheme === 'espresso' || currentTheme === 'midnight' ? (
                 <MoonIcon width="16" height="16" />
@@ -933,52 +956,145 @@ export default function AdminScreen() {
                 <SunIcon width="16" height="16" />
               )}
             </button>
+
+            {/* Mobile Account / Permissions Button & Bottom Sheet */}
+            <div className="admin-account-wrapper">
+              <button
+                type="button"
+                className={`admin-account-btn ${isAccountOpen ? 'is-active' : ''}`}
+                onClick={() => setIsAccountOpen((prev) => !prev)}
+                title="Staff account & permissions menu"
+                aria-label="Staff account & permissions menu"
+                aria-expanded={isAccountOpen}
+              >
+                <UserIcon width="18" height="18" />
+              </button>
+
+              {isAccountOpen && (
+                <>
+                  <div
+                    className="admin-account-backdrop"
+                    onClick={() => setIsAccountOpen(false)}
+                    aria-hidden="true"
+                  />
+                  <div className="admin-account-sheet" role="dialog" aria-label="Account Settings">
+                    <div className="admin-account-sheet__header">
+                      <div className="admin-account-avatar">
+                        {(user?.email || role || 'A')[0].toUpperCase()}
+                      </div>
+                      <div className="admin-account-meta">
+                        <span className="admin-account-email" title={user?.email || 'Staff Contributor'}>
+                          {user?.email || 'Staff Contributor'}
+                        </span>
+                        <span className={`admin-account-role-tag role-${role}`}>
+                          {role.toUpperCase()}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="admin-account-close"
+                        onClick={() => setIsAccountOpen(false)}
+                        aria-label="Close account menu"
+                      >
+                        <CloseIcon width="16" height="16" />
+                      </button>
+                    </div>
+
+                    <div className="admin-account-sheet__body">
+                      <div className="admin-sheet-field">
+                        <label className="admin-sheet-label" htmlFor="mobile-role-select">
+                          <LockIcon width="13" height="13" />
+                          <span>Active Role</span>
+                        </label>
+                        <select
+                          id="mobile-role-select"
+                          className="role-switch-select admin-sheet-select"
+                          value={role}
+                          onChange={(e) => {
+                            setDevRole(e.target.value)
+                          }}
+                          aria-label="Simulate Role"
+                        >
+                          <option value="admin">Admin</option>
+                          <option value="editor">Editor</option>
+                          <option value="reviewer">Reviewer</option>
+                          <option value="contributor">Contributor</option>
+                        </select>
+                      </div>
+
+                      {user && (
+                        <button
+                          type="button"
+                          className="btn btn--ghost admin-sheet-signout-btn"
+                          onClick={async () => {
+                            setIsAccountOpen(false)
+                            await signOut()
+                          }}
+                        >
+                          Sign Out
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Tabbed Navigation Bar */}
-        <nav className="admin-tabs" role="tablist" aria-label="Portal Navigation">
-          <button
-            type="button"
-            className={`admin-tab-btn ${activeTab === 'dashboard' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
-          >
-            <BarChartIcon width="16" height="16" />
-            <span>Dashboard</span>
-          </button>
-
-          <button
-            type="button"
-            className={`admin-tab-btn ${activeTab === 'add-question' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('add-question')}
-          >
-            <PlusIcon width="16" height="16" />
-            <span>Add Question</span>
-          </button>
-
-          <button
-            type="button"
-            className={`admin-tab-btn ${activeTab === 'review-queue' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('review-queue')}
-          >
-            <ShieldCheckIcon width="16" height="16" />
-            <span>Review Queue</span>
-            {stats.pending > 0 && (
-              <span className="admin-tab-badge is-pending">{stats.pending}</span>
-            )}
-          </button>
-
-          {role === 'admin' && (
+        <div className="admin-tabs-wrapper">
+          <nav className="admin-tabs" role="tablist" aria-label="Portal Navigation">
             <button
+              ref={activeTab === 'dashboard' ? activeTabRef : null}
               type="button"
-              className={`admin-tab-btn ${activeTab === 'users' ? 'is-active' : ''}`}
-              onClick={() => setActiveTab('users')}
+              className={`admin-tab-btn ${activeTab === 'dashboard' ? 'is-active' : ''}`}
+              onClick={() => setActiveTab('dashboard')}
             >
-              <UsersIcon width="16" height="16" />
-              <span>User Management</span>
+              <BarChartIcon width="16" height="16" />
+              <span className="tab-label-full">Dashboard</span>
+              <span className="tab-label-short">Dashboard</span>
             </button>
-          )}
-        </nav>
+
+            <button
+              ref={activeTab === 'add-question' ? activeTabRef : null}
+              type="button"
+              className={`admin-tab-btn ${activeTab === 'add-question' ? 'is-active' : ''}`}
+              onClick={() => setActiveTab('add-question')}
+            >
+              <PlusIcon width="16" height="16" />
+              <span className="tab-label-full">Add Question</span>
+              <span className="tab-label-short">Add</span>
+            </button>
+
+            <button
+              ref={activeTab === 'review-queue' ? activeTabRef : null}
+              type="button"
+              className={`admin-tab-btn ${activeTab === 'review-queue' ? 'is-active' : ''}`}
+              onClick={() => setActiveTab('review-queue')}
+            >
+              <ShieldCheckIcon width="16" height="16" />
+              <span className="tab-label-full">Review Queue</span>
+              <span className="tab-label-short">Review</span>
+              {stats.pending > 0 && (
+                <span className="admin-tab-badge is-pending">{stats.pending}</span>
+              )}
+            </button>
+
+            {role === 'admin' && (
+              <button
+                ref={activeTab === 'users' ? activeTabRef : null}
+                type="button"
+                className={`admin-tab-btn ${activeTab === 'users' ? 'is-active' : ''}`}
+                onClick={() => setActiveTab('users')}
+              >
+                <UsersIcon width="16" height="16" />
+                <span className="tab-label-full">User Management</span>
+                <span className="tab-label-short">Users</span>
+              </button>
+            )}
+          </nav>
+        </div>
       </header>
 
       {/* Global Notice Toast */}
@@ -1365,7 +1481,7 @@ export default function AdminScreen() {
                 <div className="flex items-center gap-1 p-1 bg-[var(--surface-2)] rounded-full border border-[var(--border)]">
                   <button
                     type="button"
-                    className={`min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                       reviewViewMode === 'cards'
                         ? 'bg-[var(--surface)] text-[var(--text)] shadow-xs'
                         : 'text-[var(--muted)] hover:text-[var(--text)]'
@@ -1377,7 +1493,7 @@ export default function AdminScreen() {
                   </button>
                   <button
                     type="button"
-                    className={`min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                       reviewViewMode === 'table'
                         ? 'bg-[var(--surface)] text-[var(--text)] shadow-xs'
                         : 'text-[var(--muted)] hover:text-[var(--text)]'
@@ -1419,7 +1535,7 @@ export default function AdminScreen() {
               <div className="queue-table-view space-y-6">
                 {groupedReviewQuestions.map(([dateGroup, items]) => (
                   <div key={dateGroup} className="date-group-section">
-                    <div className="date-group-header flex items-center justify-between gap-2 mb-2">
+                    <div className="date-group-header flex flex-wrap items-center justify-between gap-2 mb-2">
                       <span className="date-group-title text-sm sm:text-base font-bold text-[var(--text)]">{dateGroup}</span>
                       <span className="date-group-count text-xs text-[var(--muted)]">{items.length} questions</span>
                     </div>
@@ -1464,7 +1580,7 @@ export default function AdminScreen() {
                                 <div className="flex items-center gap-1.5">
                                   <button
                                     type="button"
-                                    className="action-btn is-edit min-h-[36px] px-3 py-1 text-xs"
+                                    className="action-btn is-edit min-h-[44px] md:min-h-[36px] px-3 py-1 text-xs"
                                     onClick={() => setEditingQuestion(q)}
                                     title="Edit question"
                                   >
@@ -1474,7 +1590,7 @@ export default function AdminScreen() {
                                   {q.status !== 'approved' && (
                                     <button
                                       type="button"
-                                      className="action-btn is-approve min-h-[36px] px-3 py-1 text-xs"
+                                      className="action-btn is-approve min-h-[44px] md:min-h-[36px] px-3 py-1 text-xs"
                                       onClick={() => handleApproveQuestion(q)}
                                       title="Approve question"
                                     >
@@ -1485,7 +1601,7 @@ export default function AdminScreen() {
                                   {q.status !== 'rejected' && (
                                     <button
                                       type="button"
-                                      className="action-btn is-reject min-h-[36px] px-3 py-1 text-xs"
+                                      className="action-btn is-reject min-h-[44px] md:min-h-[36px] px-3 py-1 text-xs"
                                       onClick={() => handleRejectQuestion(q)}
                                       title="Reject question"
                                     >
@@ -1495,7 +1611,7 @@ export default function AdminScreen() {
                                   )}
                                   <button
                                     type="button"
-                                    className="action-btn is-delete min-h-[36px] px-2 py-1 text-xs"
+                                    className="action-btn is-delete min-h-[44px] min-w-[44px] md:min-h-[36px] md:min-w-[auto] justify-center px-2 py-1 text-xs"
                                     onClick={() => handleDeleteQuestion(q)}
                                     title="Delete question"
                                   >
@@ -1741,8 +1857,8 @@ export default function AdminScreen() {
               {loadingUsers ? (
                 <div className="loading-state">Loading staff profiles…</div>
               ) : (
-                <div className="table-responsive overflow-x-auto w-full border border-[var(--border)] rounded-2xl bg-[var(--surface)] shadow-xs mt-3">
-                  <table className="staff-table min-w-[680px] w-full text-left border-collapse">
+                <div className="table-responsive overflow-x-auto w-full md:border md:border-[var(--border)] md:rounded-2xl md:bg-[var(--surface)] md:shadow-xs mt-3">
+                  <table className="staff-table w-full text-left border-collapse">
                     <thead>
                       <tr>
                         <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">Member</th>
@@ -1813,7 +1929,7 @@ export default function AdminScreen() {
           aria-modal="true"
           onClick={() => setShowSubjectModal(false)}
         >
-          <div className="modal w-[95%] max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="modal admin-subject-modal w-[95%] max-w-lg max-h-[calc(100vh-2rem)] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Create New Subject</h2>
               <button

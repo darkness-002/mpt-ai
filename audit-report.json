@@ -1,0 +1,1617 @@
+{
+  "headerIssues": [
+    {
+      "role": "admin",
+      "w": 320,
+      "height": 193
+    },
+    {
+      "role": "admin",
+      "w": 360,
+      "height": 172
+    },
+    {
+      "role": "admin",
+      "w": 390,
+      "height": 172
+    },
+    {
+      "role": "admin",
+      "w": 430,
+      "height": 172
+    },
+    {
+      "role": "editor",
+      "w": 320,
+      "height": 193
+    },
+    {
+      "role": "editor",
+      "w": 360,
+      "height": 172
+    },
+    {
+      "role": "editor",
+      "w": 390,
+      "height": 172
+    },
+    {
+      "role": "editor",
+      "w": 430,
+      "height": 172
+    },
+    {
+      "role": "reviewer",
+      "w": 320,
+      "height": 193
+    },
+    {
+      "role": "reviewer",
+      "w": 360,
+      "height": 172
+    },
+    {
+      "role": "reviewer",
+      "w": 390,
+      "height": 172
+    },
+    {
+      "role": "reviewer",
+      "w": 430,
+      "height": 172
+    },
+    {
+      "role": "contributor",
+      "w": 320,
+      "height": 193
+    },
+    {
+      "role": "contributor",
+      "w": 360,
+      "height": 172
+    },
+    {
+      "role": "contributor",
+      "w": 390,
+      "height": 172
+    },
+    {
+      "role": "contributor",
+      "w": 430,
+      "height": 172
+    }
+  ],
+  "overflowIssues": [
+    {
+      "type": "page-overflow",
+      "label": "admin-w320-Dashboard",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w320-Dashboard",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w320-Dashboard",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w320-AddQuestion",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w320-AddQuestion",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w320-AddQuestion",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w320-ReviewQueue-Cards",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w320-ReviewQueue-Cards",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w320-ReviewQueue-Cards",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w320-Users",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w320-Users",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w320-Users",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w360-Dashboard",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w360-Dashboard",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w360-Dashboard",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w360-AddQuestion",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w360-AddQuestion",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w360-AddQuestion",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w360-ReviewQueue-Cards",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w360-ReviewQueue-Cards",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w360-ReviewQueue-Cards",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w360-Users",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w360-Users",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w360-Users",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w390-Dashboard",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w390-Dashboard",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w390-Dashboard",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w390-AddQuestion",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w390-AddQuestion",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w390-AddQuestion",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w390-ReviewQueue-Cards",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w390-ReviewQueue-Cards",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w390-ReviewQueue-Cards",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w390-Users",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w390-Users",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w390-Users",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w430-Dashboard",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w430-Dashboard",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w430-Dashboard",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w430-AddQuestion",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w430-AddQuestion",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w430-AddQuestion",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w430-ReviewQueue-Cards",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w430-ReviewQueue-Cards",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w430-ReviewQueue-Cards",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "admin-w430-Users",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "admin-w430-Users",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "admin-w430-Users",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "editor-w320-Dashboard",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "editor-w320-Dashboard",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "editor-w320-Dashboard",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "editor-w320-AddQuestion",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "editor-w320-AddQuestion",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "editor-w320-AddQuestion",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "editor-w320-ReviewQueue-Cards",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "editor-w320-ReviewQueue-Cards",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "editor-w320-ReviewQueue-Cards",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "editor-w360-Dashboard",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "editor-w360-Dashboard",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "editor-w360-Dashboard",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "editor-w360-AddQuestion",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "editor-w360-AddQuestion",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "editor-w360-AddQuestion",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "editor-w360-ReviewQueue-Cards",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "editor-w360-ReviewQueue-Cards",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "editor-w360-ReviewQueue-Cards",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "editor-w390-Dashboard",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "editor-w390-Dashboard",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "editor-w390-Dashboard",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "editor-w390-AddQuestion",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "editor-w390-AddQuestion",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "editor-w390-AddQuestion",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "editor-w390-ReviewQueue-Cards",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "editor-w390-ReviewQueue-Cards",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "editor-w390-ReviewQueue-Cards",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "editor-w430-Dashboard",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "editor-w430-Dashboard",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "editor-w430-Dashboard",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "editor-w430-AddQuestion",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "editor-w430-AddQuestion",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "editor-w430-AddQuestion",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "editor-w430-ReviewQueue-Cards",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "editor-w430-ReviewQueue-Cards",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "editor-w430-ReviewQueue-Cards",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "reviewer-w320-Dashboard",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "reviewer-w320-Dashboard",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "reviewer-w320-Dashboard",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "reviewer-w320-AddQuestion",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "reviewer-w320-AddQuestion",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "reviewer-w320-AddQuestion",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "reviewer-w320-ReviewQueue-Cards",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "reviewer-w320-ReviewQueue-Cards",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "reviewer-w320-ReviewQueue-Cards",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "reviewer-w360-Dashboard",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "reviewer-w360-Dashboard",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "reviewer-w360-Dashboard",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "reviewer-w360-AddQuestion",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "reviewer-w360-AddQuestion",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "reviewer-w360-AddQuestion",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "reviewer-w360-ReviewQueue-Cards",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "reviewer-w360-ReviewQueue-Cards",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "reviewer-w360-ReviewQueue-Cards",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "reviewer-w390-Dashboard",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "reviewer-w390-Dashboard",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "reviewer-w390-Dashboard",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "reviewer-w390-AddQuestion",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "reviewer-w390-AddQuestion",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "reviewer-w390-AddQuestion",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "reviewer-w390-ReviewQueue-Cards",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "reviewer-w390-ReviewQueue-Cards",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "reviewer-w390-ReviewQueue-Cards",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "reviewer-w430-Dashboard",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "reviewer-w430-Dashboard",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "reviewer-w430-Dashboard",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "reviewer-w430-AddQuestion",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "reviewer-w430-AddQuestion",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "reviewer-w430-AddQuestion",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "reviewer-w430-ReviewQueue-Cards",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "reviewer-w430-ReviewQueue-Cards",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "reviewer-w430-ReviewQueue-Cards",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "contributor-w320-Dashboard",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "contributor-w320-Dashboard",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "contributor-w320-Dashboard",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "contributor-w320-AddQuestion",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "contributor-w320-AddQuestion",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "contributor-w320-AddQuestion",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "contributor-w320-ReviewQueue-Cards",
+      "width": 320,
+      "docScrollWidth": 508,
+      "winWidth": 320,
+      "diff": 188
+    },
+    {
+      "type": "header-too-tall",
+      "label": "contributor-w320-ReviewQueue-Cards",
+      "width": 320,
+      "headerHeight": 193
+    },
+    {
+      "type": "element-overflow",
+      "label": "contributor-w320-ReviewQueue-Cards",
+      "width": 320,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "contributor-w360-Dashboard",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "contributor-w360-Dashboard",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "contributor-w360-Dashboard",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "contributor-w360-AddQuestion",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "contributor-w360-AddQuestion",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "contributor-w360-AddQuestion",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "contributor-w360-ReviewQueue-Cards",
+      "width": 360,
+      "docScrollWidth": 508,
+      "winWidth": 360,
+      "diff": 148
+    },
+    {
+      "type": "header-too-tall",
+      "label": "contributor-w360-ReviewQueue-Cards",
+      "width": 360,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "contributor-w360-ReviewQueue-Cards",
+      "width": 360,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "contributor-w390-Dashboard",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "contributor-w390-Dashboard",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "contributor-w390-Dashboard",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "contributor-w390-AddQuestion",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "contributor-w390-AddQuestion",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "contributor-w390-AddQuestion",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "contributor-w390-ReviewQueue-Cards",
+      "width": 390,
+      "docScrollWidth": 508,
+      "winWidth": 390,
+      "diff": 118
+    },
+    {
+      "type": "header-too-tall",
+      "label": "contributor-w390-ReviewQueue-Cards",
+      "width": 390,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "contributor-w390-ReviewQueue-Cards",
+      "width": 390,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "span.admin-user-email (w: 73, r: 398)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "contributor-w430-Dashboard",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "contributor-w430-Dashboard",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "contributor-w430-Dashboard",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "contributor-w430-AddQuestion",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "contributor-w430-AddQuestion",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "contributor-w430-AddQuestion",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    },
+    {
+      "type": "page-overflow",
+      "label": "contributor-w430-ReviewQueue-Cards",
+      "width": 430,
+      "docScrollWidth": 508,
+      "winWidth": 430,
+      "diff": 78
+    },
+    {
+      "type": "header-too-tall",
+      "label": "contributor-w430-ReviewQueue-Cards",
+      "width": 430,
+      "headerHeight": 172
+    },
+    {
+      "type": "element-overflow",
+      "label": "contributor-w430-ReviewQueue-Cards",
+      "width": 430,
+      "elements": [
+        "div.admin-header__right (w: 492, r: 508)",
+        "div.admin-user-pill (w: 157, r: 471)",
+        "button.admin-signout-btn (w: 53, r: 459)",
+        "button.admin-tool-btn (w: 28, r: 508)",
+        "svg (w: 16, r: 502)",
+        "circle (w: 7, r: 498)",
+        "line (w: 1, r: 490)",
+        "line (w: 1, r: 500)"
+      ]
+    }
+  ],
+  "tapTargetIssues": [
+    "select[Admin (Full Control)]: 212x17px",
+    "button[Sign Out]: 53x43px",
+    "button[admin-tool-btn]: 28x32px",
+    "button[Cards]: 61x38px",
+    "button[Question Grid]: 106x38px",
+    "a[Student App]: 122x33px"
+  ],
+  "fontSizeIssues": [
+    "select.role-switch-select (12.8px)",
+    "select.step-select (15.2px)",
+    "textarea.Enter the question text c (14.72px)",
+    "input.Option A... (14.72px)",
+    "input.Option B... (14.72px)",
+    "input.Option C... (14.72px)",
+    "input.Option D... (14.72px)",
+    "textarea.Cite relevant constitutio (14.72px)",
+    "input.e.g. examiner@fpsc.gov.pk (14.72px)",
+    "input.Minimum 6 characters (14.72px)",
+    "input.e.g. Dr. Salman Khan (14.72px)",
+    "select.field-input (14.72px)"
+  ],
+  "drawerModalIssues": []
+}

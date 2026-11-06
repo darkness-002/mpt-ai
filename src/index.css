@@ -517,8 +517,9 @@ h6 {
 .modal-backdrop {
   position: fixed !important;
   inset: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
+  width: 100% !important;
+  height: 100vh;
+  height: 100dvh;
   background: rgba(15, 23, 42, 0.65) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
@@ -526,7 +527,7 @@ h6 {
   align-items: center !important;
   justify-content: center !important;
   z-index: 99999 !important;
-  padding: 1.25rem !important;
+  padding: 1rem !important;
   animation: modalFadeIn 0.18s ease-out;
 }
 
@@ -537,6 +538,9 @@ h6 {
   padding: 1.75rem;
   max-width: 28rem;
   width: 100%;
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
   animation: modalSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
